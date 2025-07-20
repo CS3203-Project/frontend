@@ -16,30 +16,36 @@ const HeroSection = () => {
   const [videoPlaying, setVideoPlaying] = useState(true);
   const videoRef = useRef(null);
 
-  const locationData = {
-    'United States': {
-      'California': ['Los Angeles', 'San Francisco', 'San Diego', 'Sacramento', 'San Jose'],
-      'New York': ['New York City', 'Buffalo', 'Albany', 'Rochester', 'Syracuse'],
-      'Texas': ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth'],
-      'Florida': ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'Fort Lauderdale'],
-      'Illinois': ['Chicago', 'Springfield', 'Rockford', 'Peoria', 'Elgin'],
-      'All States': ['All Cities']
-    },
-    'Canada': {
-      'Ontario': ['Toronto', 'Ottawa', 'Hamilton', 'London', 'Windsor'],
-      'Quebec': ['Montreal', 'Quebec City', 'Laval', 'Gatineau', 'Sherbrooke'],
-      'British Columbia': ['Vancouver', 'Victoria', 'Burnaby', 'Surrey', 'Richmond'],
-      'Alberta': ['Calgary', 'Edmonton', 'Red Deer', 'Lethbridge', 'Medicine Hat'],
-      'All Provinces': ['All Cities']
-    },
-    'United Kingdom': {
-      'England': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Leeds'],
-      'Scotland': ['Edinburgh', 'Glasgow', 'Aberdeen', 'Dundee', 'Stirling'],
-      'Wales': ['Cardiff', 'Swansea', 'Newport', 'Wrexham', 'Barry'],
-      'Northern Ireland': ['Belfast', 'Derry', 'Lisburn', 'Newtownabbey', 'Bangor'],
-      'All Regions': ['All Cities']
+const locationData = {
+    'Sri Lanka': {
+        'Colombo': ['Colombo', 'Dehiwala-Mount Lavinia', 'Moratuwa', 'Kotte', 'Homagama', 'Kesbewa', 'Maharagama', 'Kolonnawa', 'Kaduwela', 'Ratmalana'],
+        'Gampaha': ['Negombo', 'Gampaha', 'Katunayake', 'Ja-Ela', 'Wattala', 'Kelaniya', 'Minuwangoda', 'Divulapitiya', 'Dompe', 'Attanagalla'],
+        'Kalutara': ['Kalutara', 'Panadura', 'Beruwala', 'Horana', 'Matugama', 'Agalawatta', 'Bandaragama', 'Bulathsinhala', 'Ingiriya', 'Millaniya'],
+        'Kandy': ['Kandy', 'Gampola', 'Nawalapitiya', 'Akurana', 'Peradeniya', 'Katugastota', 'Pilimathalawa', 'Wattegama', 'Galagedara', 'Ududumbara'],
+        'Matale': ['Matale', 'Dambulla', 'Galewela', 'Ukuwela', 'Rattota', 'Naula', 'Pallepola', 'Yatawatta', 'Ambanganga Korale', 'Wilgamuwa'],
+        'Nuwara Eliya': ['Nuwara Eliya', 'Hatton', 'Talawakele', 'Kotagala', 'Ragala', 'Watawala', 'Maskeliya', 'Lindula', 'Ambewela', 'Pundaluoya'],
+        'Galle': ['Galle', 'Hikkaduwa', 'Ambalangoda', 'Baddegama', 'Elpitiya', 'Karandeniya', 'Bentota', 'Balapitiya', 'Ahungalla', 'Wakwella'],
+        'Matara': ['Matara', 'Weligama', 'Hakmana', 'Akurassa', 'Kamburupitiya', 'Deniyaya', 'Devinuwara', 'Dickwella', 'Thihagoda', 'Mulatiyana'],
+        'Hambantota': ['Hambantota', 'Tangalle', 'Tissamaharama', 'Ambalantota', 'Beliatta', 'Weeraketiya', 'Walasmulla', 'Sooriyawewa', 'Katuwana', 'Lunugamvehera'],
+        'Jaffna': ['Jaffna', 'Nallur', 'Chavakachcheri', 'Point Pedro', 'Kopay', 'Vaddukoddai', 'Karainagar', 'Chankanai', 'Tellippalai', 'Uduvil'],
+        'Kilinochchi': ['Kilinochchi', 'Pallai', 'Poonakary', 'Karachchi', 'Paranthan'],
+        'Mannar': ['Mannar', 'Murunkan', 'Pesalai', 'Madhu', 'Nanattan', 'Musali', 'Manthai'],
+        'Vavuniya': ['Vavuniya', 'Vavuniya South', 'Vavuniya North', 'Vavuniya Town', 'Cheddikulam'],
+        'Mullaitivu': ['Mullaitivu', 'Puthukudiyiruppu', 'Oddusuddan', 'Thunukkai', 'Manthai East', 'Maritimepattu', 'Welioya'],
+        'Batticaloa': ['Batticaloa', 'Eravur', 'Kattankudy', 'Valaichenai', 'Oddamavadi', 'Chenkalady', 'Kaluwanchikudy', 'Akkaraipattu', 'Kalkudah', 'Paddiruppu'],
+        'Ampara': ['Ampara', 'Kalmunai', 'Akkaraipattu', 'Sammanthurai', 'Addalaichenai', 'Pottuvil', 'Sainthamaruthu', 'Uhana', 'Dehiattakandiya', 'Lahugala'],
+        'Trincomalee': ['Trincomalee', 'Kinniya', 'Kantale', 'Muttur', 'Kuchchaveli', 'Seruwila', 'Thampalakamam', 'Gomarankadawala', 'Morawewa', 'Padavi Siripura'],
+        'Kurunegala': ['Kurunegala', 'Kuliyapitiya', 'Pannala', 'Polgahawela', 'Mawathagama', 'Narammala', 'Wariyapola', 'Alawwa', 'Nikaweratiya', 'Galgamuwa'],
+        'Puttalam': ['Puttalam', 'Chilaw', 'Wennappuwa', 'Nattandiya', 'Anamaduwa', 'Mundel', 'Madampe', 'Dankotuwa', 'Palaviya', 'Kalpitiya'],
+        'Anuradhapura': ['Anuradhapura', 'Kekirawa', 'Medawachchiya', 'Mihintale', 'Galnewa', 'Talawa', 'Nochchiyagama', 'Padaviya', 'Thambuttegama', 'Kahatagasdigiliya'],
+        'Polonnaruwa': ['Polonnaruwa', 'Hingurakgoda', 'Medirigiriya', 'Dimbulagala', 'Elahera', 'Lankapura', 'Thamankaduwa', 'Welikanda'],
+        'Badulla': ['Badulla', 'Bandarawela', 'Haputale', 'Welimada', 'Mahiyanganaya', 'Passara', 'Hali Ela', 'Diyatalawa', 'Ella', 'Lunugala'],
+        'Monaragala': ['Monaragala', 'Wellawaya', 'Bibile', 'Medagama', 'Siyambalanduwa', 'Buttala', 'Thanamalwila', 'Madulla', 'Sevanagala'],
+        'Ratnapura': ['Ratnapura', 'Balangoda', 'Embilipitiya', 'Kuruwita', 'Pelmadulla', 'Eheliyagoda', 'Opanayaka', 'Ayagama', 'Kahawatta', 'Kalawana'],
+        'Kegalle': ['Kegalle', 'Mawanella', 'Rambukkana', 'Warakapola', 'Galigamuwa', 'Aranayake', 'Ruwanwella', 'Deraniyagala', 'Yatiyanthota', 'Dehiowita'],
+        'All Districts': ['All Towns']
     }
-  };
+};
 
   const countries = Object.keys(locationData);
   const provinces = locationData[selectedLocation.country] ? Object.keys(locationData[selectedLocation.country]) : [];
@@ -341,10 +347,10 @@ return (
 
             {/* App Location Option */}
             <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <button className="w-full flex items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium">
+              <Button className="w-full flex items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium">
                 <MapPin className="h-5 w-5 mr-2" />
                 Use Current Location
-              </button>
+              </Button>
               <p className="text-xs text-gray-500 text-center mt-2">
                 We'll detect your location automatically
               </p>
