@@ -1,9 +1,15 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
+import HeroSection from '../components/HeroSection'
+import Footer from '../components/Footer'
 
 export default function Homepage() {
   return (
     <div>
-      <h1>Homepage</h1>
+      <Navbar />
+      <HeroSection />
+      <Footer />
+
     </div>
   )
 }
