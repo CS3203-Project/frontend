@@ -7,7 +7,7 @@ import Button from './Button';
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState({
-    country: 'United States',
+    country: 'Sri Lanka',
     province: 'All States',
     city: 'All Cities'
   });
@@ -164,7 +164,7 @@ return (
             muted
             playsInline
           >
-            <source src="/intro.mp4" type="video/mp4" />
+            <source src="https://sg.fiverrcdn.com/packages_lp/cover_video.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/50"></div>
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-purple-900/30"></div>
