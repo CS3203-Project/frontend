@@ -1,7 +1,7 @@
 
 
 import React from "react";
-import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin, FaMailBulk, FaMailchimp, FaTwitter } from "react-icons/fa";
 import PropTypes from "prop-types";
 
 const defaultSections = [
@@ -35,10 +35,10 @@ const defaultSections = [
 ];
 
 const defaultSocialLinks = [
-  { icon: <FaInstagram className="size-5" />, href: "#", label: "Instagram" },
-  { icon: <FaFacebook className="size-5" />, href: "#", label: "Facebook" },
-  { icon: <FaTwitter className="size-5" />, href: "#", label: "Twitter" },
-  { icon: <FaLinkedin className="size-5" />, href: "#", label: "LinkedIn" },
+  { icon: <FaInstagram className="size-5" />, href: "https://www.instagram.com/zia.contact", label: "Instagram" },
+  { icon: <FaFacebook className="size-5" />, href: "https://www.facebook.com/profile.php?id=61578604951668", label: "Facebook" },
+  { icon: <FaMailBulk className="size-5" />, href: "mailto:zia.contact.team@gmail.com", label: "Email" },
+  { icon: <FaLinkedin className="size-5" />, href: "https://www.linkedin.com/in/zia2025", label: "LinkedIn" },
 ];
 
 const defaultLegalLinks = [
