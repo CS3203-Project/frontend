@@ -4,6 +4,7 @@ import Homepage from './pages/Homepage.jsx'
 import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
+import HowWorks from './Pages/HowWorks.jsx'
 
 function App() {
   return (
@@ -13,6 +14,8 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/stories" element={<SucessStories />} />
+        <Route path="/howWorks" element={<HowWorks />} />
+
       </Routes>
     </Router>
   )
