@@ -5,6 +5,7 @@ import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
 import HowWorks from './Pages/HowWorks.jsx'
+import ServiceProviderProfile from './Pages/ServiceProviderProfile.tsx'
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
         <Route path="/articles" element={<Articles />} />
         <Route path="/stories" element={<SucessStories />} />
         <Route path="/howWorks" element={<HowWorks />} />
-
+        <Route path="/provider/:id" element={<ServiceProviderProfile />} />
       </Routes>
     </Router>
   )

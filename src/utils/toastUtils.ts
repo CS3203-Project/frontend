@@ -18,14 +18,19 @@ const toastConfig = {
 // Success toast
 export const showSuccessToast = (message: string): void => {
   toast.success(message, {
-    ...toastConfig,
-    iconTheme: {
-      primary: '#10b981',
-      secondary: '#fff',
-    },
+    duration: 4000,
+    position: 'top-right',
     style: {
-      ...toastConfig.style,
-      borderLeft: '4px solid #10b981',
+      background: '#10B981',
+      color: '#fff',
+      borderRadius: '8px',
+      padding: '16px',
+      fontSize: '14px',
+      fontWeight: '500',
+    },
+    iconTheme: {
+      primary: '#fff',
+      secondary: '#10B981',
     },
   })
 }
@@ -33,14 +38,19 @@ export const showSuccessToast = (message: string): void => {
 // Error toast
 export const showErrorToast = (message: string): void => {
   toast.error(message, {
-    ...toastConfig,
-    iconTheme: {
-      primary: '#ef4444',
-      secondary: '#fff',
-    },
+    duration: 4000,
+    position: 'top-right',
     style: {
-      ...toastConfig.style,
-      borderLeft: '4px solid #ef4444',
+      background: '#EF4444',
+      color: '#fff',
+      borderRadius: '8px',
+      padding: '16px',
+      fontSize: '14px',
+      fontWeight: '500',
+    },
+    iconTheme: {
+      primary: '#fff',
+      secondary: '#EF4444',
     },
   })
 }
@@ -68,7 +78,15 @@ export const showWarningToast = (message: string): void => {
 // Loading toast
 export const showLoadingToast = (message: string): string => {
   return toast.loading(message, {
-    ...toastConfig,
+    position: 'top-right',
+    style: {
+      background: '#3B82F6',
+      color: '#fff',
+      borderRadius: '8px',
+      padding: '16px',
+      fontSize: '14px',
+      fontWeight: '500',
+    },
   }) as string
 }
 
