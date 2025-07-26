@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { FiSearch, FiMessageCircle, FiCreditCard, FiStar, FiUsers, FiShield, FiTrendingUp, FiCheckCircle, FiArrowRight, FiPlay, FiClock, FiAward, FiHeart } from 'react-icons/fi'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -360,7 +360,7 @@ export default function HowWorks() {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
                   <ul className="space-y-2">
-                    {selectedStep.features.map((feature, index) => (
+                    {selectedStep.features.map((feature: string, index: number) => (
                       <li key={index} className="flex items-center text-sm">
                         <FiCheckCircle className="w-4 h-4 text-green-500 mr-3" />
                         {feature}

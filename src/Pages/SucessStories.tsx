@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { FiStar, FiTrendingUp, FiUsers, FiDollarSign, FiClock, FiArrowRight, FiPlay, FiMessageCircle, FiHeart, FiAward, FiHeadphones } from 'react-icons/fi'
+import { useState } from 'react'
+import { FiStar, FiDollarSign, FiArrowRight, FiPlay, FiMessageCircle, FiHeart, FiAward, FiHeadphones } from 'react-icons/fi'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -407,7 +407,7 @@ export default function SuccessStories() {
                   <div className="bg-gray-50 rounded-lg p-6">
                     <h4 className="font-semibold text-gray-900 mb-4">Key Results</h4>
                     <ul className="space-y-2">
-                      {selectedStory.results.map((result, index) => (
+                      {selectedStory.results.map((result: string, index: number) => (
                         <li key={index} className="flex items-center text-sm">
                           <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                           {result}
@@ -453,7 +453,7 @@ export default function SuccessStories() {
                     <div className="flex items-center">
                       <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-4">
                         <span className="text-gray-600 font-medium">
-                          {selectedStory.freelancerName.split(' ').map(n => n[0]).join('')}
+                          {selectedStory.freelancerName.split(' ').map((n: any[]) => n[0]).join('')}
                         </span>
                       </div>
                       <div>

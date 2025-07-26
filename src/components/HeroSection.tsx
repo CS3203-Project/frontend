@@ -1,22 +1,36 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Star, Users, MessageCircle, MapPin, Play, Pause, Filter, ChevronDown, Globe, Map, Home, X } from 'lucide-react';
+import { Search, MapPin, Play, Pause, ChevronDown, Globe, Map, Home, X } from 'lucide-react';
 import Button from './Button';
 
+type LocationData = {
+  [country: string]: {
+    [province: string]: string[];
+  };
+};
 
-const HeroSection = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState({
+type Location = {
+  country: string;
+  province: string;
+  city: string;
+};
+
+
+
+const HeroSection: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState<Location>({
     country: 'Sri Lanka',
     province: 'All States',
-    city: 'All Cities'
+    city: 'All Cities',
   });
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [locationStep, setLocationStep] = useState('country'); // country, province, city
-  const [videoPlaying, setVideoPlaying] = useState(true);
-  const videoRef = useRef(null);
+  const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
+  const [locationStep, setLocationStep] = useState<'country' | 'province' | 'city'>('country');
+  const [videoPlaying, setVideoPlaying] = useState<boolean>(true);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-const locationData = {
+const locationData: LocationData = {
     'Sri Lanka': {
         'Colombo': ['Colombo', 'Dehiwala-Mount Lavinia', 'Moratuwa', 'Kotte', 'Homagama', 'Kesbewa', 'Maharagama', 'Kolonnawa', 'Kaduwela', 'Ratmalana'],
         'Gampaha': ['Negombo', 'Gampaha', 'Katunayake', 'Ja-Ela', 'Wattala', 'Kelaniya', 'Minuwangoda', 'Divulapitiya', 'Dompe', 'Attanagalla'],
@@ -47,10 +61,10 @@ const locationData = {
     }
 };
 
-  const countries = Object.keys(locationData);
-  const provinces = locationData[selectedLocation.country] ? Object.keys(locationData[selectedLocation.country]) : [];
-  const cities = locationData[selectedLocation.country] && locationData[selectedLocation.country][selectedLocation.province] 
-    ? locationData[selectedLocation.country][selectedLocation.province] 
+  const countries: string[] = Object.keys(locationData);
+  const provinces: string[] = locationData[selectedLocation.country] ? Object.keys(locationData[selectedLocation.country]) : [];
+  const cities: string[] = locationData[selectedLocation.country] && locationData[selectedLocation.country][selectedLocation.province]
+    ? locationData[selectedLocation.country][selectedLocation.province]
     : [];
 
   // Handle video looping behavior
@@ -63,7 +77,7 @@ const locationData = {
       };
 
       video.addEventListener('ended', handleVideoEnd);
-      
+
       const handleTimeUpdate = () => {
         if (video.currentTime >= video.duration - 0.1) {
           video.currentTime = 0;
@@ -79,8 +93,13 @@ const locationData = {
     }
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    doSearch();
+  };
+
+  // For input Enter key
+  const doSearch = () => {
     console.log('Searching for:', searchQuery, 'in', selectedLocation);
   };
 
@@ -92,47 +111,48 @@ const locationData = {
       } else {
         video.play();
       }
-      setVideoPlaying(!videoPlaying);
+      setVideoPlaying((prev) => !prev);
     }
   };
 
-  const openLocationModal = () => {
+  const openLocationModal = (): void => {
     setShowLocationModal(true);
     setLocationStep('country');
   };
 
-  const closeLocationModal = () => {
+  const closeLocationModal = (): void => {
     setShowLocationModal(false);
     setLocationStep('country');
   };
 
-  const handleCountrySelect = (country) => {
+  const handleCountrySelect = (country: string): void => {
+    const firstProvince = Object.keys(locationData[country])[0];
     setSelectedLocation({
       country: country,
-      province: Object.keys(locationData[country])[0],
-      city: locationData[country][Object.keys(locationData[country])[0]][0]
+      province: firstProvince,
+      city: locationData[country][firstProvince][0],
     });
     setLocationStep('province');
   };
 
-  const handleProvinceSelect = (province) => {
-    setSelectedLocation(prev => ({
+  const handleProvinceSelect = (province: string): void => {
+    setSelectedLocation((prev) => ({
       ...prev,
       province: province,
-      city: locationData[prev.country][province][0]
+      city: locationData[prev.country][province][0],
     }));
     setLocationStep('city');
   };
 
-  const handleCitySelect = (city) => {
-    setSelectedLocation(prev => ({
+  const handleCitySelect = (city: string): void => {
+    setSelectedLocation((prev) => ({
       ...prev,
-      city: city
+      city: city,
     }));
     closeLocationModal();
   };
 
-  const getLocationDisplayText = () => {
+  const getLocationDisplayText = (): string => {
     if (selectedLocation.city === 'All Cities' && selectedLocation.province === 'All States') {
       return selectedLocation.country;
     } else if (selectedLocation.city === 'All Cities') {
@@ -142,7 +162,7 @@ const locationData = {
     }
   };
 
-  const popularSearches = [
+  const popularSearches: string[] = [
     "House Cleaning",
     "Tutoring", 
     "Plumbing",
@@ -202,7 +222,12 @@ return (
                     placeholder="What service do you need?"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        doSearch();
+                      }
+                    }}
                     className="w-full pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 bg-transparent border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-base font-medium"
                   />
                 </div>

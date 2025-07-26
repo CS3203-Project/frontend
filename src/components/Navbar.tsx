@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, ChevronDown, X, Search, Star, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, DollarSign, MessageCircle, BarChart3 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3 } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
 
@@ -8,8 +8,8 @@ const Navbar = () => {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [forProvidersOpen, setForProvidersOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [servicesTimeout, setServicesTimeout] = useState(null);
-  const [providersTimeout, setProvidersTimeout] = useState(null);
+  const [servicesTimeout, setServicesTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -140,8 +140,11 @@ const Navbar = () => {
                   alt="Zia Logo" 
                   className="h-8 w-8"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    const img = e.target as HTMLImageElement;
+                    img.style.display = 'none';
+                    if (img.nextSibling && img.nextSibling instanceof HTMLElement) {
+                      (img.nextSibling as HTMLElement).style.display = 'flex';
+                    }
                   }}
                 />
                 <div className="hidden h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg items-center justify-center text-white font-bold text-lg">

@@ -8,7 +8,7 @@ import Footer from '../components/Footer'
 
 export default function Support() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [openFAQ, setOpenFAQ] = useState(null)
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
   const [emailForm, setEmailForm] = useState({
@@ -77,18 +77,18 @@ export default function Support() {
     }
   ]
 
-  const toggleFAQ = (index) => {
+  const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index)
   }
 
-  const handleEmailFormChange = (e) => {
+  const handleEmailFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEmailForm({
       ...emailForm,
       [e.target.name]: e.target.value
     })
   }
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     // Here you would typically send the email to your backend
     console.log('Email form submitted:', emailForm)

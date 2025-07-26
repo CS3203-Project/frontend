@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { FiSearch, FiBook, FiUsers, FiShield, FiDollarSign, FiClock, FiEye, FiChevronRight } from 'react-icons/fi'
 import { useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'

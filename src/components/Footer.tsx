@@ -1,7 +1,4 @@
-
-
-import React from "react";
-import { FaFacebook, FaInstagram, FaLinkedin, FaMailBulk, FaMailchimp, FaTwitter } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin, FaMailBulk } from "react-icons/fa";
 import PropTypes from "prop-types";
 
 const defaultSections = [
