@@ -1,9 +1,11 @@
 import toast from 'react-hot-toast'
 
 // Custom toast configurations
+import type { ToastPosition } from 'react-hot-toast'
+
 const toastConfig = {
   duration: 5000,
-  position: 'top-right',
+  position: 'top-right' as ToastPosition,
   style: {
     background: '#fff',
     color: '#333',
@@ -14,7 +16,7 @@ const toastConfig = {
 }
 
 // Success toast
-export const showSuccessToast = (message) => {
+export const showSuccessToast = (message: string): void => {
   toast.success(message, {
     ...toastConfig,
     iconTheme: {
@@ -29,7 +31,7 @@ export const showSuccessToast = (message) => {
 }
 
 // Error toast
-export const showErrorToast = (message) => {
+export const showErrorToast = (message: string): void => {
   toast.error(message, {
     ...toastConfig,
     iconTheme: {
@@ -44,7 +46,7 @@ export const showErrorToast = (message) => {
 }
 
 // Info toast
-export const showInfoToast = (message) => {
+export const showInfoToast = (message: string): void => {
   toast(message, {
     ...toastConfig,
     icon: 'ℹ️',
@@ -52,7 +54,7 @@ export const showInfoToast = (message) => {
 }
 
 // Warning toast
-export const showWarningToast = (message) => {
+export const showWarningToast = (message: string): void => {
   toast(message, {
     ...toastConfig,
     icon: '⚠️',
@@ -64,18 +66,18 @@ export const showWarningToast = (message) => {
 }
 
 // Loading toast
-export const showLoadingToast = (message) => {
+export const showLoadingToast = (message: string): string => {
   return toast.loading(message, {
     ...toastConfig,
-  })
+  }) as string
 }
 
 // Dismiss toast
-export const dismissToast = (toastId) => {
+export const dismissToast = (toastId: string): void => {
   toast.dismiss(toastId)
 }
 
 // Dismiss all toasts
-export const dismissAllToasts = () => {
+export const dismissAllToasts = (): void => {
   toast.dismiss()
 }

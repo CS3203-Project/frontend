@@ -116,10 +116,10 @@ const Navbar = () => {
   ];
 
   const navLinks = [
-    { name: "How It Works", href: "#" },
+    { name: "How It Works", href: "/howWorks" },
     { name: "Pricing", href: "#" },
-    { name: "Success Stories", href: "#" },
-    { name: "Support", href: "#" }
+    { name: "Success Stories", href: "/stories" },
+    { name: "Support", href: "/support" }
   ];
 
   return (
