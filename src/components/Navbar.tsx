@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3, LogOut, User } from 'lucide-react';
+import { Menu, ChevronDown, X, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3 } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
-import { userApi } from '../api/userApi';
-import type { UserProfile } from '../api/userApi';
+import { Link } from 'react-router-dom';
+import SpecificSearchCard from './services/SpecificSearchCard';
+import { categoriesData } from '../data/servicesData';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -95,51 +96,6 @@ const Navbar = () => {
     setProvidersTimeout(timeout);
   };
 
-  const services = [
-    {
-      title: "Home Services",
-      description: "Cleaning, repairs, maintenance",
-      href: "#",
-      icon: Home,
-      gradient: "from-green-400 to-blue-500"
-    },
-    {
-      title: "Professional Services",
-      description: "Tutoring, consulting, coaching",
-      href: "#",
-      icon: Briefcase,
-      gradient: "from-blue-400 to-purple-500"
-    },
-    {
-      title: "Creative Services",
-      description: "Design, photography, writing",
-      href: "#",
-      icon: Sparkles,
-      gradient: "from-purple-400 to-pink-500"
-    },
-    {
-      title: "Technical Services",
-      description: "IT support, web development",
-      href: "#",
-      icon: Globe,
-      gradient: "from-cyan-400 to-blue-500"
-    },
-    {
-      title: "Personal Care",
-      description: "Beauty, wellness, fitness",
-      href: "#",
-      icon: UserCheck,
-      gradient: "from-pink-400 to-red-500"
-    },
-    {
-      title: "Business Services",
-      description: "Accounting, marketing, legal",
-      href: "#",
-      icon: BarChart3,
-      gradient: "from-indigo-400 to-purple-500"
-    },
-  ];
-
   const providerFeatures = [
     {
       title: "Easy Setup",
@@ -220,7 +176,8 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-8">
             {/* Services Dropdown */}
             <div className="relative">
-              <button 
+              <Link
+                to="/services"
                 className="flex items-center space-x-1 text-gray-700 hover:text-black font-medium transition-colors duration-200 py-2"
                 onMouseEnter={handleServicesEnter}
                 onMouseLeave={handleServicesLeave}
@@ -230,7 +187,7 @@ const Navbar = () => {
                   "h-4 w-4 transition-transform duration-200",
                   servicesOpen && "rotate-180"
                 )} />
-              </button>
+              </Link>
               
               {/* Services Mega Menu */}
               <div 
@@ -244,13 +201,14 @@ const Navbar = () => {
                 onMouseLeave={handleServicesLeave}
               >
                 <div className="grid grid-cols-2 gap-4">
-                  {services.map((service, index) => {
+                  {categoriesData.map((service, index) => {
                     const IconComponent = service.icon;
                     return (
-                      <a
+                      <Link
                         key={index}
-                        href={service.href}
+                        to={`/services/${service.slug}`}
                         className="group p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 border border-transparent hover:border-gray-200"
+                        onClick={() => setServicesOpen(false)}
                       >
                         <div className="flex items-start space-x-3">
                           <div className={cn(
@@ -268,22 +226,11 @@ const Navbar = () => {
                             </p>
                           </div>
                         </div>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Need something specific?</h4>
-                      <p className="text-sm text-gray-600">Search through thousands of service providers</p>
-                    </div>
-                    <Button size="sm" className="shrink-0">
-                      <Search className="mr-1 h-4 w-4" />
-                      Search
-                    </Button>
-                  </div>
-                </div>
+                <SpecificSearchCard />
               </div>
             </div>
 
@@ -472,12 +419,12 @@ const Navbar = () => {
                 servicesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
               )}>
                 <div className="space-y-2 pl-4">
-                  {services.map((service, index) => {
+                  {categoriesData.map((service, index) => {
                     const IconComponent = service.icon;
                     return (
-                      <a
+                      <Link
                         key={index}
-                        href={service.href}
+                        to={`/services/${service.slug}`}
                         className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white transition-colors duration-200"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -491,7 +438,7 @@ const Navbar = () => {
                           <div className="font-medium text-gray-900">{service.title}</div>
                           <div className="text-sm text-gray-600">{service.description}</div>
                         </div>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
