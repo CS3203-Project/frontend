@@ -1,7 +1,6 @@
 import React from 'react';
 import { Star, Heart } from 'lucide-react';
 import type { Service } from '../../data/servicesData';
-import { cn } from '../../utils/utils';
 
 interface ServiceCardProps {
   service: Service;
