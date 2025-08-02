@@ -8,6 +8,7 @@ import HowWorks from './Pages/HowWorks.jsx'
 import ServiceProviderProfile from './Pages/ServiceProviderProfile.tsx'
 import Signup from './Pages/Signup.tsx'
 import SignIn from './Pages/SignIn.tsx'
+import Profile from './Pages/Profile.tsx'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/provider/:id" element={<ServiceProviderProfile />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/profile" element={<Profile />} />
         {/* Add more routes as needed */}
       </Routes>
     </Router>
