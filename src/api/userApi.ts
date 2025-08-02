@@ -25,6 +25,19 @@ export interface RegisterUserResponse {
   };
 }
 
+// User profile type
+export interface UserProfile {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  imageUrl?: string;
+  location: string;
+  address?: string;
+  phone: string;
+  socialmedia?: string;
+}
+
 // User API functions
 export const userApi = {
   // Login user
@@ -81,9 +94,36 @@ export const userApi = {
     }
   },
 
+  // Get user profile
+  getProfile: async (): Promise<UserProfile> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.get('/users/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to fetch profile');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Logout user
+  logout: async (): Promise<void> => {
+    localStorage.removeItem('token');
+  },
+
   // You can add more user-related API calls here
-  // login: async (credentials: LoginData): Promise<LoginResponse> => { ... },
-  // getProfile: async (userId: string): Promise<UserProfile> => { ... },
   // updateProfile: async (userId: string, data: UpdateUserData): Promise<UserProfile> => { ... },
 };
 

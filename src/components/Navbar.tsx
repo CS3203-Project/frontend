@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3 } from 'lucide-react';
+import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3, LogOut, User } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
+import { userApi } from '../api/userApi';
+import type { UserProfile } from '../api/userApi';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -10,6 +12,9 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [servicesTimeout, setServicesTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +23,57 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      console.log('Checking auth, token:', token);
+      if (token) {
+        try {
+          console.log('Making API call to get profile...');
+          const userData = await userApi.getProfile();
+          console.log('Profile response:', userData);
+          setUser(userData);
+          setIsLoggedIn(true);
+          console.log('User logged in:', userData);
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+          localStorage.removeItem('token');
+          setIsLoggedIn(false);
+          setUser(null);
+        }
+      } else {
+        console.log('No token found, user not logged in');
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuOpen && !(event.target as Element).closest('.user-menu')) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [userMenuOpen]);
+
+  const handleLogout = async () => {
+    try {
+      await userApi.logout();
+      setUser(null);
+      setIsLoggedIn(false);
+      setUserMenuOpen(false);
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const handleServicesEnter = () => {
     if (servicesTimeout) clearTimeout(servicesTimeout);
@@ -310,18 +366,74 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center space-x-3">
-            <a href="/signin">
-              <Button variant="ghost" className="font-medium">
-              Sign In
-              </Button>
-            </a>
-            <a href="/signup">
-              <Button className="font-medium shadow-lg">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </a>
+          <div className="hidden lg:flex items-center space-x-3">            
+            {isLoggedIn && user ? (
+              <div className="relative user-menu">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                >
+                  {user.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm">
+                      {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                    </div>
+                  )}
+                  <span className="text-gray-700 font-medium">{user.firstName}</span>
+                  <ChevronDown className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    userMenuOpen && "rotate-180"
+                  )} />
+                </button>
+
+                {/* User Dropdown Menu */}
+                <div className={cn(
+                  "absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 transition-all duration-200 origin-top-right",
+                  userMenuOpen 
+                    ? "opacity-100 visible scale-100" 
+                    : "opacity-0 invisible scale-95 pointer-events-none"
+                )}>
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</p>
+                    <p className="text-xs text-gray-600">{user.email}</p>
+                  </div>
+                  <a
+                    href="/profile"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4 mr-3" />
+                    My Profile
+                  </a>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  >
+                    <LogOut className="h-4 w-4 mr-3" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <a href="/signin">
+                  <Button variant="ghost" className="font-medium">
+                    Sign In
+                  </Button>
+                </a>
+                <a href="/signup">
+                  <Button className="font-medium shadow-lg">
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </a>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -445,18 +557,57 @@ const Navbar = () => {
 
             {/* Mobile CTA */}
             <div className="pt-4 border-t border-gray-300 space-y-3">
-              <a
-                href="/signin"
-                className="w-full justify-center inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium hover:bg-gray-100 transition-colors duration-200"
-              >
-                Sign In
-              </a>
-                <a href="/signup" className="w-full">
-                  <Button className="w-full justify-center">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </a>
+              {isLoggedIn && user ? (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                    {user.imageUrl ? (
+                      <img
+                        src={user.imageUrl}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                        {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-gray-900">{user.firstName} {user.lastName}</p>
+                      <p className="text-sm text-gray-600">{user.email}</p>
+                    </div>
+                  </div>
+                  <a
+                    href="/profile"
+                    className="w-full justify-center inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium hover:bg-gray-100 transition-colors duration-200"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    My Profile
+                  </a>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <a
+                    href="/signin"
+                    className="w-full justify-center inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    Sign In
+                  </a>
+                  <a href="/signup" className="w-full">
+                    <Button className="w-full justify-center">
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </div>
