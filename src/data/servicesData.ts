@@ -94,7 +94,7 @@ export const categoriesData: ServiceCategory[] = [
     subcategories: [
       { id: 's1', name: "Cleaning", slug: "cleaning", description: "Residential and commercial cleaning.", icon: Sparkles },
       { id: 's2', name: "Plumbing", slug: "plumbing", description: "Fix leaks, install fixtures.", icon: Wrench },
-      { id: 's3', name: "Electrician", slug: "electrician", description: "Wiring, repairs, and installations.", icon: BookOpen },
+      { id: 's3', name: "Electrician", slug: "electrician", description: "Wiring, repairs, and installations.", icon: Zap },
     ]
   },
   {
