@@ -6,6 +6,8 @@ import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
 import HowWorks from './Pages/HowWorks.jsx'
 import ServiceProviderProfile from './Pages/ServiceProviderProfile.tsx'
+import Signup from './Pages/Signup.tsx'
+import SignIn from './Pages/SignIn.tsx'
 
 function App() {
   return (
@@ -17,6 +19,9 @@ function App() {
         <Route path="/stories" element={<SucessStories />} />
         <Route path="/howWorks" element={<HowWorks />} />
         <Route path="/provider/:id" element={<ServiceProviderProfile />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/signin" element={<SignIn />} />
+        {/* Add more routes as needed */}
       </Routes>
     </Router>
   )
