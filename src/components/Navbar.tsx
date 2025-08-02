@@ -311,13 +311,17 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-3">
-            <Button variant="ghost" className="font-medium">
+            <a href="/signin">
+              <Button variant="ghost" className="font-medium">
               Sign In
-            </Button>
-            <Button className="font-medium shadow-lg">
+              </Button>
+            </a>
+            <a href="/signup">
+              <Button className="font-medium shadow-lg">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+              </Button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -441,13 +445,18 @@ const Navbar = () => {
 
             {/* Mobile CTA */}
             <div className="pt-4 border-t border-gray-300 space-y-3">
-              <Button variant="outline" className="w-full justify-center">
+              <a
+                href="/signin"
+                className="w-full justify-center inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium hover:bg-gray-100 transition-colors duration-200"
+              >
                 Sign In
-              </Button>
-              <Button className="w-full justify-center">
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              </a>
+                <a href="/signup" className="w-full">
+                  <Button className="w-full justify-center">
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </a>
             </div>
           </div>
         </div>

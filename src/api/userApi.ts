@@ -27,6 +27,21 @@ export interface RegisterUserResponse {
 
 // User API functions
 export const userApi = {
+  // Login user
+  login: async (credentials: { email: string; password: string }): Promise<{ message: string; token?: string; user?: any }> => {
+    try {
+      const response = await apiClient.post('/users/login', credentials);
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Login failed');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
   // Check if email already exists
   checkEmailExists: async (email: string): Promise<{ exists: boolean; message: string }> => {
     try {

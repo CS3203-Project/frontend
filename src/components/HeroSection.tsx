@@ -16,7 +16,7 @@ type Location = {
   city: string;
 };
 
-
+console.log('Token stored in localStorage:', localStorage.getItem('token'));
 
 const HeroSection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
