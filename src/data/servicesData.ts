@@ -92,7 +92,7 @@ export const categoriesData: ServiceCategory[] = [
     icon: Home,
     gradient: "from-green-400 to-blue-500",
     subcategories: [
-      { id: 's1', name: "Cleaning", slug: "cleaning", description: "Residential and commercial cleaning.", icon: Wrench },
+      { id: 's1', name: "Cleaning", slug: "cleaning", description: "Residential and commercial cleaning.", icon: Sparkles },
       { id: 's2', name: "Plumbing", slug: "plumbing", description: "Fix leaks, install fixtures.", icon: Paintbrush },
       { id: 's3', name: "Electrician", slug: "electrician", description: "Wiring, repairs, and installations.", icon: BookOpen },
     ]
