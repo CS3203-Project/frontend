@@ -299,7 +299,7 @@ export default function Profile() {
           </div>
             )}
             {/* Company Info in Header */}
-            {providerProfile.companies && providerProfile.companies.length > 0 && (
+            {providerProfile && providerProfile.companies && providerProfile.companies.length > 0 && (
           <div className="flex items-center mt-4">
             {providerProfile.companies[0].logo ? (
               <img
