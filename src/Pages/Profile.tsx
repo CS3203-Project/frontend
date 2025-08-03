@@ -11,9 +11,6 @@ import {
   Award,
   Briefcase,
   ExternalLink,
-  Camera,
-  Save,
-  X,
   UserPlus,
   Trash2,
   AlertTriangle
@@ -22,19 +19,19 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
-import type { UserProfile, UpdateProfileData, ProviderProfile } from '../api/userApi';
+import type { UserProfile, ProviderProfile } from '../api/userApi';
 import BecomeProviderModal from '../components/Profile/BecomeProviderModal';
 import EditProviderModal from '../components/Profile/EditProviderModal';
+import EditProfileModal from '../components/Profile/EditProfileModal';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
 export default function Profile() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<UpdateProfileData>({});
   const [showBecomeProviderModal, setShowBecomeProviderModal] = useState(false);
   const [showEditProviderModal, setShowEditProviderModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
 
@@ -47,12 +44,6 @@ export default function Profile() {
       setLoading(true);
       const userData = await userApi.getProfile();
       setUser(userData);
-      setEditForm({
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        imageUrl: userData.imageUrl,
-        socialmedia: userData.socialmedia
-      });
 
       // If user is a provider, fetch provider profile
       if (userData.role === 'PROVIDER') {
@@ -70,15 +61,8 @@ export default function Profile() {
     }
   };
 
-  const handleUpdateProfile = async () => {
-    try {
-      const updatedUser = await userApi.updateProfile(editForm);
-      setUser(prev => prev ? { ...prev, ...updatedUser } : null);
-      setIsEditing(false);
-      toast.success('Profile updated successfully!');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
-    }
+  const handleUpdateProfile = (updatedUser: Partial<UserProfile>) => {
+    setUser(prev => prev ? { ...prev, ...updatedUser } : null);
   };
 
   const handleBecomeProvider = () => {
@@ -142,118 +126,123 @@ export default function Profile() {
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-8">
         {/* Profile Header */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-          <div className="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600">
-            <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-          </div>
-          
-          <div className="relative px-6 pb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-end -mt-16">
-              {/* Avatar */}
-              <div className="relative">
-                {user.imageUrl ? (
-                  <img
-                    src={user.imageUrl}
-                    alt={`${user.firstName} ${user.lastName}`}
-                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-                  />
-                ) : (
-                  <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
-                    {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-                  </div>
-                )}
-                {isEditing && (
-                  <button className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                    <Camera className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-4 sm:mt-0 sm:ml-6 flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      {user.firstName} {user.lastName}
-                    </h1>
-                    <div className="flex items-center mt-2 space-x-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        user.role === 'PROVIDER' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {user.role === 'PROVIDER' ? 'Service Provider' : 'User'}
-                      </span>
-                      {user.isEmailVerified && (
-                        <div className="flex items-center text-green-600">
-                          <Shield className="h-4 w-4 mr-1" />
-                          <span className="text-sm">Verified</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 sm:mt-0 flex space-x-3">
-                    {user.role === 'USER' && (
-                      <Button
-                        onClick={handleBecomeProvider}
-                        className="flex items-center space-x-2"
-                      >
-                        <UserPlus className="h-4 w-4" />
-                        <span>Become a Provider</span>
-                      </Button>
-                    )}
-                    {user.role === 'PROVIDER' && (
-                      <>
-                        <Button
-                          onClick={() => setShowEditProviderModal(true)}
-                          variant="outline"
-                          className="flex items-center space-x-2"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                          <span>Edit Provider</span>
-                        </Button>
-                        <Button
-                          onClick={() => setShowDeleteConfirmation(true)}
-                          variant="outline"
-                          className="flex items-center space-x-2 text-red-600 border-red-300 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span>Delete Provider</span>
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      variant={isEditing ? "ghost" : "outline"}
-                      onClick={() => {
-                        if (isEditing) {
-                          setIsEditing(false);
-                          setEditForm({
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            imageUrl: user.imageUrl,
-                            socialmedia: user.socialmedia
-                          });
-                        } else {
-                          setIsEditing(true);
-                        }
-                      }}
-                      className="flex items-center space-x-2"
-                    >
-                      {isEditing ? <X className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
-                      <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
-                    </Button>
-                    {isEditing && (
-                      <Button
-                        onClick={handleUpdateProfile}
-                        className="flex items-center space-x-2"
-                      >
-                        <Save className="h-4 w-4" />
-                        <span>Save Changes</span>
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
+          {/* Banner */}
+          <div className="relative h-36 bg-gradient-to-r from-blue-500 to-purple-600">
+        <img
+          src="https://4kwallpapers.com/images/walls/thumbs_3t/8728.jpg"
+          alt="Profile Banner"
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+        {/* Avatar - half above the banner */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-16 z-10">
+          <div className="relative">
+            {user.imageUrl && user.imageUrl.trim() ? (
+          <img
+            src={user.imageUrl}
+            alt={`${user.firstName} ${user.lastName}`}
+            className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.style.display = 'none';
+              const defaultAvatar = img.nextElementSibling as HTMLElement;
+              if (defaultAvatar) defaultAvatar.style.display = 'flex';
+            }}
+          />
+            ) : null}
+            <div
+          className={`w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold ${
+            user.imageUrl && user.imageUrl.trim() ? 'hidden' : 'flex'
+          }`}
+            >
+          {(user.firstName?.charAt(0) || 'U').toUpperCase()}
+          {(user.lastName?.charAt(0) || 'S').toUpperCase()}
             </div>
+          </div>
+        </div>
+          </div>
+          {/* Header Content */}
+          <div className="px-4 sm:px-6 pb-6 ">
+        <div className="flex flex-col lg:flex-row items-center lg:items-end lg:space-x-8 mt-0">
+          {/* Spacer for avatar */}
+          <div className="w-32 h-16 lg:hidden" />
+          {/* Info & Actions */}
+          <div className="flex-1 text-center lg:text-left ml-5 mt-13 lg:mt-0">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+          <div>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-4 mb-1">
+              {user.firstName || 'First'} {user.lastName || 'Last'}
+            </h1>
+            <p className="text-gray-600 text-lg mb-1">{user.email}</p>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-2">
+              <span
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+              user.role === 'PROVIDER'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-blue-100 text-blue-800'
+            }`}
+              >
+            {user.role === 'PROVIDER' ? 'Service Provider' : 'User'}
+              </span>
+              {user.isEmailVerified && (
+            <span className="flex items-center text-green-600">
+              <Shield className="h-5 w-5 mr-1" />
+              <span className="text-sm">Verified</span>
+            </span>
+              )}
+              {user.phone && (
+            <span className="flex items-center text-gray-500">
+              <Phone className="h-4 w-4 mr-1" />
+              <span className="text-xs">{user.phone}</span>
+            </span>
+              )}
+              {user.location && (
+            <span className="flex items-center text-gray-500">
+              <MapPin className="h-4 w-4 mr-1" />
+              <span className="text-xs">{user.location}</span>
+            </span>
+              )}
+            </div>
+          </div>
+          {/* Edit Profile Button */}
+          <Button
+            onClick={() => setShowEditProfileModal(true)}
+            variant="outline"
+            className="flex items-center space-x-2 px-4 py-2 text-base font-medium"
+            size="sm"
+          >
+            <Edit2 className="h-5 w-5" />
+            <span>Edit Profile</span>
+          </Button>
+            </div>
+            {/* Provider Actions */}
+            {user.role === 'PROVIDER' && (
+          <div className="flex flex-wrap justify-center lg:justify-start gap-3 mt-2">
+            <Button
+              onClick={() => setShowEditProviderModal(true)}
+              variant="outline"
+              className="flex items-center space-x-2 px-6 py-3 text-base font-medium"
+              size="lg"
+            >
+              <Edit2 className="h-5 w-5" />
+              <span>Edit Provider</span>
+            </Button>
+            <Button
+              onClick={() => setShowDeleteConfirmation(true)}
+              variant="outline"
+              className="flex items-center space-x-2 text-red-600 border-red-300 hover:bg-red-50 px-6 py-3 text-base font-medium"
+              size="lg"
+            >
+              <Trash2 className="h-5 w-5" />
+              <span>Delete Provider</span>
+            </Button>
+          </div>
+            )}
+            {/* Social Media Links */}
+          </div>
+        </div>
           </div>
         </div>
 
@@ -292,6 +281,16 @@ export default function Profile() {
                     </div>
                   </div>
                 )}
+
+                {user.address && (
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p className="text-gray-900">{user.address}</p>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex items-center space-x-3">
                   <Calendar className="h-5 w-5 text-gray-400" />
@@ -306,96 +305,31 @@ export default function Profile() {
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Editable Information for USER role */}
-            {user.role === 'USER' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  {isEditing ? 'Edit Information' : 'Personal Details'}
-                </h2>
-                
-                {isEditing ? (
-                  <div className="space-y-4">
+                {user.socialmedia && user.socialmedia.length > 0 && (
+                  <div className="flex items-start space-x-3">
+                    <ExternalLink className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.firstName || ''}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.lastName || ''}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Profile Image URL
-                      </label>
-                      <input
-                        type="url"
-                        value={editForm.imageUrl || ''}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, imageUrl: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="https://example.com/image.jpg"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Social Media (one per line)
-                      </label>
-                      <textarea
-                        value={editForm.socialmedia?.join('\n') || ''}
-                        onChange={(e) => setEditForm(prev => ({ 
-                          ...prev, 
-                          socialmedia: e.target.value.split('\n').filter(link => link.trim())
-                        }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        rows={3}
-                        placeholder="twitter.com/username&#10;linkedin.com/in/username"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {user.socialmedia && user.socialmedia.length > 0 && (
-                      <div>
-                        <p className="text-sm text-gray-500 mb-2">Social Media</p>
-                        <div className="space-y-2">
-                          {user.socialmedia.map((link, index) => (
-                            <a
-                              key={index}
-                              href={link.startsWith('http') ? link : `https://${link}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              {link}
-                            </a>
-                          ))}
-                        </div>
+                      <p className="text-sm text-gray-500 mb-2">Social Media</p>
+                      <div className="space-y-2">
+                        {user.socialmedia.map((link, index) => (
+                          <a
+                            key={index}
+                            href={link.startsWith('http') ? link : `https://${link}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            <ExternalLink className="h-3 w-3 mr-2" />
+                            {link}
+                          </a>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Right Column - Provider-specific content */}
@@ -595,6 +529,13 @@ export default function Profile() {
         isOpen={showBecomeProviderModal}
         onClose={() => setShowBecomeProviderModal(false)}
         onSuccess={handleProviderCreated}
+      />
+
+      <EditProfileModal 
+        isOpen={showEditProfileModal}
+        onClose={() => setShowEditProfileModal(false)}
+        onSuccess={handleUpdateProfile}
+        user={user}
       />
 
       {providerProfile && (

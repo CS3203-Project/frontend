@@ -75,6 +75,9 @@ export interface UpdateProfileData {
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
+  location?: string;
+  phone?: string;
+  address?: string;
   socialmedia?: string[];
 }
 
