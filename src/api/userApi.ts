@@ -75,6 +75,9 @@ export interface UpdateProfileData {
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
+  location?: string;
+  phone?: string;
+  address?: string;
   socialmedia?: string[];
 }
 
@@ -84,6 +87,7 @@ export interface CreateProviderData {
   skills?: string[];
   qualifications?: string[];
   logoUrl?: string;
+  IDCardUrl: string; // Required field - ID card image URL
 }
 
 export interface UpdateProviderData {
@@ -91,6 +95,37 @@ export interface UpdateProviderData {
   skills?: string[];
   qualifications?: string[];
   logoUrl?: string;
+  IDCardUrl?: string; // Optional for updates
+}
+
+// Company types
+export interface CreateCompanyData {
+  name: string;
+  description?: string;
+  logo?: string;
+  address?: string;
+  contact?: string;
+  socialmedia?: string[];
+}
+
+export interface UpdateCompanyData {
+  name?: string;
+  description?: string;
+  logo?: string;
+  address?: string;
+  contact?: string;
+  socialmedia?: string[];
+}
+
+export interface Company {
+  id: string;
+  providerId: string;
+  name?: string;
+  description?: string;
+  logo?: string;
+  address?: string;
+  contact?: string;
+  socialmedia: string[];
 }
 
 export interface ProviderProfile {
@@ -102,6 +137,8 @@ export interface ProviderProfile {
   logoUrl?: string;
   averageRating?: number;
   totalReviews?: number;
+  isVerified?: boolean;
+  IDCardUrl: string; // Required field
   createdAt: string;
   updatedAt: string;
   user: {
@@ -118,6 +155,7 @@ export interface ProviderProfile {
     createdAt: string;
     isEmailVerified: boolean;
   };
+  companies: Company[];
   services: Array<{
     id: string;
     title: string;
@@ -335,6 +373,98 @@ export const userApi = {
     } catch (error: any) {
       if (error.response) {
         throw new Error(error.response.data?.message || 'Failed to delete provider profile');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Company API methods
+  getCompanies: async (): Promise<Company[]> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.get('/companies', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to fetch companies');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  createCompany: async (companyData: CreateCompanyData): Promise<Company> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.post('/companies', companyData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data.company;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to create company');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  updateCompany: async (companyId: string, companyData: UpdateCompanyData): Promise<Company> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.put(`/companies/${companyId}`, companyData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data.company;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to update company');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  deleteCompany: async (companyId: string): Promise<void> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      await apiClient.delete(`/companies/${companyId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to delete company');
       } else if (error.request) {
         throw new Error('Network error. Please check your connection.');
       } else {
