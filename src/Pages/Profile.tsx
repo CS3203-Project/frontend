@@ -15,15 +15,18 @@ import {
   UserPlus,
   Trash2,
   AlertTriangle,
-  Clock
+  Clock,
+  Building,
+  Plus
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
-import type { UserProfile, ProviderProfile } from '../api/userApi';
+import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
+import CompanyModal from '../components/Profile/CompanyModal';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
@@ -34,6 +37,10 @@ export default function Profile() {
   const [showEditProviderModal, setShowEditProviderModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [showDeleteCompanyConfirmation, setShowDeleteCompanyConfirmation] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
 
   useEffect(() => {
@@ -87,6 +94,60 @@ export default function Profile() {
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete provider profile');
     }
+  };
+
+  const handleCompanySuccess = (company: Company) => {
+    // Update the provider profile with the new/updated company
+    if (providerProfile) {
+      if (selectedCompany) {
+        // Update existing company
+        setProviderProfile({
+          ...providerProfile,
+          companies: providerProfile.companies.map(c => 
+            c.id === company.id ? company : c
+          )
+        });
+      } else {
+        // Add new company
+        setProviderProfile({
+          ...providerProfile,
+          companies: [...providerProfile.companies, company]
+        });
+      }
+    }
+    setSelectedCompany(null);
+  };
+
+  const handleEditCompany = (company: Company) => {
+    setSelectedCompany(company);
+    setShowCompanyModal(true);
+  };
+
+  const handleDeleteCompany = async () => {
+    if (!companyToDelete) return;
+    
+    try {
+      await userApi.deleteCompany(companyToDelete);
+      toast.success('Company deleted successfully!');
+      
+      // Update the provider profile
+      if (providerProfile) {
+        setProviderProfile({
+          ...providerProfile,
+          companies: providerProfile.companies.filter(c => c.id !== companyToDelete)
+        });
+      }
+      
+      setShowDeleteCompanyConfirmation(false);
+      setCompanyToDelete(null);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete company');
+    }
+  };
+
+  const handleDeleteCompanyClick = (companyId: string) => {
+    setCompanyToDelete(companyId);
+    setShowDeleteCompanyConfirmation(true);
   };
 
   if (loading) {
@@ -235,6 +296,23 @@ export default function Profile() {
               <Trash2 className="h-5 w-5" />
               <span>Delete Provider</span>
             </Button>
+          </div>
+            )}
+            {/* Company Info in Header */}
+            {providerProfile.companies && providerProfile.companies.length > 0 && (
+          <div className="flex items-center mt-4">
+            {providerProfile.companies[0].logo ? (
+              <img
+                src={providerProfile.companies[0].logo}
+                alt={providerProfile.companies[0].name}
+                className="w-10 h-10 rounded-full object-cover mr-3"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                <Building className="h-5 w-5 text-gray-400" />
+              </div>
+            )}
+            <span className="text-sm text-gray-600">{providerProfile.companies[0].name}</span>
           </div>
             )}
             {/* Social Media Links */}
@@ -530,6 +608,121 @@ export default function Profile() {
                   </div>
                 )}
 
+                {/* Companies */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">Companies</h2>
+                    <Button
+                      onClick={() => {
+                        setSelectedCompany(null);
+                        setShowCompanyModal(true);
+                      }}
+                      size="sm"
+                      className="flex items-center space-x-1"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Add Company</span>
+                    </Button>
+                  </div>
+                  
+                  {providerProfile.companies && providerProfile.companies.length > 0 ? (
+                    <div className="space-y-4">
+                      {providerProfile.companies.map((company) => (
+                        <div key={company.id} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              {company.logo ? (
+                                <img
+                                  src={company.logo}
+                                  alt={company.name}
+                                  className="w-12 h-12 rounded-lg object-cover"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                                  <Building className="h-6 w-6 text-gray-400" />
+                                </div>
+                              )}
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{company.name}</h3>
+                                {company.description && (
+                                  <p className="text-gray-600 text-sm mt-1">{company.description}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                onClick={() => handleEditCompany(company)}
+                                variant="ghost"
+                                size="sm"
+                                className="p-2"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteCompanyClick(company.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="p-2 text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                            {company.address && (
+                              <div className="flex items-center space-x-2">
+                                <MapPin className="h-4 w-4" />
+                                <span>{company.address}</span>
+                              </div>
+                            )}
+                            {company.contact && (
+                              <div className="flex items-center space-x-2">
+                                <Phone className="h-4 w-4" />
+                                <span>{company.contact}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {company.socialmedia && company.socialmedia.length > 0 && (
+                            <div className="mt-3">
+                              <div className="flex flex-wrap gap-2">
+                                {company.socialmedia.map((link, index) => (
+                                  <a
+                                    key={index}
+                                    href={link.startsWith('http') ? link : `https://${link}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                                  >
+                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                    {new URL(link.startsWith('http') ? link : `https://${link}`).hostname}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Building className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 mb-4">No companies added yet</p>
+                      <Button
+                        onClick={() => {
+                          setSelectedCompany(null);
+                          setShowCompanyModal(true);
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Add Your First Company
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 {/* Recent Reviews */}
                 {providerProfile.reviews && providerProfile.reviews.length > 0 && (
                   <div className="bg-white rounded-xl shadow-lg p-6">
@@ -624,6 +817,54 @@ export default function Profile() {
           onSuccess={handleProviderUpdated}
           provider={providerProfile}
         />
+      )}
+
+      {/* Company Modal */}
+      <CompanyModal 
+        isOpen={showCompanyModal}
+        onClose={() => {
+          setShowCompanyModal(false);
+          setSelectedCompany(null);
+        }}
+        onSuccess={handleCompanySuccess}
+        company={selectedCompany}
+      />
+
+      {/* Delete Company Confirmation Modal */}
+      {showDeleteCompanyConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Company</h3>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this company? This action cannot be undone.
+              </p>
+              <div className="flex space-x-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowDeleteCompanyConfirmation(false);
+                    setCompanyToDelete(null);
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDeleteCompany}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Delete Company
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Provider Confirmation Modal */}
