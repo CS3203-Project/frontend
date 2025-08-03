@@ -11,6 +11,7 @@ import SignIn from './Pages/SignIn.tsx'
 import BrowseServices from './Pages/BrowseServices';
 import ServiceCategoryPage from './Pages/ServiceCategoryPage';
 import Profile from "./Pages/Profile.tsx";
+import BecomeProvider from "./Pages/BecomeProvider.tsx";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/services" element={<BrowseServices />} />
         <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/become-provider" element={<BecomeProvider />} />
         {/* Add more routes as needed */}
       </Routes>
     </Router>

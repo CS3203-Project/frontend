@@ -87,6 +87,7 @@ export interface CreateProviderData {
   skills?: string[];
   qualifications?: string[];
   logoUrl?: string;
+  IDCardUrl: string; // Required field - ID card image URL
 }
 
 export interface UpdateProviderData {
@@ -94,6 +95,7 @@ export interface UpdateProviderData {
   skills?: string[];
   qualifications?: string[];
   logoUrl?: string;
+  IDCardUrl?: string; // Optional for updates
 }
 
 export interface ProviderProfile {
@@ -105,6 +107,8 @@ export interface ProviderProfile {
   logoUrl?: string;
   averageRating?: number;
   totalReviews?: number;
+  isVerified?: boolean;
+  IDCardUrl: string; // Required field
   createdAt: string;
   updatedAt: string;
   user: {

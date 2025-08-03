@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -13,23 +14,23 @@ import {
   ExternalLink,
   UserPlus,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import type { UserProfile, ProviderProfile } from '../api/userApi';
-import BecomeProviderModal from '../components/Profile/BecomeProviderModal';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showBecomeProviderModal, setShowBecomeProviderModal] = useState(false);
   const [showEditProviderModal, setShowEditProviderModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -66,11 +67,7 @@ export default function Profile() {
   };
 
   const handleBecomeProvider = () => {
-    setShowBecomeProviderModal(true);
-  };
-
-  const handleProviderCreated = () => {
-    fetchProfile(); // Refresh the entire profile
+    navigate('/become-provider');
   };
 
   const handleProviderUpdated = (updatedProvider: ProviderProfile) => {
@@ -335,6 +332,93 @@ export default function Profile() {
           {/* Right Column - Provider-specific content */}
           <div className="lg:col-span-2">
             {user.role === 'PROVIDER' && providerProfile ? (
+              // Check if provider is verified
+              providerProfile.isVerified === false ? (
+                /* Unverified Provider */
+                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                  <div className="max-w-md mx-auto">
+                    <div className="p-3 bg-yellow-100 rounded-full inline-flex mb-4">
+                      <Clock className="h-12 w-12 text-yellow-600" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">Verification in Progress</h2>
+                    <p className="text-gray-600 mb-6">
+                      Your provider profile has been submitted and is currently under review. 
+                      Our team is verifying your information and credentials.
+                    </p>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                      <h3 className="font-semibold text-yellow-900 mb-2">What's Next?</h3>
+                      <ul className="text-sm text-yellow-800 space-y-1 text-left">
+                        <li>• We'll review your profile and credentials</li>
+                        <li>• You'll receive an email once verification is complete</li>
+                        <li>• Verification typically takes 1-3 business days</li>
+                        <li>• Once verified, you can start adding services</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-3">
+                      <Button
+                        onClick={() => setShowEditProviderModal(true)}
+                        variant="outline"
+                        size="lg"
+                        className="flex items-center space-x-2 mx-auto"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                        <span>Edit Profile</span>
+                      </Button>
+                      <Button
+                        onClick={() => setShowDeleteConfirmation(true)}
+                        variant="ghost"
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        Cancel Application
+                      </Button>
+                    </div>
+                    
+                    {/* Show basic provider info */}
+                    <div className="mt-8 text-left">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Submitted Information</h3>
+                      <div className="space-y-4">
+                        {providerProfile.bio && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-1">Bio</h4>
+                            <p className="text-gray-600 text-sm">{providerProfile.bio}</p>
+                          </div>
+                        )}
+                        
+                        {providerProfile.skills && providerProfile.skills.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Skills</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {providerProfile.skills.map((skill, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {providerProfile.qualifications && providerProfile.qualifications.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Qualifications</h4>
+                            <div className="space-y-1">
+                              {providerProfile.qualifications.map((qualification, index) => (
+                                <div key={index} className="flex items-center space-x-2">
+                                  <Award className="h-4 w-4 text-blue-500" />
+                                  <span className="text-gray-600 text-sm">{qualification}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Verified Provider - existing content */
               <div className="space-y-6">
                 {/* Provider Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -493,6 +577,7 @@ export default function Profile() {
                   </div>
                 )}
               </div>
+              )
             ) : user.role === 'PROVIDER' && !providerProfile ? (
               /* Loading provider data */
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
@@ -525,12 +610,6 @@ export default function Profile() {
       </main>
 
       {/* Modals */}
-      <BecomeProviderModal 
-        isOpen={showBecomeProviderModal}
-        onClose={() => setShowBecomeProviderModal(false)}
-        onSuccess={handleProviderCreated}
-      />
-
       <EditProfileModal 
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}
