@@ -5,7 +5,8 @@ import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
 import HowWorks from './Pages/HowWorks.jsx'
-import ServiceProviderProfile from './Pages/ServiceProviderProfile';
+import OnlineServiceProviderProfile from './Pages/OnlineServiceProviderProfile';
+import PrintingServiceProviderProfile from "./Pages/PrintingServiceProviderProfile";
 import Signup from './Pages/Signup.tsx'
 import SignIn from './Pages/SignIn.tsx'
 import BrowseServices from './Pages/BrowseServices';
@@ -20,7 +21,8 @@ function App() {
         <Route path="/articles" element={<Articles />} />
         <Route path="/stories" element={<SucessStories />} />
         <Route path="/howWorks" element={<HowWorks />} />
-        <Route path="/provider/:id" element={<ServiceProviderProfile />} />
+        <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
+        <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/services" element={<BrowseServices />} />

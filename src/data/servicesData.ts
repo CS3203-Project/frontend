@@ -1,4 +1,4 @@
-import { Home, Briefcase, Sparkles, Globe, UserCheck, BarChart3, Wrench, Paintbrush, BookOpen, Code, Video, Music, PenTool, Camera, Mic, Shield, DollarSign, Users, TrendingUp, Heart } from 'lucide-react';
+import { Home, Briefcase, Sparkles, Globe, UserCheck, BarChart3, Wrench, Paintbrush, BookOpen, Code, Video, Music, PenTool, Camera, Mic, Shield, DollarSign, Users, TrendingUp, Heart, Zap } from 'lucide-react';
 
 export interface Service {
   id: string;
