@@ -178,7 +178,8 @@ const Navbar = () => {
     { name: "How It Works", href: "/howWorks" },
     { name: "Pricing", href: "#" },
     { name: "Success Stories", href: "/stories" },
-    { name: "Support", href: "/support" }
+    { name: "Support", href: "/support" },
+    { name: "Messages", href: "/messaging" }
   ];
 
   return (
