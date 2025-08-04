@@ -566,9 +566,21 @@ export default function Profile() {
                 )}
 
                 {/* Services */}
-                {providerProfile.services && providerProfile.services.length > 0 && (
+                {providerProfile.services && providerProfile.services.length > 0 ? (
                   <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Services</h2>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+                      <Button
+                        onClick={() => {
+                          navigate('/create-service');
+                        }}
+                        size="sm"
+                        className="flex items-center space-x-1"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span>Create Service</span>
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {providerProfile.services.slice(0, 4).map((service) => (
                         <div key={service.id} className="border border-gray-200 rounded-lg p-4">
@@ -605,6 +617,35 @@ export default function Profile() {
                         </Button>
                       </div>
                     )}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+                      <Button
+                        onClick={() => {
+                          navigate('/create-service');
+                        }}
+                        size="sm"
+                        className="flex items-center space-x-1"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span>Create Service</span>
+                      </Button>
+                    </div>
+                    <div className="text-center py-8">
+                      <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 mb-4">No services created yet</p>
+                      <Button
+                        onClick={() => {
+                          navigate('/create-service');
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Create Your First Service
+                      </Button>
+                    </div>
                   </div>
                 )}
 
