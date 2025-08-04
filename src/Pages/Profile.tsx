@@ -42,6 +42,7 @@ export default function Profile() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
+  const [showAllServices, setShowAllServices] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -569,7 +570,15 @@ export default function Profile() {
                 {providerProfile.services && providerProfile.services.length > 0 ? (
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+                      <div>
+                        <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+                        <p className="text-sm text-gray-500">
+                          {showAllServices
+                            ? `Showing all ${providerProfile.services.length} services`
+                            : `Showing ${Math.min(4, providerProfile.services.length)} of ${providerProfile.services.length} services`
+                          }
+                        </p>
+                      </div>
                       <Button
                         onClick={() => {
                           navigate('/create-service');
@@ -582,10 +591,14 @@ export default function Profile() {
                       </Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {providerProfile.services.slice(0, 4).map((service) => (
-                        <div key={service.id} className="border border-gray-200 rounded-lg p-4">
+                      {(showAllServices ? providerProfile.services : providerProfile.services.slice(0, 4)).map((service) => (
+                        <div 
+                          key={service.id} 
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
+                          onClick={() => navigate(`/service/${service.id}`)}
+                        >
                           <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-medium text-gray-900 text-sm">{service.title}</h3>
+                            <h3 className="font-medium text-gray-900 text-sm">{service.title || 'Untitled Service'}</h3>
                             <span className={`px-2 py-1 text-xs rounded-full ${
                               service.isActive 
                                 ? 'bg-green-100 text-green-800' 
@@ -594,26 +607,54 @@ export default function Profile() {
                               {service.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </div>
-                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">{service.description}</p>
+                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">{service.description || 'No description'}</p>
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-blue-600">
                               {service.currency} {service.price}
                             </span>
                             <div className="flex flex-wrap gap-1">
-                              {service.tags?.slice(0, 2).map((tag, index) => (
-                                <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                                  {tag}
+                              {service.tags && service.tags.length > 0 ? (
+                                service.tags.slice(0, 2).map((tag, index) => (
+                                  <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                                    {tag}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-gray-400">No tags</span>
+                              )}
+                              {service.tags && service.tags.length > 2 && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                                  +{service.tags.length - 2}
                                 </span>
-                              ))}
+                              )}
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                     {providerProfile.services.length > 4 && (
-                      <div className="mt-4 text-center">
-                        <Button variant="outline" size="sm">
-                          View All Services ({providerProfile.services.length})
+                      <div className="mt-6 text-center">
+                        <Button 
+                          variant={showAllServices ? "outline" : "default"}
+                          size="sm"
+                          onClick={() => setShowAllServices(!showAllServices)}
+                          className={`px-6 ${showAllServices ? "border-blue-300 text-blue-600 hover:bg-blue-50" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
+                        >
+                          {showAllServices ? (
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              </svg>
+                              Show Less
+                            </span>
+                          ) : (
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                              View All Services ({providerProfile.services.length})
+                            </span>
+                          )}
                         </Button>
                       </div>
                     )}
