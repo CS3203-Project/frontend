@@ -25,14 +25,13 @@ function App() {
         <Route path="/articles" element={<Articles />} />
         <Route path="/stories" element={<SucessStories />} />
         <Route path="/howWorks" element={<HowWorks />} />
-        <Route path="/provider/:id" element={<ServiceProviderProfile />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/services" element={<BrowseServices />} />
         <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/become-provider" element={<BecomeProvider />} />
-        <Route path="/provider" element={<Provider />} />
+        <Route path="/provider/:id" element={<Provider />} />
         <Route path="/create-service" element={<CreateServise />} />
         
         {/* Add more routes as needed */}
