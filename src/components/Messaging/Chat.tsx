@@ -6,14 +6,8 @@ import { userApi } from '../../api/userApi';
 import type { UserProfile } from '../../api/userApi';
 
 export interface Message {
-  id: string;
-  content: string;
-  sender: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-  timestamp: string;
+  user: string;
+  message: string;
 }
 
 const Chat: React.FC = () => {
@@ -33,28 +27,25 @@ const Chat: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    function onNewMessage(message: Message) {
+    function onReceiveMessage(message: Message) {
       setMessages((previous) => [...previous, message]);
     }
 
-    socket.on('newMessage', onNewMessage);
+    socket.on('receive_message', onReceiveMessage);
 
     return () => {
-      socket.off('newMessage', onNewMessage);
+      socket.off('receive_message', onReceiveMessage);
     };
   }, []);
 
   const handleSendMessage = useCallback((content: string) => {
     if (content.trim() && currentUser) {
-      const message: Omit<Message, 'id' | 'timestamp'> = {
-        content,
-        sender: {
-          id: currentUser.id,
-          name: `${currentUser.firstName} ${currentUser.lastName}`,
-          avatar: currentUser.imageUrl,
-        },
+      const message: Message = {
+        user: `${currentUser.firstName} ${currentUser.lastName}`,
+        message: content,
       };
-      socket.emit('sendMessage', message);
+      setMessages((prev) => [...prev, message]); // Optimistically add your own message
+      socket.emit('send_message', message);
     }
   }, [currentUser]);
 
