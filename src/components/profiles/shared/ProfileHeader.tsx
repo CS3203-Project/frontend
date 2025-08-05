@@ -1,8 +1,8 @@
 import { FiCamera, FiShare2, FiFlag, FiMapPin, FiStar, FiClock, FiCheck, FiAward, FiMessageCircle, FiHeart, FiUser } from 'react-icons/fi';
-import Button from '../Button';
-import { cn } from '../../utils/utils';
+import Button from '../../Button.tsx';
+import { cn } from '../../../utils/utils.ts';
 import type { ServiceProviderProfile } from './types.ts';
-import { showSuccessToast } from '../../utils/toastUtils';
+import { showSuccessToast } from '../../../utils/toastUtils.ts';
 
 interface ProfileHeaderProps {
   provider: ServiceProviderProfile;

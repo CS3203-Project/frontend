@@ -1,4 +1,4 @@
-import { Home, Briefcase, Sparkles, Globe, UserCheck, BarChart3, Wrench, Paintbrush, BookOpen, Code, Video, Music, PenTool, Camera, Mic, Shield, DollarSign, Users, TrendingUp, Heart } from 'lucide-react';
+import { Home, Briefcase, Sparkles, Globe, UserCheck, BarChart3, Wrench, Paintbrush, BookOpen, Code, Video, Music, PenTool, Camera, Mic, Shield, DollarSign, Users, TrendingUp, Heart, Zap } from 'lucide-react';
 
 export interface Service {
   id: string;
@@ -92,9 +92,9 @@ export const categoriesData: ServiceCategory[] = [
     icon: Home,
     gradient: "from-green-400 to-blue-500",
     subcategories: [
-      { id: 's1', name: "Cleaning", slug: "cleaning", description: "Residential and commercial cleaning.", icon: Wrench },
-      { id: 's2', name: "Plumbing", slug: "plumbing", description: "Fix leaks, install fixtures.", icon: Paintbrush },
-      { id: 's3', name: "Electrician", slug: "electrician", description: "Wiring, repairs, and installations.", icon: BookOpen },
+      { id: 's1', name: "Cleaning", slug: "cleaning", description: "Residential and commercial cleaning.", icon: Sparkles },
+      { id: 's2', name: "Plumbing", slug: "plumbing", description: "Fix leaks, install fixtures.", icon: Wrench },
+      { id: 's3', name: "Electrician", slug: "electrician", description: "Wiring, repairs, and installations.", icon: Zap },
     ]
   },
   {

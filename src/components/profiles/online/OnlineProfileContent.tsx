@@ -1,7 +1,7 @@
 import { FiStar, FiClock, FiMapPin, FiGlobe, FiCalendar, FiExternalLink, FiChevronRight } from 'react-icons/fi';
 import { FaLinkedin, FaInstagram } from 'react-icons/fa';
-import { cn } from '../../utils/utils';
-import type { ServiceProviderProfile } from './types';
+import { cn } from '../../../utils/utils';
+import type { ServiceProviderProfile } from '../shared/types';
 
 interface ProfileContentProps {
   activeTab: string;

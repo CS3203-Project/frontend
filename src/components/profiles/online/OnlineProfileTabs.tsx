@@ -1,5 +1,5 @@
-import { FiUser, FiDollarSign, FiCamera, FiStar, FiMessageCircle } from 'react-icons/fi';
-import { cn } from '../../utils/utils';
+import { FiUser, FiDollarSign, FiCamera, FiStar, FiMessageCircle } from "react-icons/fi";
+import { cn } from "../../../utils/utils";
 
 interface ProfileTabsProps {
   activeTab: string;

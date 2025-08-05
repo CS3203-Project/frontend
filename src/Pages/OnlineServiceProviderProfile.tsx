@@ -2,11 +2,11 @@ import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Toaster } from 'react-hot-toast';
-import ProfileHeader from '../components/ServiceProviderProfile/ProfileHeader';
-import ProfileTabs from '../components/ServiceProviderProfile/ProfileTabs';
-import ProfileContent from '../components/ServiceProviderProfile/ProfileContent';
-import {ContactModal,LocationModal} from '../components/ServiceProviderProfile/Modals';
-import type { ServiceProviderProfile } from '../components/ServiceProviderProfile//types';
+import ProfileHeader from '../components/profiles/shared/ProfileHeader';
+import OnlineProfileTabs from '../components/profiles/online/OnlineProfileTabs';
+import OnlineProfileContent from '../components/profiles/online/OnlineProfileContent';
+import {ContactModal,LocationModal} from '../components/profiles/shared/Modals';
+import type { ServiceProviderProfile } from '../components/profiles/shared/types';
 
 export default function ServiceProviderProfile() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -288,12 +288,12 @@ export default function ServiceProviderProfile() {
         {/* Tabs and Content Section */}
         <section className="max-w-7xl mx-auto px-2 sm:px-4 md:px-8 animate-fade-in-up">
           <div className="rounded-2xl shadow-lg bg-white/95 backdrop-blur-md p-0 md:p-4 lg:p-8">
-            <ProfileTabs 
+            <OnlineProfileTabs 
               activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
             <div className="mt-8">
-              <ProfileContent 
+              <OnlineProfileContent 
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 provider={provider}
