@@ -164,7 +164,7 @@ export default function CreateService() {
       // };
       
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, SIMULATED_API_DELAY_MS));
       
       toast.success('Service created successfully!');
       navigate('/profile');
