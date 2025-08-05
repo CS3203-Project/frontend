@@ -261,6 +261,37 @@ export default function ServiceProviderProfile() {
     }
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center mt-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-gray-700">Loading provider profile...</h3>
+            <p className="text-gray-500 mt-2">Please wait while we fetch the provider details.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Error state
+  if (!provider) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center mt-16">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-700">Provider not found</h3>
+            <p className="text-gray-500 mt-2">The provider you're looking for doesn't exist or has been removed.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col ">
       {/* Sticky Navbar */}

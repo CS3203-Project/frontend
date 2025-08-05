@@ -17,16 +17,13 @@ import {
   AlertTriangle,
   Clock,
   Building,
-  Plus,
-  X,
-  Save
+  Plus
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
-import { serviceApi } from '../api/serviceApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
 import CompanyModal from '../components/Profile/CompanyModal';
@@ -45,29 +42,6 @@ export default function Profile() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
-  const [showAllServices, setShowAllServices] = useState(false);
-  const [showUpdateServiceModal, setShowUpdateServiceModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<{
-    id: string;
-    title?: string;
-    description?: string;
-    price: number;
-    currency: string;
-    tags?: string[];
-    images?: string[];
-    isActive: boolean;
-    workingTime?: string[];
-  } | null>(null);
-  const [serviceFormData, setServiceFormData] = useState({
-    title: '',
-    description: '',
-    price: 0,
-    currency: 'LKR',
-    tags: [] as string[],
-    images: [] as string[],
-    isActive: true,
-    workingTime: [] as string[]
-  });
 
   useEffect(() => {
     fetchProfile();
@@ -88,8 +62,8 @@ export default function Profile() {
           console.error('Failed to fetch provider profile:', error);
         }
       }
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to load profile');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -117,8 +91,8 @@ export default function Profile() {
       toast.success('Provider profile deleted successfully!');
       setShowDeleteConfirmation(false);
       fetchProfile(); // Refresh profile to show USER role
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete provider profile');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete provider profile');
     }
   };
 
@@ -166,72 +140,14 @@ export default function Profile() {
       
       setShowDeleteCompanyConfirmation(false);
       setCompanyToDelete(null);
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete company');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete company');
     }
   };
 
   const handleDeleteCompanyClick = (companyId: string) => {
     setCompanyToDelete(companyId);
     setShowDeleteCompanyConfirmation(true);
-  };
-
-  const handleEditService = (service: {
-    id: string;
-    title?: string;
-    description?: string;
-    price: number;
-    currency: string;
-    tags?: string[];
-    images?: string[];
-    isActive: boolean;
-    workingTime?: string[];
-  }) => {
-    setSelectedService(service);
-    setServiceFormData({
-      title: service.title || '',
-      description: service.description || '',
-      price: service.price || 0,
-      currency: service.currency || 'LKR',
-      tags: service.tags || [],
-      images: service.images || [],
-      isActive: service.isActive ?? true,
-      workingTime: service.workingTime || []
-    });
-    setShowUpdateServiceModal(true);
-  };
-
-  const handleUpdateService = async () => {
-    if (!selectedService) return;
-
-    try {
-      await serviceApi.updateService(selectedService.id, serviceFormData);
-      toast.success('Service updated successfully!');
-      
-      // Update the provider profile with the updated service
-      if (providerProfile) {
-        setProviderProfile({
-          ...providerProfile,
-          services: providerProfile.services.map(s => 
-            s.id === selectedService.id 
-              ? { ...s, ...serviceFormData }
-              : s
-          )
-        });
-      }
-      
-      setShowUpdateServiceModal(false);
-      setSelectedService(null);
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to update service');
-    }
-  };
-
-  const handleServiceFormChange = (field: string, value: string | number | boolean | string[]) => {
-    setServiceFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
   };
 
   if (loading) {
@@ -653,15 +569,7 @@ export default function Profile() {
                 {providerProfile.services && providerProfile.services.length > 0 ? (
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-900">Services</h2>
-                        <p className="text-sm text-gray-500">
-                          {showAllServices
-                            ? `Showing all ${providerProfile.services.length} services`
-                            : `Showing ${Math.min(4, providerProfile.services.length)} of ${providerProfile.services.length} services`
-                          }
-                        </p>
-                      </div>
+                      <h2 className="text-xl font-semibold text-gray-900">Services</h2>
                       <Button
                         onClick={() => {
                           navigate('/create-service');
@@ -674,94 +582,38 @@ export default function Profile() {
                       </Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {(showAllServices ? providerProfile.services : providerProfile.services.slice(0, 4)).map((service) => (
-                        <div 
-                          key={service.id} 
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
-                        >
+                      {providerProfile.services.slice(0, 4).map((service) => (
+                        <div key={service.id} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-start justify-between mb-2">
-                            <h3 
-                              className="font-medium text-gray-900 text-sm cursor-pointer flex-1"
-                              onClick={() => navigate(`/service/${service.id}`)}
-                            >
-                              {service.title || 'Untitled Service'}
-                            </h3>
-                            <div className="flex items-center space-x-2 ml-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                service.isActive 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {service.isActive ? 'Active' : 'Inactive'}
-                              </span>
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditService(service);
-                                }}
-                                variant="default"
-                                size="sm"
-                                className="px-3 py-2 h-9 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-1"
-                                title="Edit Service"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                                <span className="text-xs">Edit</span>
-                              </Button>
-                            </div>
+                            <h3 className="font-medium text-gray-900 text-sm">{service.title}</h3>
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              service.isActive 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {service.isActive ? 'Active' : 'Inactive'}
+                            </span>
                           </div>
-                          <div 
-                            className="cursor-pointer"
-                            onClick={() => navigate(`/service/${service.id}`)}
-                          >
-                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">{service.description || 'No description'}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-blue-600">
-                                {service.currency} {service.price}
-                              </span>
-                              <div className="flex flex-wrap gap-1">
-                                {service.tags && service.tags.length > 0 ? (
-                                  service.tags.slice(0, 2).map((tag, index) => (
-                                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                                      {tag}
-                                    </span>
-                                  ))
-                                ) : (
-                                  <span className="text-xs text-gray-400">No tags</span>
-                                )}
-                                {service.tags && service.tags.length > 2 && (
-                                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                                    +{service.tags.length - 2}
-                                  </span>
-                                )}
-                              </div>
+                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">{service.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-blue-600">
+                              {service.currency} {service.price}
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {service.tags?.slice(0, 2).map((tag, index) => (
+                                <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                                  {tag}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                     {providerProfile.services.length > 4 && (
-                      <div className="mt-6 text-center">
-                        <Button 
-                          variant={showAllServices ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => setShowAllServices(!showAllServices)}
-                          className={`px-6 ${showAllServices ? "border-blue-300 text-blue-600 hover:bg-blue-50" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
-                        >
-                          {showAllServices ? (
-                            <span className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                              Show Less
-                            </span>
-                          ) : (
-                            <span className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                              View All Services ({providerProfile.services.length})
-                            </span>
-                          )}
+                      <div className="mt-4 text-center">
+                        <Button variant="outline" size="sm">
+                          View All Services ({providerProfile.services.length})
                         </Button>
                       </div>
                     )}
@@ -992,167 +844,6 @@ export default function Profile() {
       </main>
 
       {/* Modals */}
-      {/* Update Service Modal */}
-      {showUpdateServiceModal && selectedService && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">Update Service</h3>
-              <button
-                onClick={() => {
-                  setShowUpdateServiceModal(false);
-                  setSelectedService(null);
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            {/* Modal Content */}
-            <div className="p-6 space-y-6">
-              {/* Service Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Service Title *
-                </label>
-                <input
-                  type="text"
-                  value={serviceFormData.title}
-                  onChange={(e) => handleServiceFormChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter service title"
-                />
-              </div>
-
-              {/* Service Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={serviceFormData.description}
-                  onChange={(e) => handleServiceFormChange('description', e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Describe your service..."
-                />
-              </div>
-
-              {/* Price and Currency */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price *
-                  </label>
-                  <input
-                    type="number"
-                    value={serviceFormData.price}
-                    onChange={(e) => handleServiceFormChange('price', parseFloat(e.target.value) || 0)}
-                    min="0"
-                    step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency
-                  </label>
-                  <select
-                    value={serviceFormData.currency}
-                    onChange={(e) => handleServiceFormChange('currency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="LKR">LKR</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={serviceFormData.tags.join(', ')}
-                  onChange={(e) => handleServiceFormChange('tags', e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="web development, design, frontend"
-                />
-              </div>
-
-              {/* Working Time */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Working Time (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={serviceFormData.workingTime.join(', ')}
-                  onChange={(e) => handleServiceFormChange('workingTime', e.target.value.split(',').map(time => time.trim()).filter(time => time))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Monday-Friday 9AM-5PM, Weekends flexible"
-                />
-              </div>
-
-              {/* Images */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URLs (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={serviceFormData.images.join(', ')}
-                  onChange={(e) => handleServiceFormChange('images', e.target.value.split(',').map(img => img.trim()).filter(img => img))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                />
-              </div>
-
-              {/* Active Status */}
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={serviceFormData.isActive}
-                  onChange={(e) => handleServiceFormChange('isActive', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                  Service is active and visible to clients
-                </label>
-              </div>
-            </div>
-            
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex space-x-3">
-              <Button
-                onClick={() => {
-                  setShowUpdateServiceModal(false);
-                  setSelectedService(null);
-                }}
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleUpdateService}
-                className="flex-1 flex items-center justify-center space-x-2"
-              >
-                <Save className="h-4 w-4" />
-                <span>Update Service</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <EditProfileModal 
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}

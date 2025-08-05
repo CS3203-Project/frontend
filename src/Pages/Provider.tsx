@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -16,15 +16,13 @@ import {
   DollarSign,
   Camera,
   MessageCircle,
-  ChevronRight,
-  X
+  ChevronRight
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import type { UserProfile, ProviderProfile } from '../api/userApi';
-import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
@@ -33,11 +31,36 @@ export default function Provider() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
-  const [detailedServices, setDetailedServices] = useState<ServiceResponse[]>([]);
-  const [servicesLoading, setServicesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [reviewFilter, setReviewFilter] = useState('all');
-  const [showContactModal, setShowContactModal] = useState(false);
+
+  // Mock data for demonstration - in real app this would come from API
+  const mockServices = [
+    {
+      id: 'service-1',
+      title: 'Full-Stack Web Development',
+      description: 'Complete web application development using modern technologies like React, Node.js, and MongoDB.',
+      price: 2500,
+      currency: 'USD',
+      duration: '2-4 weeks',
+      category: 'Web Development',
+      images: ['https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80'],
+      isActive: true,
+      tags: ['React', 'Node.js', 'MongoDB']
+    },
+    {
+      id: 'service-2',
+      title: 'UI/UX Design',
+      description: 'Modern, user-centered design for web and mobile applications with interactive prototypes.',
+      price: 1200,
+      currency: 'USD',
+      duration: '1-2 weeks',
+      category: 'Design',
+      images: ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'],
+      isActive: true,
+      tags: ['Figma', 'Adobe XD']
+    }
+  ];
 
   const mockPortfolio = [
     {
@@ -96,41 +119,18 @@ export default function Provider() {
   ];
 
   // State for modal interactions (for future use)
-  const [selectedService, setSelectedService] = useState<{
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    currency: string;
-    images: string[];
-    isActive: boolean;
-    tags?: string[];
-    createdAt?: string;
-  } | null>(null);
+  const [selectedService, setSelectedService] = useState<typeof mockServices[0] | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState<typeof mockPortfolio[0] | null>(null);
   
   // Suppress unused variable warnings for now
   void selectedService;
   void selectedPortfolio;
 
-  const fetchDetailedServices = useCallback(async (providerId: string) => {
-    try {
-      setServicesLoading(true);
-      const response = await serviceApi.getServices({ 
-        providerId,
-        isActive: undefined // Get both active and inactive services
-      });
-      setDetailedServices(response.data);
-    } catch (error) {
-      console.error('Failed to fetch detailed services:', error);
-      // Fall back to basic service data from provider profile
-      setDetailedServices([]);
-    } finally {
-      setServicesLoading(false);
-    }
+  useEffect(() => {
+    fetchProfile();
   }, []);
 
-  const fetchProfile = useCallback(async () => {
+  const fetchProfile = async () => {
     try {
       setLoading(true);
       const userData = await userApi.getProfile();
@@ -141,11 +141,6 @@ export default function Provider() {
         try {
           const providerData = await userApi.getProviderProfile();
           setProviderProfile(providerData);
-          
-          // Fetch detailed services for the provider
-          if (providerData.id) {
-            await fetchDetailedServices(providerData.id);
-          }
         } catch (error) {
           console.error('Failed to fetch provider profile:', error);
         }
@@ -155,11 +150,7 @@ export default function Provider() {
     } finally {
       setLoading(false);
     }
-  }, [fetchDetailedServices]);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  };
 
   const handleBecomeProvider = () => {
     navigate('/become-provider');
@@ -279,19 +270,6 @@ export default function Provider() {
             </div>
           </div>
             </div>
-            {/* Contact Button for verified providers */}
-            {providerProfile && providerProfile.isVerified && (
-              <div className="mt-4 lg:mt-0 flex justify-center lg:justify-end">
-                <Button
-                  onClick={() => setShowContactModal(true)}
-                  size="default"
-                  className="flex items-center space-x-2"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  <span>Contact Provider</span>
-                </Button>
-              </div>
-            )}
             {/* Social Media Links */}
           </div>
         </div>
@@ -511,9 +489,7 @@ export default function Provider() {
                         <div className="bg-white rounded-xl shadow-lg p-6 text-center">
                           <Briefcase className="h-8 w-8 text-green-500 mx-auto mb-2" />
                           <p className="text-2xl font-bold text-gray-900">
-                            {detailedServices.length > 0 
-                              ? detailedServices.length 
-                              : (providerProfile.services?.length || 0)}
+                            {providerProfile.services?.length || 0}
                           </p>
                           <p className="text-sm text-gray-500">Active Services</p>
                         </div>
@@ -609,168 +585,52 @@ export default function Provider() {
 
                   {/* Services Tab */}
                   {activeTab === 'services' && (
-                    <div>
-                      {servicesLoading ? (
-                        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                          <p className="text-gray-600">Loading services...</p>
-                        </div>
-                      ) : detailedServices && detailedServices.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {detailedServices.map((service) => (
-                            <div 
-                              key={service.id}
-                              className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
-                              onClick={() => setSelectedService({
-                                id: service.id,
-                                title: service.title || 'Untitled Service',
-                                description: service.description || 'No description available',
-                                price: service.price,
-                                currency: service.currency,
-                                images: service.images,
-                                isActive: service.isActive,
-                                tags: service.tags,
-                                createdAt: service.createdAt
-                              })}
-                            >
-                              <div className="relative">
-                                {service.images && service.images.length > 0 ? (
-                                  <img 
-                                    src={service.images[0]} 
-                                    alt={service.title || 'Service'}
-                                    className="w-full h-48 object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                                    <div className="text-center">
-                                      <Briefcase className="h-12 w-12 text-blue-500 mx-auto mb-2" />
-                                      <p className="text-sm text-gray-600">No Image</p>
-                                    </div>
-                                  </div>
-                                )}
-                                <span className="absolute top-4 left-4 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                                  Service
-                                </span>
-                                <span className={`absolute top-4 right-4 px-2 py-1 text-xs rounded-full ${
-                                  service.isActive 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-gray-100 text-gray-600'
-                                }`}>
-                                  {service.isActive ? 'Active' : 'Inactive'}
-                                </span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {mockServices.map((service) => (
+                        <div 
+                          key={service.id}
+                          className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
+                          onClick={() => setSelectedService(service)}
+                        >
+                          <div className="relative">
+                            <img 
+                              src={service.images[0]} 
+                              alt={service.title}
+                              className="w-full h-48 object-cover"
+                            />
+                            <span className="absolute top-4 left-4 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                              {service.category}
+                            </span>
+                            <span className={`absolute top-4 right-4 px-2 py-1 text-xs rounded-full ${
+                              service.isActive 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {service.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <div className="p-6">
+                            <div className="flex items-center justify-between mb-3">
+                              <h3 className="text-lg font-semibold text-gray-900 truncate">{service.title}</h3>
+                              <span className="text-xl font-bold text-blue-600">{service.currency} {service.price}</span>
+                            </div>
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{service.description}</p>
+                            <div className="flex items-center justify-between text-sm text-gray-500">
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-1" />
+                                {service.duration}
                               </div>
-                              <div className="p-6">
-                                <div className="flex items-center justify-between mb-3">
-                                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                                    {service.title || 'Untitled Service'}
-                                  </h3>
-                                  <span className="text-xl font-bold text-blue-600">
-                                    {service.currency} {service.price}
+                              <div className="flex flex-wrap gap-1">
+                                {service.tags?.slice(0, 2).map((tag, index) => (
+                                  <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                                    {tag}
                                   </span>
-                                </div>
-                                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                  {service.description || 'No description available'}
-                                </p>
-                                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                  <div className="flex items-center">
-                                    <Clock className="w-4 h-4 mr-1" />
-                                    <span>
-                                      {service.workingTime && service.workingTime.length > 0 
-                                        ? service.workingTime.join(', ') 
-                                        : 'Contact for timing'}
-                                    </span>
-                                  </div>
-                                  {/* Show created date */}
-                                  <div className="text-xs text-gray-400">
-                                    {new Date(service.createdAt).toLocaleDateString()}
-                                  </div>
-                                </div>
-                                {/* Tags */}
-                                {service.tags && service.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {service.tags.slice(0, 3).map((tag, index) => (
-                                      <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                                        {tag}
-                                      </span>
-                                    ))}
-                                    {service.tags.length > 3 && (
-                                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                                        +{service.tags.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
+                                ))}
                               </div>
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      ) : providerProfile?.services && providerProfile.services.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {providerProfile.services.map((service) => (
-                            <div 
-                              key={service.id}
-                              className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
-                              onClick={() => setSelectedService(service)}
-                            >
-                              <div className="relative">
-                                {service.images && service.images.length > 0 ? (
-                                  <img 
-                                    src={service.images[0]} 
-                                    alt={service.title || 'Service'}
-                                    className="w-full h-48 object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                                    <div className="text-center">
-                                      <Briefcase className="h-12 w-12 text-blue-500 mx-auto mb-2" />
-                                      <p className="text-sm text-gray-600">No Image</p>
-                                    </div>
-                                  </div>
-                                )}
-                                <span className="absolute top-4 left-4 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                                  Service
-                                </span>
-                                <span className={`absolute top-4 right-4 px-2 py-1 text-xs rounded-full ${
-                                  service.isActive 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-gray-100 text-gray-600'
-                                }`}>
-                                  {service.isActive ? 'Active' : 'Inactive'}
-                                </span>
-                              </div>
-                              <div className="p-6">
-                                <div className="flex items-center justify-between mb-3">
-                                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                                    {service.title || 'Untitled Service'}
-                                  </h3>
-                                  <span className="text-xl font-bold text-blue-600">
-                                    {service.currency} {service.price}
-                                  </span>
-                                </div>
-                                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                  {service.description || 'No description available'}
-                                </p>
-                                <div className="flex items-center justify-between text-sm text-gray-500">
-                                  <div className="flex items-center">
-                                    <Clock className="w-4 h-4 mr-1" />
-                                    <span>Contact for timing</span>
-                                  </div>
-                                  {/* Show created date if available */}
-                                  <div className="text-xs text-gray-400">
-                                    Basic service info
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                          <Briefcase className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Services Yet</h3>
-                          <p className="text-gray-600 mb-6">This provider hasn't added any services yet.</p>
-                        </div>
-                      )}
+                      ))}
                     </div>
                   )}
 
@@ -1004,102 +864,7 @@ export default function Provider() {
         </div>
       </main>
 
-      {/* Contact Modal */}
-      {showContactModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">Contact Provider</h3>
-              <button
-                onClick={() => setShowContactModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            {/* Modal Content */}
-            <div className="p-6">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="relative">
-                  {user.imageUrl && user.imageUrl.trim() ? (
-                    <img
-                      src={user.imageUrl}
-                      alt={`${user.firstName} ${user.lastName}`}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
-                      {(user.firstName?.charAt(0) || 'U').toUpperCase()}
-                      {(user.lastName?.charAt(0) || 'S').toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">
-                    {user.firstName || 'First'} {user.lastName || 'Last'}
-                  </h4>
-                  <p className="text-sm text-gray-500">Service Provider</p>
-                </div>
-              </div>
-              
-              {/* Contact Options */}
-              <div className="space-y-3">
-                {/* Email Contact */}
-                <a
-                  href={`mailto:${user.email}`}
-                  className="flex items-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
-                >
-                  <div className="p-2 bg-blue-100 group-hover:bg-blue-200 rounded-lg transition-colors">
-                    <Mail className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">Send Email</p>
-                    <p className="text-sm text-gray-600">{user.email}</p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400" />
-                </a>
-                
-                {/* Phone Contact */}
-                {user.phone && (
-                  <a
-                    href={`tel:${user.phone}`}
-                    className="flex items-center space-x-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group"
-                  >
-                    <div className="p-2 bg-green-100 group-hover:bg-green-200 rounded-lg transition-colors">
-                      <Phone className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">Call Now</p>
-                      <p className="text-sm text-gray-600">{user.phone}</p>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
-                  </a>
-                )}
-              </div>
-              
-              {/* Note */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">
-                  <strong>Note:</strong> Clicking these options will open your default email client or phone app to contact the provider directly.
-                </p>
-              </div>
-            </div>
-            
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-              <Button
-                onClick={() => setShowContactModal(false)}
-                variant="outline"
-                className="w-full"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
 
       <Footer />
       <Toaster />
