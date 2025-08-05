@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -25,6 +25,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
+import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
 import { serviceApi } from '../api/serviceApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
@@ -45,6 +46,8 @@ export default function Profile() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
+  const [services, setServices] = useState<ServiceResponse[]>([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
   const [showAllServices, setShowAllServices] = useState(false);
   const [showUpdateServiceModal, setShowUpdateServiceModal] = useState(false);
   const [selectedService, setSelectedService] = useState<{
@@ -69,11 +72,28 @@ export default function Profile() {
     workingTime: [] as string[]
   });
 
-  useEffect(() => {
-    fetchProfile();
+
+  const fetchProviderServices = useCallback(async (providerId: string) => {
+    try {
+      console.log('Fetching services for provider ID:', providerId);
+      setServicesLoading(true);
+      const response = await serviceApi.getServices({ providerId });
+      console.log('Services API response:', response);
+      if (response.success) {
+        console.log('Services data:', response.data);
+        setServices(response.data);
+      } else {
+        console.log('Services API returned unsuccessful response:', response);
+      }
+    } catch (error) {
+      console.error('Failed to fetch services:', error);
+      toast.error('Failed to load services');
+    } finally {
+      setServicesLoading(false);
+    }
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
       const userData = await userApi.getProfile();
@@ -83,7 +103,16 @@ export default function Profile() {
       if (userData.role === 'PROVIDER') {
         try {
           const providerData = await userApi.getProviderProfile();
+          console.log('Provider profile data:', providerData);
           setProviderProfile(providerData);
+          
+          // Fetch services for this provider
+          if (providerData.id) {
+            console.log('Fetching services for provider ID:', providerData.id);
+            await fetchProviderServices(providerData.id);
+          } else {
+            console.log('Provider data does not have an ID:', providerData);
+          }
         } catch (error) {
           console.error('Failed to fetch provider profile:', error);
         }
@@ -93,7 +122,31 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchProviderServices]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const refreshServices = useCallback(() => {
+    if (providerProfile?.id) {
+      fetchProviderServices(providerProfile.id);
+    }
+  }, [providerProfile?.id, fetchProviderServices]);
+
+  // Listen for window focus to refresh services when returning from create service page
+  useEffect(() => {
+    const handleFocus = () => {
+      if (providerProfile?.id) {
+        refreshServices();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [providerProfile?.id, refreshServices]);
 
   const handleUpdateProfile = (updatedUser: Partial<UserProfile>) => {
     setUser(prev => prev ? { ...prev, ...updatedUser } : null);
@@ -108,6 +161,10 @@ export default function Profile() {
     // Also update user data if needed
     if (user && updatedProvider.user) {
       setUser(prev => prev ? { ...prev, role: updatedProvider.user.role } : null);
+    }
+    // Refresh services after provider update
+    if (updatedProvider.id) {
+      fetchProviderServices(updatedProvider.id);
     }
   };
 
@@ -603,7 +660,7 @@ export default function Profile() {
                   <div className="bg-white rounded-xl shadow-lg p-6 text-center">
                     <Briefcase className="h-8 w-8 text-green-500 mx-auto mb-2" />
                     <p className="text-2xl font-bold text-gray-900">
-                      {providerProfile.services?.length || 0}
+                      {services.length}
                     </p>
                     <p className="text-sm text-gray-500">Active Services</p>
                   </div>
@@ -650,21 +707,48 @@ export default function Profile() {
                 )}
 
                 {/* Services */}
-                {providerProfile.services && providerProfile.services.length > 0 ? (
+                {servicesLoading ? (
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Services</h2>
+                      <Button
+                        onClick={() => {
+                          navigate('/create-service', { 
+                            state: { 
+                              providerId: providerProfile?.id,
+                              onServiceCreated: refreshServices
+                            }
+                          });
+                        }}
+                        size="sm"
+                        className="flex items-center space-x-1"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span>Create Service</span>
+                      </Button>
+                    </div>
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                      <p className="text-gray-500">Loading services...</p>
+                    </div>
+                  </div>
+                ) : services.length > 0 ? (
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <h2 className="text-xl font-semibold text-gray-900">Services</h2>
                         <p className="text-sm text-gray-500">
-                          {showAllServices
-                            ? `Showing all ${providerProfile.services.length} services`
-                            : `Showing ${Math.min(4, providerProfile.services.length)} of ${providerProfile.services.length} services`
-                          }
+                          Showing all {services.length} services
                         </p>
                       </div>
                       <Button
                         onClick={() => {
-                          navigate('/create-service');
+                          navigate('/create-service', { 
+                            state: { 
+                              providerId: providerProfile?.id,
+                              onServiceCreated: refreshServices
+                            }
+                          });
                         }}
                         size="sm"
                         className="flex items-center space-x-1"
@@ -674,7 +758,7 @@ export default function Profile() {
                       </Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {(showAllServices ? providerProfile.services : providerProfile.services.slice(0, 4)).map((service) => (
+                      {services.map((service) => (
                         <div 
                           key={service.id} 
                           className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
@@ -739,32 +823,6 @@ export default function Profile() {
                         </div>
                       ))}
                     </div>
-                    {providerProfile.services.length > 4 && (
-                      <div className="mt-6 text-center">
-                        <Button 
-                          variant={showAllServices ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => setShowAllServices(!showAllServices)}
-                          className={`px-6 ${showAllServices ? "border-blue-300 text-blue-600 hover:bg-blue-50" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
-                        >
-                          {showAllServices ? (
-                            <span className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                              Show Less
-                            </span>
-                          ) : (
-                            <span className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                              View All Services ({providerProfile.services.length})
-                            </span>
-                          )}
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <div className="bg-white rounded-xl shadow-lg p-6">
@@ -772,7 +830,12 @@ export default function Profile() {
                       <h2 className="text-xl font-semibold text-gray-900">Services</h2>
                       <Button
                         onClick={() => {
-                          navigate('/create-service');
+                          navigate('/create-service', { 
+                            state: { 
+                              providerId: providerProfile?.id,
+                              onServiceCreated: refreshServices
+                            }
+                          });
                         }}
                         size="sm"
                         className="flex items-center space-x-1"
@@ -786,7 +849,12 @@ export default function Profile() {
                       <p className="text-gray-500 mb-4">No services created yet</p>
                       <Button
                         onClick={() => {
-                          navigate('/create-service');
+                          navigate('/create-service', { 
+                            state: { 
+                              providerId: providerProfile?.id,
+                              onServiceCreated: refreshServices
+                            }
+                          });
                         }}
                         variant="outline"
                         size="sm"
