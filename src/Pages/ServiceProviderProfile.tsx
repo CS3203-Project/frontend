@@ -10,7 +10,7 @@ import type { ServiceProviderProfile } from '../components/ServiceProviderProfil
 
 export default function ServiceProviderProfile() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedService, setSelectedService] = useState<ServiceProviderProfile['services'][0] | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceProviderProfile['services'][number] | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState<ServiceProviderProfile['portfolio'][number] | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
