@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Star, Heart } from 'lucide-react';
 import type { Service } from '../../data/servicesData';
 
@@ -7,11 +8,28 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/service/${service.id}`);
+  };
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking heart
+    // TODO: Implement wishlist functionality
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-200/80">
+    <div 
+      onClick={handleCardClick}
+      className="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-200/80 cursor-pointer"
+    >
       <div className="relative">
         <img className="w-full h-48 object-cover" src={service.image} alt={service.title} />
-        <button className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200">
+        <button 
+          onClick={handleHeartClick}
+          className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200"
+        >
           <Heart className="w-5 h-5" />
         </button>
       </div>

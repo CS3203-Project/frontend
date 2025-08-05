@@ -832,7 +832,7 @@ export default function SignupForm() {
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-all duration-200">
+              <a href="/signin" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-all duration-200">
                 Sign in
               </a>
             </p>

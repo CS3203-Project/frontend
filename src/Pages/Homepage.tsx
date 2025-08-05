@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 export default function Homepage() {
   return (
     <div>
+      
       <Navbar />
       <HeroSection />
       <Footer />
