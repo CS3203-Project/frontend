@@ -27,7 +27,6 @@ import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
-import { serviceApi } from '../api/serviceApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
 import CompanyModal from '../components/Profile/CompanyModal';
