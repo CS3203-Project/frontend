@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { MessagingProvider } from './components/Messaging/MessagingProvider';
 import './App.css'
 import Homepage from './Pages/Homepage.js'
 import Support from './Pages/Support.jsx'
@@ -19,26 +20,27 @@ import MessagingPage from "./Pages/MessagingPage.tsx";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/articles" element={<Articles />} />
-        <Route path="/stories" element={<SucessStories />} />
-        <Route path="/howWorks" element={<HowWorks />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/services" element={<BrowseServices />} />
-        <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/become-provider" element={<BecomeProvider />} />
-        <Route path="/provider/:id" element={<Provider />} />
-        <Route path="/create-service" element={<CreateServise />} />
-        <Route path="/messaging" element={<MessagingPage />} />
-        
-        {/* Add more routes as needed */}
-      </Routes>
-    </Router>
+    <MessagingProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/articles" element={<Articles />} />
+          <Route path="/stories" element={<SucessStories />} />
+          <Route path="/howWorks" element={<HowWorks />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/services" element={<BrowseServices />} />
+          <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/become-provider" element={<BecomeProvider />} />
+          <Route path="/provider/:id" element={<Provider />} />
+          <Route path="/create-service" element={<CreateServise />} />
+          <Route path="/messaging" element={<MessagingPage />} />
+          {/* Add more routes as needed */}
+        </Routes>
+      </Router>
+    </MessagingProvider>
   )
 }
 

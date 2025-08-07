@@ -4,6 +4,8 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import { userApi } from '../../api/userApi';
 import type { UserProfile } from '../../api/userApi';
+import { showInfoToast } from '../../utils/toastUtils';
+import { saveMessages, getMessagesBetween } from '../../utils/messageDB';
 
 interface OnlineUser {
   userId: string;
@@ -39,37 +41,40 @@ const Chat: React.FC = () => {
     fetchUser();
   }, []);
 
-  // Register user and listen for online users/messages
+  // Listen for online users updates
   useEffect(() => {
     if (!currentUser) return;
-
-    if (!socket.connected) socket.connect();
-
-    // Register this user with the backend
-    socket.emit('register_user', {
-      userId: currentUser.id,
-      name: `${currentUser.firstName} ${currentUser.lastName}`,
-    });
-
-    // Request the current online users list
-    socket.emit('get_online_users');
-
-    // Listen for online users updates
     const handleOnlineUsers = (users: OnlineUser[]) => {
-      // Exclude self from the list
       setOnlineUsers(users.filter(u => u.userId !== currentUser.id));
     };
     socket.on('online_users', handleOnlineUsers);
-
     return () => {
       socket.off('online_users', handleOnlineUsers);
     };
   }, [currentUser]);
 
-  // When user switches chat, clear messages
+  // When user switches chat, fetch messages from backend and load from IndexedDB
   useEffect(() => {
-    setMessages([]);
-  }, [selectedUser]);
+    const fetchAndLoad = async () => {
+      if (!currentUser || !selectedUser) return;
+      socket.emit('fetch_messages', { userA: currentUser.id, userB: selectedUser.userId });
+
+      // Listen for messages_history from backend
+      const handleMessagesHistory = async (data: { userA: string; userB: string; messages: Message[] }) => {
+        await saveMessages(data.messages);
+        const msgs = await getMessagesBetween(currentUser.id, selectedUser.userId);
+        setMessages(msgs);
+      };
+
+      socket.on('messages_history', handleMessagesHistory);
+
+      return () => {
+        socket.off('messages_history', handleMessagesHistory);
+      };
+    };
+    fetchAndLoad();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, selectedUser]);
 
   const handleSendMessage = useCallback(
     (content: string) => {
@@ -98,26 +103,24 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    const handleReceiveMessage = (msg: Message) => {
-      if (
-        selectedUser &&
-        (
-          (msg.fromUserId === selectedUser.userId && msg.toUserId === currentUser.id) ||
-          (msg.fromUserId === currentUser.id && msg.toUserId === selectedUser.userId)
-        )
-      ) {
-        // If this is an echo of a pending message, mark as delivered
+    const handleReceiveMessage = async (msg: Message) => {
+      // Always add the message to the list and save to IndexedDB
+      setMessages(prev => {
         if (msg.fromUserId === currentUser.id && msg.pendingId) {
-          setMessages(prev =>
-            prev.map(m =>
-              m.pendingId === msg.pendingId
-                ? { ...msg, delivered: true }
-                : m
-            )
+          return prev.map(m =>
+            m.pendingId === msg.pendingId
+              ? { ...msg, delivered: true }
+              : m
           );
         } else {
-          setMessages(prev => [...prev, msg]);
+          return [...prev, msg];
         }
+      });
+      await saveMessages([msg]);
+
+      // Show toast if the message is from a user who is not currently selected
+      if (!selectedUser || msg.fromUserId !== selectedUser.userId) {
+        showInfoToast(`New message from ${msg.fromName}`);
       }
     };
 
