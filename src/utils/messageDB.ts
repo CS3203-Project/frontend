@@ -1,3 +1,7 @@
+export async function clearMessages() {
+  const db = await getDB();
+  await db.clear(STORE_NAME);
+}
 import { openDB } from 'idb';
 import type { Message } from '../components/Messaging/Chat';
 

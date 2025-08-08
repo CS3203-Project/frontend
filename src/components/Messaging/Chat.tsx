@@ -10,7 +10,6 @@ import { saveMessages, getMessagesBetween } from '../../utils/messageDB';
 interface OnlineUser {
   userId: string;
   name: string;
-  socketId: string;
 }
 
 export interface Message {

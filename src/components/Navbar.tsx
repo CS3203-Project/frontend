@@ -3,6 +3,7 @@ import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRigh
 import Button from './Button';
 import { cn } from '../utils/utils';
 import { userApi } from '../api/userApi';
+import { clearMessages } from '../utils/messageDB';
 import type { UserProfile } from '../api/userApi';
 import { Link } from 'react-router-dom';
 import SpecificSearchCard from './services/SpecificSearchCard';
@@ -69,6 +70,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await userApi.logout();
+      await clearMessages(); // Clear IndexedDB messages on logout
       setUser(null);
       setIsLoggedIn(false);
       setUserMenuOpen(false);

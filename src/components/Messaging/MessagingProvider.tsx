@@ -3,6 +3,7 @@ import React, { createContext, useEffect, useState, useMemo } from 'react';
 import { socket } from '../../api/socket';
 import { userApi } from '../../api/userApi';
 import type { UserProfile } from '../../api/userApi';
+import { saveMessages } from '../../utils/messageDB';
 
 interface MessagingContextType {
   socket: typeof socket;
@@ -30,6 +31,30 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
     fetchUser();
   }, []);
+
+  // On sign-in, fetch all messages for the user and store in IndexedDB
+  useEffect(() => {
+    const fetchAllMessages = async () => {
+      if (!currentUser) return;
+      try {
+        // Fetch all messages for the user from backend
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const response = await fetch(
+          `/api/messages/all?userId=${currentUser.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data.messages)) {
+          await saveMessages(data.messages);
+        }
+      } catch (err) {
+        // Ignore errors for now
+      }
+    };
+    fetchAllMessages();
+  }, [currentUser]);
 
   // Connect socket and register user globally
   useEffect(() => {
