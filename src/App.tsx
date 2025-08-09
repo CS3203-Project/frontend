@@ -18,7 +18,8 @@ import ServiceDetailPage from './Pages/ServiceDetailPage';
 import Profile from "./Pages/Profile.tsx";
 import BecomeProvider from "./Pages/BecomeProvider.tsx";
 import Provider from "./Pages/Provider.tsx";
-import CreateServise from "./Pages/CreateService.tsx";
+import CreateService from "./Pages/CreateService.tsx";
+
 
 
 function App() {
@@ -43,7 +44,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/become-provider" element={<BecomeProvider />} />
         <Route path="/provider/:id" element={<Provider />} />
-        <Route path="/create-service" element={<CreateServise />} />
+        <Route path="/create-service" element={<CreateService />} />
         
         {/* Add more routes as needed */}
       </Routes>

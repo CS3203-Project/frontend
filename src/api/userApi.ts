@@ -336,6 +336,21 @@ export const userApi = {
     }
   },
 
+  getProviderById: async (providerId: string): Promise<ProviderProfile> => {
+    try {
+      const response = await apiClient.get(`/providers/${providerId}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to fetch provider details');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
   updateProvider: async (providerData: UpdateProviderData): Promise<ProviderProfile> => {
     try {
       const token = localStorage.getItem('token');
