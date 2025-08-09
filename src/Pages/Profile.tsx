@@ -47,7 +47,6 @@ export default function Profile() {
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
   const [services, setServices] = useState<ServiceResponse[]>([]);
   const [servicesLoading, setServicesLoading] = useState(false);
-  const [showAllServices, setShowAllServices] = useState(false);
   const [showUpdateServiceModal, setShowUpdateServiceModal] = useState(false);
   const [selectedService, setSelectedService] = useState<{
     id: string;
@@ -264,16 +263,12 @@ export default function Profile() {
       await serviceApi.updateService(selectedService.id, serviceFormData);
       toast.success('Service updated successfully!');
       
-      // Update the provider profile with the updated service
-      if (providerProfile) {
-        setProviderProfile({
-          ...providerProfile,
-          services: providerProfile.services.map(s => 
-            s.id === selectedService.id 
-              ? { ...s, ...serviceFormData }
-              : s
-          )
-        });
+      // Refetch the profile data to get the updated values
+      await fetchProfile();
+      
+      // Also refetch services if we have a provider profile
+      if (providerProfile?.id) {
+        await fetchProviderServices(providerProfile.id);
       }
       
       setShowUpdateServiceModal(false);
@@ -665,6 +660,25 @@ export default function Profile() {
                   </div>
                 </div>
 
+                {/* Create Service Button */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Ready to offer a new service?</h2>
+                    <p className="text-gray-600 mb-4">Create and publish your service to start getting bookings from clients.</p>
+                    <Button
+                      onClick={() => {
+                        console.log('Navigating to create service...');
+                        navigate('/create-service');
+                      }}
+                      size="lg"
+                      className="flex items-center space-x-2 mx-auto px-8 py-3"
+                    >
+                      <Plus className="h-5 w-5" />
+                      <span>Create New Service</span>
+                    </Button>
+                  </div>
+                </div>
+
                 {/* Bio */}
                 {providerProfile.bio && (
                   <div className="bg-white rounded-xl shadow-lg p-6">
@@ -710,21 +724,6 @@ export default function Profile() {
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-semibold text-gray-900">Services</h2>
-                      <Button
-                        onClick={() => {
-                          navigate('/create-service', { 
-                            state: { 
-                              providerId: providerProfile?.id,
-                              onServiceCreated: refreshServices
-                            }
-                          });
-                        }}
-                        size="sm"
-                        className="flex items-center space-x-1"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>Create Service</span>
-                      </Button>
                     </div>
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
@@ -740,21 +739,6 @@ export default function Profile() {
                           Showing all {services.length} services
                         </p>
                       </div>
-                      <Button
-                        onClick={() => {
-                          navigate('/create-service', { 
-                            state: { 
-                              providerId: providerProfile?.id,
-                              onServiceCreated: refreshServices
-                            }
-                          });
-                        }}
-                        size="sm"
-                        className="flex items-center space-x-1"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>Create Service</span>
-                      </Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {services.map((service) => (
@@ -827,39 +811,10 @@ export default function Profile() {
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-semibold text-gray-900">Services</h2>
-                      <Button
-                        onClick={() => {
-                          navigate('/create-service', { 
-                            state: { 
-                              providerId: providerProfile?.id,
-                              onServiceCreated: refreshServices
-                            }
-                          });
-                        }}
-                        size="sm"
-                        className="flex items-center space-x-1"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>Create Service</span>
-                      </Button>
                     </div>
                     <div className="text-center py-8">
                       <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-gray-500 mb-4">No services created yet</p>
-                      <Button
-                        onClick={() => {
-                          navigate('/create-service', { 
-                            state: { 
-                              providerId: providerProfile?.id,
-                              onServiceCreated: refreshServices
-                            }
-                          });
-                        }}
-                        variant="outline"
-                        size="sm"
-                      >
-                        Create Your First Service
-                      </Button>
                     </div>
                   </div>
                 )}

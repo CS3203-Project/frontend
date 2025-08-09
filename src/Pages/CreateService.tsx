@@ -1,207 +1,294 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  X, 
-  Clock,
-  DollarSign,
-  FileText,
-  Tag,
-  Image as ImageIcon,
-  Video,
-  Eye,
-  EyeOff
-} from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import Button from '../components/Button';
-import toast from 'react-hot-toast';
-import { Toaster } from 'react-hot-toast';
+import { serviceApi } from '../api/serviceApi';
+import { categoryApi } from '../api/categoryApi';
+import { userApi } from '../api/userApi';
+import { showSuccessToast, showErrorToast } from '../utils/toastUtils';
+import type { CreateServiceRequest } from '../api/serviceApi';
+import type { Category } from '../api/categoryApi';
+import type { ProviderProfile } from '../api/userApi';
 
-interface ServiceForm {
+interface FormData {
+  categoryId: string;
   title: string;
   description: string;
-  category: string;
   price: string;
   currency: string;
-  workingTime: string;
+  tags: string[];
+  images: string[];
+  workingTime: string[];
   isActive: boolean;
-  mediaUrls: string[];
 }
+
+const workingTimeSlots = [
+  'Monday: 9:00 AM - 5:00 PM',
+  'Tuesday: 9:00 AM - 5:00 PM',
+  'Wednesday: 9:00 AM - 5:00 PM',
+  'Thursday: 9:00 AM - 5:00 PM',
+  'Friday: 9:00 AM - 5:00 PM',
+  'Saturday: 10:00 AM - 4:00 PM',
+  'Sunday: 10:00 AM - 4:00 PM',
+];
 
 export default function CreateService() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [newMediaUrl, setNewMediaUrl] = useState('');
-  const [formData, setFormData] = useState<ServiceForm>({
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [currentTag, setCurrentTag] = useState('');
+  const [currentImage, setCurrentImage] = useState('');
+  const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
+  
+  const [formData, setFormData] = useState<FormData>({
+    categoryId: '',
     title: '',
     description: '',
-    category: '',
     price: '',
     currency: 'USD',
-    workingTime: '',
+    tags: [],
+    images: [],
+    workingTime: [],
     isActive: true,
-    mediaUrls: []
   });
 
-  const categories = [
-    'Home Services',
-    'Technical Services',
-    'Business Services',
-    'Creative Services',
-    'Personal Services'
-  ];
+  const [errors, setErrors] = useState<Partial<FormData>>({});
 
-  const currencies = [
-    { code: 'USD', symbol: '$', name: 'US Dollar' },
-    { code: 'EUR', symbol: '€', name: 'Euro' },
-    { code: 'GBP', symbol: '£', name: 'British Pound' },
-    { code: 'LKR', symbol: 'Rs', name: 'Sri Lankan Rupee' },
-    { code: 'INR', symbol: '₹', name: 'Indian Rupee' }
-  ];
+  // Fetch categories and provider profile on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch categories
+        const categoriesResponse = await categoryApi.getCategories();
+        if (categoriesResponse.success) {
+          // Filter to show only main categories (no parent)
+          const mainCategories = categoriesResponse.data.filter(category => !category.parentId);
+          setCategories(mainCategories);
+        }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({
-        ...prev,
-        [name]: checked
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+        // Fetch provider profile
+        const providerData = await userApi.getProviderProfile();
+        setProviderProfile(providerData);
+      } catch (error) {
+        console.error('Failed to fetch initial data:', error);
+        showErrorToast('Failed to load required data');
+        // Redirect back to profile if user is not a provider
+        navigate('/profile');
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<FormData> = {};
+
+    if (!formData.categoryId) newErrors.categoryId = 'Category is required';
+    if (!formData.title) newErrors.title = 'Title is required';
+    if (!formData.description) newErrors.description = 'Description is required';
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      newErrors.price = 'Valid price is required';
     }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const addMediaUrl = () => {
-    if (!newMediaUrl.trim()) {
-      toast.error('Please enter a media URL');
-      return;
-    }
-    
-    // Basic URL validation
-    try {
-      new URL(newMediaUrl);
-    } catch {
-      toast.error('Please enter a valid URL');
-      return;
-    }
-    
-    // Check if URL already exists
-    if (formData.mediaUrls.includes(newMediaUrl)) {
-      toast.error('This URL has already been added');
-      return;
-    }
-    
-    // Add URL to the list (maximum 5 URLs)
-    if (formData.mediaUrls.length >= 5) {
-      toast.error('Maximum 5 media URLs allowed');
-      return;
-    }
-    
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      mediaUrls: [...prev.mediaUrls, newMediaUrl]
+      [name]: value
     }));
     
-    // Clear the input
-    setNewMediaUrl('');
-    toast.success('Media URL added successfully');
+    // Clear error when user starts typing
+    if (errors[name as keyof FormData]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
   };
 
-  const removeMedia = (index: number) => {
+  const handleAddTag = () => {
+    const trimmedTag = currentTag.trim();
+    
+    // Validation checks
+    if (!trimmedTag) return;
+    if (trimmedTag.length > 30) {
+      showErrorToast('Tag must not exceed 30 characters');
+      return;
+    }
+    if (trimmedTag.startsWith('data:')) {
+      showErrorToast('Invalid tag format. Please enter a text tag, not an image.');
+      return;
+    }
+    if (formData.tags.includes(trimmedTag)) {
+      showErrorToast('Tag already exists');
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
-      mediaUrls: prev.mediaUrls.filter((_, i) => i !== index)
+      tags: [...prev.tags, trimmedTag]
+    }));
+    setCurrentTag('');
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleAddImage = () => {
+    const trimmedImage = currentImage.trim();
+    
+    // Validation checks
+    if (!trimmedImage) return;
+    if (!trimmedImage.startsWith('http://') && !trimmedImage.startsWith('https://') && !trimmedImage.startsWith('data:')) {
+      showErrorToast('Please enter a valid image URL (starting with http://, https://, or data:)');
+      return;
+    }
+    if (formData.images.includes(trimmedImage)) {
+      showErrorToast('Image URL already exists');
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, trimmedImage]
+    }));
+    setCurrentImage('');
+  };
+
+  const handleRemoveImage = (imageToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter(image => image !== imageToRemove)
+    }));
+  };
+
+  const handleWorkingTimeChange = (time: string) => {
+    setFormData(prev => ({
+      ...prev,
+      workingTime: prev.workingTime.includes(time)
+        ? prev.workingTime.filter(t => t !== time)
+        : [...prev.workingTime, time]
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim()) {
-      toast.error('Please enter a service title');
+    if (!validateForm()) {
+      showErrorToast('Please fix the errors in the form');
       return;
     }
-    
-    if (!formData.description.trim()) {
-      toast.error('Please enter a service description');
-      return;
-    }
-    
-    if (!formData.category) {
-      toast.error('Please select a category');
-      return;
-    }
-    
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      toast.error('Please enter a valid price');
-      return;
-    }
-    
-    if (!formData.workingTime.trim()) {
-      toast.error('Please enter working time');
+
+    if (!providerProfile?.id) {
+      showErrorToast('Provider profile not found. Please ensure you are a verified provider.');
       return;
     }
 
     setLoading(true);
     
     try {
-      // TODO: Implement actual API call to create service
-      // const serviceData = {
-      //   title: formData.title,
-      //   description: formData.description,
-      //   category: formData.category,
-      //   price: parseFloat(formData.price),
-      //   currency: formData.currency,
-      //   workingTime: formData.workingTime,
-      //   isActive: formData.isActive,
-      //   mediaUrls: formData.mediaUrls
-      // };
+      const serviceData: CreateServiceRequest = {
+        providerId: providerProfile.id, // Use real provider ID
+        categoryId: formData.categoryId,
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        currency: formData.currency,
+        tags: formData.tags,
+        images: formData.images,
+        workingTime: formData.workingTime,
+        isActive: formData.isActive,
+      };
+
+      console.log('Sending service data:', serviceData); // Debug log
+
+      const response = await serviceApi.createService(serviceData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, SIMULATED_API_DELAY_MS));
-      
-      toast.success('Service created successfully!');
-      navigate('/profile');
+      if (response.success) {
+        showSuccessToast('Service created successfully!');
+        navigate('/profile'); // Navigate back to profile page
+      } else {
+        showErrorToast(response.message || 'Failed to create service');
+      }
     } catch (error: unknown) {
       console.error('Error creating service:', error);
-      toast.error('Failed to create service. Please try again.');
+      
+      // More detailed error handling
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string; error?: string; details?: unknown } } };
+        console.log('Full error response:', axiosError.response?.data);
+        
+        if (axiosError.response?.data?.message) {
+          showErrorToast(axiosError.response.data.message);
+        } else if (axiosError.response?.data?.error) {
+          showErrorToast(axiosError.response.data.error);
+        } else if (axiosError.response?.data?.details) {
+          // Handle validation errors
+          const details = axiosError.response.data.details;
+          if (Array.isArray(details) && details.length > 0) {
+            const firstError = details[0] as { message?: string };
+            showErrorToast(`Validation error: ${firstError.message || 'Unknown validation error'}`);
+          } else {
+            showErrorToast('Validation failed. Check console for details.');
+          }
+        } else {
+          showErrorToast('Failed to create service. Please try again.');
+        }
+      } else {
+        showErrorToast('Failed to create service. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Button
-            onClick={() => navigate('/profile')}
-            variant="ghost"
-            className="flex items-center space-x-2 mb-4 text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Profile</span>
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Service</h1>
-          <p className="text-gray-600 mt-2">Fill in the details to create your new service offering</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-gray-600 to-black px-6 py-4">
+            <h1 className="text-2xl font-bold text-white">Create New Service</h1>
+            <p className="text-gray-200 mt-1">Fill in the details to create your service listing</p>
+          </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Category Selection */}
+            <div>
+              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
+                  errors.categoryId ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name || category.slug}
+                  </option>
+                ))}
+              </select>
+              {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>}
+            </div>
+
             {/* Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                <FileText className="h-4 w-4 inline mr-2" />
                 Service Title *
               </label>
               <input
@@ -210,17 +297,17 @@ export default function CreateService() {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                placeholder="Enter your service title"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                maxLength={100}
+                placeholder="Enter service title"
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
+                  errors.title ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
-              <p className="text-xs text-gray-500 mt-1">{formData.title.length}/100 characters</p>
+              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
             </div>
 
             {/* Description */}
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                <FileText className="h-4 w-4 inline mr-2" />
                 Description *
               </label>
               <textarea
@@ -228,41 +315,19 @@ export default function CreateService() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
+                rows={4}
                 placeholder="Describe your service in detail"
-                rows={5}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-vertical"
-                maxLength={1000}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
+                  errors.description ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
-              <p className="text-xs text-gray-500 mt-1">{formData.description.length}/1000 characters</p>
-            </div>
-
-            {/* Category */}
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                <Tag className="h-4 w-4 inline mr-2" />
-                Category *
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
             </div>
 
             {/* Price and Currency */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                  <DollarSign className="h-4 w-4 inline mr-2" />
                   Price *
                 </label>
                 <input
@@ -271,13 +336,16 @@ export default function CreateService() {
                   name="price"
                   value={formData.price}
                   onChange={handleInputChange}
-                  placeholder="0.00"
-                  min="0"
                   step="0.01"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  min="0"
+                  placeholder="0.00"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
+                    errors.price ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
               </div>
-              
+
               <div>
                 <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
                   Currency
@@ -287,170 +355,168 @@ export default function CreateService() {
                   name="currency"
                   value={formData.currency}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                 >
-                  {currencies.map((currency) => (
-                    <option key={currency.code} value={currency.code}>
-                      {currency.symbol} {currency.name} ({currency.code})
-                    </option>
-                  ))}
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="LKR">LKR</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags
+              </label>
+              <p className="text-xs text-gray-500 mb-2">Add short keywords (max 30 characters each) to help users find your service</p>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  placeholder="e.g., photography, wedding, portrait"
+                  maxLength={30}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                />
+                <Button type="button" onClick={handleAddTag} size="sm">
+                  Add Tag
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Images */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Image URLs
+              </label>
+              <p className="text-xs text-gray-500 mb-2">Add image URLs to showcase your service</p>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="url"
+                  value={currentImage}
+                  onChange={(e) => setCurrentImage(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
+                />
+                <Button type="button" onClick={handleAddImage} size="sm">
+                  Add Image
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <span className="text-sm text-gray-600 truncate flex-1">{image}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(image)}
+                      className="ml-2 text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Working Time */}
             <div>
-              <label htmlFor="workingTime" className="block text-sm font-medium text-gray-700 mb-2">
-                <Clock className="h-4 w-4 inline mr-2" />
-                Working Time *
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Working Hours
               </label>
-              <input
-                type="text"
-                id="workingTime"
-                name="workingTime"
-                value={formData.workingTime}
-                onChange={handleInputChange}
-                placeholder="e.g., 2-3 hours, 1-2 days, 1 week"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              />
-              <p className="text-xs text-gray-500 mt-1">Estimated time to complete this service</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {workingTimeSlots.map((time) => (
+                  <label key={time} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.workingTime.includes(time)}
+                      onChange={() => handleWorkingTimeChange(time)}
+                      className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                    />
+                    <span className="text-sm text-gray-700">{time}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
-            {/* Media URLs */}
+            {/* Service Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <ImageIcon className="h-4 w-4 inline mr-2" />
-                Image or Video URLs
+                Service Status
               </label>
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    value={newMediaUrl}
-                    onChange={(e) => setNewMediaUrl(e.target.value)}
-                    placeholder="Enter image or video URL (e.g., https://example.com/image.jpg)"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addMediaUrl();
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={addMediaUrl}
-                    className="px-6 py-3"
-                    disabled={!newMediaUrl.trim() || formData.mediaUrls.length >= 5}
-                  >
-                    Add URL
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Add up to 5 image or video URLs. Supported formats: JPG, PNG, GIF, MP4, WebM
-                </p>
-              </div>
-              
-              {/* Media URL Preview */}
-              {formData.mediaUrls.length > 0 && (
-                <div className="mt-4 space-y-3">
-                  <h4 className="text-sm font-medium text-gray-700">Added Media URLs:</h4>
-                  {formData.mediaUrls.map((url, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                          {url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                            <Video className="h-6 w-6 text-gray-400" />
-                          ) : (
-                            <ImageIcon className="h-6 w-6 text-gray-400" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {url.match(/\.(mp4|webm|ogg|mov)$/i) ? 'Video' : 'Image'} #{index + 1}
-                          </p>
-                          <p className="text-xs text-gray-500 truncate">{url}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded border border-blue-200 hover:border-blue-300"
-                        >
-                          Preview
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => removeMedia(index)}
-                          className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
+              <div className="flex items-center space-x-3">
+                <label className="flex items-center cursor-pointer">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      className="sr-only"
+                    />
+                    <div className={`w-10 h-6 rounded-full shadow-inner transition-colors duration-300 ${
+                      formData.isActive ? 'bg-green-500' : 'bg-gray-300'
+                    }`}>
+                      <div className={`w-4 h-4 bg-white rounded-full shadow mt-1 ml-1 transition-transform duration-300 ${
+                        formData.isActive ? 'transform translate-x-4' : ''
+                      }`}></div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                  <span className={`ml-3 text-sm font-medium ${
+                    formData.isActive ? 'text-green-700' : 'text-gray-500'
+                  }`}>
+                    {formData.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.isActive 
+                  ? 'Your service will be visible to customers and available for booking'
+                  : 'Your service will be hidden from customers and unavailable for booking'
+                }
+              </p>
             </div>
 
-            {/* Is Active Toggle */}
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="isActive"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleInputChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="isActive" className="flex items-center text-sm font-medium text-gray-700">
-                {formData.isActive ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-                Make service active immediately
-              </label>
+            {/* Submit Buttons */}
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/profile')}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="min-w-[120px]"
+              >
+                {loading ? 'Creating...' : 'Create Service'}
+              </Button>
             </div>
-            <p className="text-xs text-gray-500 ml-7">
-              {formData.isActive 
-                ? "Your service will be visible to customers right away" 
-                : "You can activate your service later from your profile"
-              }
-            </p>
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-200 mt-8">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate('/profile')}
-              className="flex-1 sm:flex-none"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating Service...
-                </>
-              ) : (
-                'Create Service'
-              )}
-            </Button>
-          </div>
-        </form>
-      </main>
-
-      <Footer />
-      <Toaster />
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
-
-
-

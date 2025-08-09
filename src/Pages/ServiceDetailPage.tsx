@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar, Shield, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
-import { servicesData, type Service } from '../data/servicesData';
+import { userApi, type ProviderProfile } from '../api/userApi';
 import Breadcrumb from '../components/services/Breadcrumb';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -38,36 +38,11 @@ const ServiceDetailPage: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
   const [service, setService] = useState<DetailedService | null>(null);
+  const [provider, setProvider] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [providerLoading, setProviderLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
-
-  // Transform Service (dummy data) to DetailedService format
-  const transformDummyService = (dummyService: Service): DetailedService => {
-    return {
-      id: dummyService.id,
-      title: dummyService.title,
-      description: `Professional ${dummyService.title} service provided by ${dummyService.provider.name}. High quality service with attention to detail and customer satisfaction guaranteed.`,
-      price: dummyService.price.amount,
-      currency: dummyService.price.currency,
-      images: [dummyService.image],
-      category: {
-        name: dummyService.category,
-        slug: dummyService.category
-      },
-      tags: [dummyService.subcategory],
-      workingTime: ['Monday - Friday: 9:00 AM - 6:00 PM', 'Saturday: 10:00 AM - 4:00 PM', 'Sunday: Closed'],
-      provider: {
-        id: dummyService.provider.name.toLowerCase().replace(/\s+/g, '-'),
-        name: dummyService.provider.name,
-        email: 'contact@provider.com',
-        avatar: dummyService.provider.avatar,
-        rating: dummyService.provider.rating,
-        reviews: dummyService.provider.reviews
-      },
-      isActive: true
-    };
-  };
 
   // Transform ServiceResponse (API data) to DetailedService format
   const transformApiService = (apiService: ServiceResponse): DetailedService => {
@@ -101,6 +76,20 @@ const ServiceDetailPage: React.FC = () => {
     };
   };
 
+  // Fetch provider details
+  const fetchProviderDetails = async (providerId: string) => {
+    try {
+      setProviderLoading(true);
+      const providerData = await userApi.getProviderById(providerId);
+      setProvider(providerData);
+    } catch (error) {
+      console.error('Failed to fetch provider details:', error);
+      // Don't show error toast for provider details failure as it's not critical
+    } finally {
+      setProviderLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchService = async () => {
       if (!serviceId) return;
@@ -108,19 +97,17 @@ const ServiceDetailPage: React.FC = () => {
       try {
         setLoading(true);
         
-        // First, try to find in dummy data (for services from Homepage/BrowseServices)
-        const dummyService = servicesData.find(s => s.id === serviceId);
-        if (dummyService) {
-          setService(transformDummyService(dummyService));
-          setLoading(false);
-          return;
-        }
-
-        // If not found in dummy data, try API
+        // Fetch service from API
         const response = await serviceApi.getServiceById(serviceId);
         
         if (response.success) {
-          setService(transformApiService(response.data));
+          const transformedService = transformApiService(response.data);
+          setService(transformedService);
+          
+          // Fetch provider details if provider ID is available
+          if (response.data.provider?.id) {
+            await fetchProviderDetails(response.data.provider.id);
+          }
         } else {
           toast.error('Service not found');
           navigate('/services');
@@ -138,14 +125,17 @@ const ServiceDetailPage: React.FC = () => {
   }, [serviceId, navigate]);
 
   const handleContactProvider = () => {
+    console.log('Service object:', service); // Debug log
+    console.log('Provider ID:', service?.provider?.id); // Debug log
+    
     if (service?.provider?.id) {
+      console.log('Navigating to provider page with ID:', service.provider.id); // Debug log
       // Navigate to the specific provider page with the provider ID
       navigate(`/provider/${service.provider.id}`);
     } else {
-      // For dummy data or when provider ID is not available, 
-      // create a generic provider ID based on the provider name
-      const providerSlug = service?.provider?.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown-provider';
-      navigate(`/provider/${providerSlug}`);
+      // When provider ID is not available, show an error
+      console.log('No provider ID available'); // Debug log
+      toast.error('Provider information not available');
     }
   };
 
@@ -381,33 +371,53 @@ const ServiceDetailPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Service Provider</h3>
                 
-                <div className="flex items-center mb-4">
-                  <img
-                    src={service.provider.avatar || "/api/placeholder/60/60"}
-                    alt={service.provider.name}
-                    className="w-16 h-16 rounded-full mr-4"
-                  />
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">{service.provider.name}</h4>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-gray-700 ml-1">
-                        {service.provider.rating?.toFixed(1) || '4.5'} ({service.provider.reviews || 23} reviews)
-                      </span>
+                {providerLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center mb-4">
+                      <img
+                        src={provider?.user?.imageUrl || "/api/placeholder/60/60"}
+                        alt={`${provider?.user?.firstName || ''} ${provider?.user?.lastName || ''}`.trim() || service?.provider?.name || 'Provider'}
+                        className="w-16 h-16 rounded-full mr-4 object-cover"
+                      />
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          {provider?.user ? 
+                            `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email :
+                            service?.provider?.name || 'Unknown Provider'
+                          }
+                        </h4>
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-gray-700 ml-1">
+                            {provider?.averageRating?.toFixed(1) || '4.5'} ({provider?.totalReviews || 0} reviews)
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-4 h-4 mr-3" />
-                    <span>Available Nationwide</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="w-4 h-4 mr-3" />
-                    <span>Usually responds within 1 hour</span>
-                  </div>
-                </div>
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="w-4 h-4 mr-3" />
+                        <span>{provider?.user?.location || 'Location not specified'}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <Clock className="w-4 h-4 mr-3" />
+                        <span>Usually responds within 1 hour</span>
+                      </div>
+                      {provider?.bio && (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            {provider.bio}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 <div className="space-y-3">
                   <button
@@ -432,20 +442,36 @@ const ServiceDetailPage: React.FC = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Contact</h3>
                 
                 <div className="space-y-4">
-                  <div className="flex items-center">
-                    <Phone className="w-5 h-5 text-gray-400 mr-3" />
-                    <span className="text-gray-700">+1 (555) 123-4567</span>
-                  </div>
+                  {provider?.user?.phone && (
+                    <div className="flex items-center">
+                      <Phone className="w-5 h-5 text-gray-400 mr-3" />
+                      <span className="text-gray-700">{provider.user.phone}</span>
+                    </div>
+                  )}
                   
                   <div className="flex items-center">
                     <Mail className="w-5 h-5 text-gray-400 mr-3" />
-                    <span className="text-gray-700">{service.provider?.email || 'Contact via platform'}</span>
+                    <span className="text-gray-700">
+                      {provider?.user?.email || service?.provider?.email || 'Contact via platform'}
+                    </span>
                   </div>
                   
                   <div className="flex items-center">
                     <MapPin className="w-5 h-5 text-gray-400 mr-3" />
-                    <span className="text-gray-700">Service Area: Nationwide</span>
+                    <span className="text-gray-700">
+                      Service Area: {provider?.user?.location || 'Location not specified'}
+                    </span>
                   </div>
+
+                  {provider?.user?.address && (
+                    <div className="flex items-start">
+                      <MapPin className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Address</p>
+                        <span className="text-gray-700">{provider.user.address}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
