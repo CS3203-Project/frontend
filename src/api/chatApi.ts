@@ -103,6 +103,7 @@ class ChatApiClient {
     conversationId?: string;
     participantId?: string;
     content: string;
+    profileName?: string;
   }) {
     console.log('Sending message:', data);
     this.socket?.emit('message:send', data);

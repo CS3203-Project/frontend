@@ -131,15 +131,21 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Send a message
   const sendMessage = (content: string) => {
-    if (!socket || !content.trim() || !activeConversation) return;
+    if (!socket || !content.trim() || !activeConversation || !currentProfile) return;
   
-    const messageData: { content: string; conversationId?: string; participantId?: string } = {
+    const messageData: {
+      content: string;
+      conversationId?: string;
+      participantId?: string;
+      profileName?: string;
+    } = {
       content: content.trim(),
     };
   
-    // If the conversation is new (has a temporary ID), send participantId
+    // If the conversation is new (has a temporary ID), send participantId and profileName
     if (activeConversation.conversationId.startsWith('new-')) {
       messageData.participantId = activeConversation.profile.id;
+      messageData.profileName = currentProfile.firstName; // Or the full name, as needed
     } else {
       // Otherwise, send the existing conversationId
       messageData.conversationId = activeConversation.conversationId;
