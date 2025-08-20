@@ -19,7 +19,8 @@ import {
   Building,
   Plus,
   X,
-  Save
+  Save,
+  Upload
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -30,6 +31,7 @@ import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
 import CompanyModal from '../components/Profile/CompanyModal';
+import { uploadMultipleImages } from '../utils/imageUpload';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
@@ -54,6 +56,7 @@ export default function Profile() {
   const [services, setServices] = useState<ServiceResponse[]>([]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [showUpdateServiceModal, setShowUpdateServiceModal] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedService, setSelectedService] = useState<{
     id: string;
     title?: string;
@@ -265,6 +268,11 @@ export default function Profile() {
   const handleUpdateService = async () => {
     if (!selectedService) return;
 
+    if (uploadingImages) {
+      toast.error('Please wait for image uploads to complete');
+      return;
+    }
+
     try {
       await serviceApi.updateService(selectedService.id, serviceFormData);
       toast.success('Service updated successfully!');
@@ -288,6 +296,33 @@ export default function Profile() {
     setServiceFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploadingImages(true);
+    try {
+      const imageUrls = await uploadMultipleImages(files);
+      setServiceFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...imageUrls]
+      }));
+      toast.success(`${files.length} image(s) uploaded successfully!`);
+    } catch (error) {
+      toast.error('Failed to upload images. Please try again.');
+      console.error('Image upload error:', error);
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setServiceFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, index) => index !== indexToRemove)
     }));
   };
 
@@ -1145,21 +1180,50 @@ export default function Profile() {
               </div>
 
               {/* Images */}
+              {/* Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Upload Images
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    const fileUrls = files.map(file => URL.createObjectURL(file));
-                    handleServiceFormChange('images', fileUrls);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={uploadingImages}
+                  />
+                  {uploadingImages && (
+                    <div className="flex items-center space-x-2 text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span className="text-sm">Uploading images...</span>
+                    </div>
+                  )}
+                  {serviceFormData.images.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Uploaded images:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {serviceFormData.images.map((imageUrl, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={imageUrl}
+                              alt={`Service image ${index + 1}`}
+                              className="w-16 h-16 object-cover rounded border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Active Status */}
@@ -1192,9 +1256,10 @@ export default function Profile() {
               <Button
                 onClick={handleUpdateService}
                 className="flex-1 flex items-center justify-center space-x-2"
+                disabled={uploadingImages}
               >
                 <Save className="h-4 w-4" />
-                <span>Update Service</span>
+                <span>{uploadingImages ? 'Uploading...' : 'Update Service'}</span>
               </Button>
             </div>
           </div>

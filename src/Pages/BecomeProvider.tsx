@@ -9,13 +9,15 @@ import {
   Award,
   Briefcase,
   ArrowLeft,
-  IdCard
+  IdCard,
+  Upload
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import type { CreateProviderData } from '../api/userApi';
+import { uploadImage } from '../utils/imageUpload';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function BecomeProvider() {
@@ -28,11 +30,53 @@ export default function BecomeProvider() {
     IDCardUrl: ''
   });
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingId, setUploadingId] = useState(false);
   const [newSkill, setNewSkill] = useState('');
   const [newQualification, setNewQualification] = useState('');
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    try {
+      const imageUrl = await uploadImage(file);
+      setFormData(prev => ({ ...prev, logoUrl: imageUrl }));
+      toast.success('Logo uploaded successfully!');
+    } catch (error) {
+      toast.error('Failed to upload logo. Please try again.');
+      console.error('Logo upload error:', error);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleIdUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingId(true);
+    try {
+      const imageUrl = await uploadImage(file);
+      setFormData(prev => ({ ...prev, IDCardUrl: imageUrl }));
+      toast.success('ID document uploaded successfully!');
+    } catch (error) {
+      toast.error('Failed to upload ID document. Please try again.');
+      console.error('ID upload error:', error);
+    } finally {
+      setUploadingId(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if uploads are in progress
+    if (uploadingLogo || uploadingId) {
+      toast.error('Please wait for image uploads to complete');
+      return;
+    }
     
     // Basic validation
     if (!formData.bio?.trim()) {
@@ -247,38 +291,71 @@ export default function BecomeProvider() {
               </div>
 
               {/* Logo URL Section */}
+              {/* Logo Upload Section */}
               <div>
                 <label className="flex items-center text-lg font-semibold text-gray-900 mb-3">
                   <FileImage className="h-5 w-5 mr-2" />
-                  Business Logo (Optional)
+                  Business Logo
                 </label>
-                <input
-                  type="url"
-                  value={formData.logoUrl || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, logoUrl: e.target.value }))}
-                  placeholder="https://example.com/your-logo.png"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={uploadingLogo}
+                  />
+                  {uploadingLogo && (
+                    <div className="flex items-center space-x-2 text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span className="text-sm">Uploading logo...</span>
+                    </div>
+                  )}
+                  {formData.logoUrl && (
+                    <div className="flex items-center space-x-2 text-green-600">
+                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                      <span className="text-sm">Logo uploaded successfully</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  Provide a URL to your business logo or personal brand image.
+                  Upload your business logo or personal brand image.
                 </p>
               </div>
 
-              {/* ID Card URL Section */}
+              {/* ID Card Upload Section */}
               <div>
                 <label className="flex items-center text-lg font-semibold text-gray-900 mb-3">
                   <IdCard className="h-5 w-5 mr-2" />
-                  ID Card/Document Image (Optional)
+                  ID Card/Document Image
                 </label>
-                <input
-                  type="text"
-                  value={formData.IDCardUrl || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, IDCardUrl: e.target.value }))}
-                  placeholder="Enter image URL or text identifier for your ID document"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleIdUpload}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={uploadingId}
+                  />
+                  {uploadingId && (
+                    <div className="flex items-center space-x-2 text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span className="text-sm">Uploading ID document...</span>
+                    </div>
+                  )}
+                  {formData.IDCardUrl && (
+                    <div className="flex items-center space-x-2 text-green-600">
+                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                      <span className="text-sm">ID document uploaded successfully</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  <strong>Optional:</strong> Provide an image URL or text identifier for your ID card, driver's license, or professional license. This can help speed up the verification process.
+                  <strong>Optional:</strong> Upload an image of your ID card, driver's license, or professional license. This can help speed up the verification process.
                 </p>
               </div>
 
