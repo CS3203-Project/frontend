@@ -33,6 +33,12 @@ import CompanyModal from '../components/Profile/CompanyModal';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
+const socialMediaLinks = [
+  { platform: 'Twitter', username: '@user123', url: 'https://twitter.com/user123', icon: '🐦' },
+  { platform: 'Facebook', username: 'user123', url: 'https://facebook.com/user123', icon: '📘' },
+  { platform: 'Instagram', username: '@user123', url: 'https://instagram.com/user123', icon: '📸' },
+];
+
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -313,10 +319,10 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
       <Navbar />
       
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-8">
+      <main className="flex-1 mx-[30px] px-4 sm:px-6 lg:px-8 mt-20 mb-8">
         {/* Profile Header */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
           {/* Banner */}
@@ -522,18 +528,34 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500 mb-2">Social Media</p>
                       <div className="space-y-2">
-                        {user.socialmedia.map((link, index) => (
-                          <a
-                            key={index}
-                            href={link.startsWith('http') ? link : `https://${link}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            <ExternalLink className="h-3 w-3 mr-2" />
-                            {link}
-                          </a>
-                        ))}
+                        {user.socialmedia.map((link, index) => {
+                          const url = link.startsWith('http') ? link : `https://${link}`;
+                          const username = url.split('/').pop(); // Extract username from URL
+                          const platformIcon = url.includes('twitter') || url.includes('x.com')
+    ? <i className="fab fa-twitter text-black"></i>
+    : url.includes('linkedin')
+    ? <i className="fab fa-linkedin text-black"></i>
+    : url.includes('instagram')
+    ? <i className="fab fa-instagram text-black"></i>
+    : url.includes('github')
+    ? <i className="fab fa-github text-black"></i>
+    : url.includes('portfolio') || url.includes('website')
+    ? <i className="fas fa-globe text-black"></i>
+    : <i className="fas fa-link text-black"></i>;
+
+  return (
+    <a
+      key={index}
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+    >
+      <span className="mr-2">{platformIcon}</span>
+      {username}
+    </a>
+  );
+                        })}
                       </div>
                     </div>
                   </div>
