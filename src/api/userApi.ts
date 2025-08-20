@@ -284,6 +284,31 @@ export const userApi = {
     }
   },
 
+  // Update user profile with image upload
+  updateProfileWithImage: async (formData: FormData): Promise<UserProfile> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.put('/users/profile', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data.user;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to update profile');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
   // Logout user
   logout: async (): Promise<void> => {
     localStorage.removeItem('token');

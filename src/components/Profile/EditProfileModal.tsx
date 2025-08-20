@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Save, User, Phone, MapPin, Globe } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Save, User, Phone, MapPin, Globe, Upload, Image } from 'lucide-react';
 import Button from '../Button';
 import toast from 'react-hot-toast';
 import { userApi } from '../../api/userApi';
@@ -15,6 +15,9 @@ interface EditProfileModalProps {
 export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: EditProfileModalProps) {
   const [formData, setFormData] = useState<UpdateProfileData>({});
   const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen && user) {
@@ -37,8 +40,46 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
         address: user.address || '',
         socialmedia: socialMediaArray
       });
+      
+      // Reset file selection when modal opens
+      setSelectedFile(null);
+      setPreviewUrl('');
     }
   }, [isOpen, user]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -47,16 +88,29 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
     setLoading(true);
     
     try {
-      // Clean up the form data before submitting
-      const cleanedData = {
-        ...formData,
-        // Remove empty image URL
-        imageUrl: formData.imageUrl?.trim() || undefined,
-        // Filter out empty social media links but maintain order
-        socialmedia: formData.socialmedia?.filter(link => link && link.trim()) || []
-      };
+      // Create FormData for file upload
+      const submitData = new FormData();
       
-      const updatedUser = await userApi.updateProfile(cleanedData);
+      // Add form fields
+      if (formData.firstName) submitData.append('firstName', formData.firstName);
+      if (formData.lastName) submitData.append('lastName', formData.lastName);
+      if (formData.location) submitData.append('location', formData.location);
+      if (formData.phone) submitData.append('phone', formData.phone);
+      if (formData.address) submitData.append('address', formData.address);
+      
+      // Add social media links (filter out empty ones)
+      const socialMediaLinks = formData.socialmedia?.filter(link => link && link.trim()) || [];
+      submitData.append('socialmedia', JSON.stringify(socialMediaLinks));
+      
+      // Add image file if selected
+      if (selectedFile) {
+        submitData.append('profileImage', selectedFile);
+      } else if (formData.imageUrl?.trim()) {
+        // If no new file but imageUrl is provided, send it as well
+        submitData.append('imageUrl', formData.imageUrl.trim());
+      }
+      
+      const updatedUser = await userApi.updateProfileWithImage(submitData);
       toast.success('Profile updated successfully!');
       onSuccess(updatedUser);
       onClose();
@@ -180,34 +234,86 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
             {/* Profile Image */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2" />
+                <Image className="h-5 w-5 mr-2" />
                 Profile Image
               </h3>
+              
+              {/* Current Image Display */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Current Profile Image
+                </label>
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={previewUrl || formData.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.firstName + ' ' + formData.lastName)}&background=3b82f6&color=fff&size=80`}
+                    alt="Profile"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  {(previewUrl || selectedFile) && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Remove new image
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload New Image
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Choose Image
+                  </button>
+                  <span className="text-sm text-gray-500">
+                    {selectedFile ? selectedFile.name : 'Max size: 5MB'}
+                  </span>
+                </div>
+              </div>
+
+              {/* URL Input (Alternative) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Profile Image URL (Optional)
+                  Or Image URL (Optional)
                 </label>
                 <input
                   type="url"
                   value={formData.imageUrl || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value.trim() || undefined }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, imageUrl: e.target.value.trim() || undefined }));
+                    // Clear file selection if URL is entered
+                    if (e.target.value.trim()) {
+                      setSelectedFile(null);
+                      setPreviewUrl('');
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://example.com/your-image.jpg (leave empty for default avatar)"
+                  placeholder="https://example.com/your-image.jpg"
+                  disabled={!!selectedFile}
                 />
-                {formData.imageUrl && formData.imageUrl.trim() && (
-                  <div className="mt-3">
-                    <p className="text-sm text-gray-500 mb-2">Preview:</p>
-                    <img
-                      src={formData.imageUrl}
-                      alt="Profile preview"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                      onError={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        img.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {selectedFile ? 'URL input disabled while file is selected' : 'Enter a direct link to your image or upload a file above'}
+                </p>
               </div>
             </div>
 

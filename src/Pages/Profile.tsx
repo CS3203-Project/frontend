@@ -356,8 +356,8 @@ export default function Profile() {
             user.imageUrl && user.imageUrl.trim() ? 'hidden' : 'flex'
           }`}
             >
-          {(user.firstName?.charAt(0) || 'U').toUpperCase()}
-          {(user.lastName?.charAt(0) || 'S').toUpperCase()}
+          {((user.firstName || '').charAt(0) || 'U').toUpperCase()}
+          {((user.lastName || '').charAt(0) || 'S').toUpperCase()}
             </div>
           </div>
         </div>
@@ -722,7 +722,7 @@ export default function Profile() {
                           {skill}
                         </span>
                       ))}
-                    </div>
+                  </div>
                   </div>
                 )}
 
@@ -972,7 +972,7 @@ export default function Profile() {
                               />
                             ) : (
                               <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-sm font-medium">
-                                {review.reviewer.firstName?.charAt(0)}{review.reviewer.lastName?.charAt(0)}
+                                {(review.reviewer.firstName || '').charAt(0)}{(review.reviewer.lastName || '').charAt(0)}
                               </div>
                             )}
                             <div className="flex-1">
@@ -1147,14 +1147,18 @@ export default function Profile() {
               {/* Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URLs (comma-separated)
+                  Upload Images
                 </label>
                 <input
-                  type="text"
-                  value={serviceFormData.images.join(', ')}
-                  onChange={(e) => handleServiceFormChange('images', e.target.value.split(',').map(img => img.trim()).filter(img => img))}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    const fileUrls = files.map(file => URL.createObjectURL(file));
+                    handleServiceFormChange('images', fileUrls);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                 />
               </div>
 
