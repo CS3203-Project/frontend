@@ -1,68 +1,103 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import { serviceApi } from '../api/serviceApi';
 import { categoryApi } from '../api/categoryApi';
 import { userApi } from '../api/userApi';
+import apiClient from '../api/axios';
 import { showSuccessToast, showErrorToast } from '../utils/toastUtils';
 import type { CreateServiceRequest } from '../api/serviceApi';
 import type { Category } from '../api/categoryApi';
 import type { ProviderProfile } from '../api/userApi';
+import { FiUpload, FiX, FiClock, FiEye, FiChevronDown, FiPlus } from 'react-icons/fi';
 
 interface FormData {
   categoryId: string;
+  subcategoryId: string;
   title: string;
   description: string;
   price: string;
   currency: string;
   tags: string[];
-  images: string[];
-  workingTime: string[];
+  images: File[];
+  uploadedImageUrls: string[];
+  workingTime: WorkingHours;
   isActive: boolean;
 }
 
-const workingTimeSlots = [
-  'Monday: 9:00 AM - 5:00 PM',
-  'Tuesday: 9:00 AM - 5:00 PM',
-  'Wednesday: 9:00 AM - 5:00 PM',
-  'Thursday: 9:00 AM - 5:00 PM',
-  'Friday: 9:00 AM - 5:00 PM',
-  'Saturday: 10:00 AM - 4:00 PM',
-  'Sunday: 10:00 AM - 4:00 PM',
+interface FormErrors {
+  categoryId?: string;
+  title?: string;
+  description?: string;
+  price?: string;
+  images?: string;
+}
+
+interface WorkingHours {
+  monday: { enabled: boolean; startTime: string; endTime: string };
+  tuesday: { enabled: boolean; startTime: string; endTime: string };
+  wednesday: { enabled: boolean; startTime: string; endTime: string };
+  thursday: { enabled: boolean; startTime: string; endTime: string };
+  friday: { enabled: boolean; startTime: string; endTime: string };
+  saturday: { enabled: boolean; startTime: string; endTime: string };
+  sunday: { enabled: boolean; startTime: string; endTime: string };
+}
+
+const defaultWorkingHours: WorkingHours = {
+  monday: { enabled: false, startTime: '09:00', endTime: '17:00' },
+  tuesday: { enabled: false, startTime: '09:00', endTime: '17:00' },
+  wednesday: { enabled: false, startTime: '09:00', endTime: '17:00' },
+  thursday: { enabled: false, startTime: '09:00', endTime: '17:00' },
+  friday: { enabled: false, startTime: '09:00', endTime: '17:00' },
+  saturday: { enabled: false, startTime: '10:00', endTime: '16:00' },
+  sunday: { enabled: false, startTime: '10:00', endTime: '16:00' },
+};
+
+const daysOfWeek = [
+  { key: 'monday', label: 'Monday' },
+  { key: 'tuesday', label: 'Tuesday' },
+  { key: 'wednesday', label: 'Wednesday' },
+  { key: 'thursday', label: 'Thursday' },
+  { key: 'friday', label: 'Friday' },
+  { key: 'saturday', label: 'Saturday' },
+  { key: 'sunday', label: 'Sunday' },
 ];
 
 export default function CreateService() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Category[]>([]);
   const [currentTag, setCurrentTag] = useState('');
-  const [currentImage, setCurrentImage] = useState('');
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<FormData>({
     categoryId: '',
+    subcategoryId: '',
     title: '',
     description: '',
     price: '',
     currency: 'USD',
     tags: [],
     images: [],
-    workingTime: [],
+    uploadedImageUrls: [],
+    workingTime: defaultWorkingHours,
     isActive: true,
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<Partial<FormErrors>>({});
 
   // Fetch categories and provider profile on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch categories
-        const categoriesResponse = await categoryApi.getCategories();
+        const categoriesResponse = await categoryApi.getRootCategories({ includeChildren: true });
         if (categoriesResponse.success) {
-          // Filter to show only main categories (no parent)
-          const mainCategories = categoriesResponse.data.filter(category => !category.parentId);
-          setCategories(mainCategories);
+          setCategories(categoriesResponse.data);
         }
 
         // Fetch provider profile
@@ -79,8 +114,33 @@ export default function CreateService() {
     fetchData();
   }, [navigate]);
 
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (formData.categoryId) {
+        try {
+          const categoryResponse = await categoryApi.getCategoryById(formData.categoryId, { includeChildren: true });
+          if (categoryResponse.success && categoryResponse.data.children) {
+            setSubcategories(categoryResponse.data.children);
+          } else {
+            setSubcategories([]);
+          }
+        } catch (error) {
+          console.error('Failed to fetch subcategories:', error);
+          setSubcategories([]);
+        }
+      } else {
+        setSubcategories([]);
+      }
+      // Reset subcategory when category changes
+      setFormData(prev => ({ ...prev, subcategoryId: '' }));
+    };
+
+    fetchSubcategories();
+  }, [formData.categoryId]);
+
   const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const newErrors: Partial<FormErrors> = {};
 
     if (!formData.categoryId) newErrors.categoryId = 'Category is required';
     if (!formData.title) newErrors.title = 'Title is required';
@@ -88,9 +148,54 @@ export default function CreateService() {
     if (!formData.price || parseFloat(formData.price) <= 0) {
       newErrors.price = 'Valid price is required';
     }
+    if (formData.images.length === 0 && formData.uploadedImageUrls.length === 0) {
+      newErrors.images = 'At least one image is required';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Upload image to S3 using backend endpoint
+  const uploadImageToS3 = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      // Use axios with authentication (handled by interceptor)
+      const response = await apiClient.post('/users/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      if (response.data && response.data.imageUrl) {
+        console.log(`Successfully uploaded ${file.name} to S3:`, response.data.imageUrl);
+        return response.data.imageUrl;
+      } else {
+        throw new Error('No image URL returned from server');
+      }
+    } catch (error: any) {
+      console.error('Error uploading image to S3:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        if (error.response.status === 401) {
+          throw new Error(`Authentication required. Please log in again.`);
+        } else if (error.response.status === 413) {
+          throw new Error(`File ${file.name} is too large. Please select a smaller image.`);
+        } else {
+          const errorMessage = error.response.data?.message || error.response.data?.error || 'Upload failed';
+          throw new Error(`Failed to upload ${file.name}: ${errorMessage}`);
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        throw new Error(`Failed to upload ${file.name}: Network error`);
+      } else {
+        // Something else happened
+        throw new Error(`Failed to upload ${file.name}: ${error.message || 'Unknown error'}`);
+      }
+    }
   };
 
   const handleInputChange = (
@@ -103,12 +208,66 @@ export default function CreateService() {
     }));
     
     // Clear error when user starts typing
-    if (errors[name as keyof FormData]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
         [name]: undefined
       }));
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Check total images limit (5)
+    const totalImages = formData.images.length + formData.uploadedImageUrls.length + files.length;
+    if (totalImages > 5) {
+      showErrorToast('You can upload maximum 5 images');
+      return;
+    }
+
+    // Validate file types and sizes
+    const validFiles = files.filter(file => {
+      if (!file.type.startsWith('image/')) {
+        showErrorToast(`${file.name} is not a valid image file`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showErrorToast(`${file.name} is too large. Maximum size is 5MB`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...validFiles]
+      }));
+
+      // Create preview URLs
+      const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+      setPreviewImages(prev => [...prev, ...newPreviews]);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+    
+    // Clean up preview URL
+    if (previewImages[index]) {
+      URL.revokeObjectURL(previewImages[index]);
+    }
+    setPreviewImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAddTag = () => {
@@ -118,10 +277,6 @@ export default function CreateService() {
     if (!trimmedTag) return;
     if (trimmedTag.length > 30) {
       showErrorToast('Tag must not exceed 30 characters');
-      return;
-    }
-    if (trimmedTag.startsWith('data:')) {
-      showErrorToast('Invalid tag format. Please enter a text tag, not an image.');
       return;
     }
     if (formData.tags.includes(trimmedTag)) {
@@ -143,41 +298,41 @@ export default function CreateService() {
     }));
   };
 
-  const handleAddImage = () => {
-    const trimmedImage = currentImage.trim();
-    
-    // Validation checks
-    if (!trimmedImage) return;
-    if (!trimmedImage.startsWith('http://') && !trimmedImage.startsWith('https://') && !trimmedImage.startsWith('data:')) {
-      showErrorToast('Please enter a valid image URL (starting with http://, https://, or data:)');
-      return;
-    }
-    if (formData.images.includes(trimmedImage)) {
-      showErrorToast('Image URL already exists');
-      return;
-    }
-    
+  const handleWorkingHoursChange = (day: keyof WorkingHours, field: 'enabled' | 'startTime' | 'endTime', value: boolean | string) => {
     setFormData(prev => ({
       ...prev,
-      images: [...prev.images, trimmedImage]
-    }));
-    setCurrentImage('');
-  };
-
-  const handleRemoveImage = (imageToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter(image => image !== imageToRemove)
+      workingTime: {
+        ...prev.workingTime,
+        [day]: {
+          ...prev.workingTime[day],
+          [field]: value
+        }
+      }
     }));
   };
 
-  const handleWorkingTimeChange = (time: string) => {
-    setFormData(prev => ({
-      ...prev,
-      workingTime: prev.workingTime.includes(time)
-        ? prev.workingTime.filter(t => t !== time)
-        : [...prev.workingTime, time]
-    }));
+  const formatWorkingHoursForAPI = (workingHours: WorkingHours): string[] => {
+    const result: string[] = [];
+    
+    // Helper function to convert 24-hour time to 12-hour format with AM/PM
+    const convertTo12Hour = (time24: string): string => {
+      const [hours, minutes] = time24.split(':');
+      const hour24 = parseInt(hours, 10);
+      const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+      const ampm = hour24 >= 12 ? 'PM' : 'AM';
+      return `${hour12}:${minutes} ${ampm}`;
+    };
+
+    Object.entries(workingHours).forEach(([day, hours]) => {
+      if (hours.enabled) {
+        const formattedDay = day.charAt(0).toUpperCase() + day.slice(1);
+        const startTime12 = convertTo12Hour(hours.startTime);
+        const endTime12 = convertTo12Hour(hours.endTime);
+        result.push(`${formattedDay}: ${startTime12} - ${endTime12}`);
+      }
+    });
+    
+    return result;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -196,33 +351,64 @@ export default function CreateService() {
     setLoading(true);
     
     try {
+      // Upload images to S3 first
+      setUploading(true);
+      const uploadedUrls: string[] = [...formData.uploadedImageUrls];
+      
+      if (formData.images.length > 0) {
+        showSuccessToast(`Uploading ${formData.images.length} image(s) to S3...`);
+        
+        for (let i = 0; i < formData.images.length; i++) {
+          const file = formData.images[i];
+          try {
+            console.log(`Uploading image ${i + 1}/${formData.images.length}: ${file.name}`);
+            const url = await uploadImageToS3(file);
+            uploadedUrls.push(url);
+            console.log(`Successfully uploaded ${file.name} to:`, url);
+          } catch (error) {
+            console.error('Failed to upload image:', file.name, error);
+            showErrorToast(`Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            // Continue with other uploads
+          }
+        }
+      }
+      
+      setUploading(false);
+
+      if (uploadedUrls.length === 0) {
+        showErrorToast('At least one image must be uploaded successfully');
+        return;
+      }
+
+      showSuccessToast(`Successfully uploaded ${uploadedUrls.length} image(s). Creating service...`);
+
       const serviceData: CreateServiceRequest = {
-        providerId: providerProfile.id, // Use real provider ID
-        categoryId: formData.categoryId,
+        providerId: providerProfile.id,
+        categoryId: formData.subcategoryId || formData.categoryId, // Use subcategory if selected, otherwise main category
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
         currency: formData.currency,
         tags: formData.tags,
-        images: formData.images,
-        workingTime: formData.workingTime,
+        images: uploadedUrls,
+        workingTime: formatWorkingHoursForAPI(formData.workingTime),
         isActive: formData.isActive,
       };
 
-      console.log('Sending service data:', serviceData); // Debug log
+      console.log('Formatted working time:', formatWorkingHoursForAPI(formData.workingTime));
+      console.log('Sending service data:', serviceData);
 
       const response = await serviceApi.createService(serviceData);
       
       if (response.success) {
         showSuccessToast('Service created successfully!');
-        navigate('/profile'); // Navigate back to profile page
+        navigate('/profile');
       } else {
         showErrorToast(response.message || 'Failed to create service');
       }
     } catch (error: unknown) {
       console.error('Error creating service:', error);
       
-      // More detailed error handling
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response?: { data?: { message?: string; error?: string; details?: unknown } } };
         console.log('Full error response:', axiosError.response?.data);
@@ -232,7 +418,6 @@ export default function CreateService() {
         } else if (axiosError.response?.data?.error) {
           showErrorToast(axiosError.response.data.error);
         } else if (axiosError.response?.data?.details) {
-          // Handle validation errors
           const details = axiosError.response.data.details;
           if (Array.isArray(details) && details.length > 0) {
             const firstError = details[0] as { message?: string };
@@ -248,223 +433,453 @@ export default function CreateService() {
       }
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-gray-600 to-black px-6 py-4">
-            <h1 className="text-2xl font-bold text-white">Create New Service</h1>
-            <p className="text-gray-200 mt-1">Fill in the details to create your service listing</p>
+    <div className="min-h-screen bg-white py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-black">
+          {/* Enhanced Header */}
+          <div className="bg-black px-8 py-8">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white rounded-xl">
+                <FiPlus className="h-8 w-8 text-black" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Create New Service</h1>
+                <p className="text-gray-300 mt-2">Showcase your expertise and reach new customers</p>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Category Selection */}
-            <div>
-              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                id="categoryId"
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
-                  errors.categoryId ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name || category.slug}
-                  </option>
-                ))}
-              </select>
-              {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>}
-            </div>
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+            {/* Category Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+                Category Selection
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Main Category */}
+                <div>
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-2">
+                    Category *
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="categoryId"
+                      name="categoryId"
+                      value={formData.categoryId}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white transition-all duration-200 appearance-none ${
+                        errors.categoryId ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
+                      }`}
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name || category.slug}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none flex space-x-1">
+                      <FiChevronDown className="text-black" />
+                      <FiChevronDown className="text-black" />
+                    </div>
+                  </div>
+                  {errors.categoryId && <p className="mt-2 text-sm text-red-600 flex items-center">
+                    <FiX className="w-4 h-4 mr-1" />
+                    {errors.categoryId}
+                  </p>}
+                </div>
 
-            {/* Title */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Service Title *
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="Enter service title"
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
-                  errors.title ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-                placeholder="Describe your service in detail"
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
-            </div>
-
-            {/* Price and Currency */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                  Price *
-                </label>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 ${
-                    errors.price ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
-                  Currency
-                </label>
-                <select
-                  id="currency"
-                  name="currency"
-                  value={formData.currency}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="LKR">LKR</option>
-                </select>
+                {/* Subcategory */}
+                <div>
+                  <label htmlFor="subcategoryId" className="block text-sm font-medium text-black mb-2">
+                    Subcategory
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="subcategoryId"
+                      name="subcategoryId"
+                      value={formData.subcategoryId}
+                      onChange={handleInputChange}
+                      disabled={!formData.categoryId || subcategories.length === 0}
+                      className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white transition-all duration-200 appearance-none ${
+                        !formData.categoryId || subcategories.length === 0 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300' 
+                          : 'border-black hover:border-gray-700'
+                      }`}
+                    >
+                      <option value="">
+                        {!formData.categoryId 
+                          ? 'Select a category first' 
+                          : subcategories.length === 0 
+                            ? 'No subcategories available' 
+                            : 'Select a subcategory (optional)'
+                        }
+                      </option>
+                      {subcategories.map((subcategory) => (
+                        <option key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name || subcategory.slug}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none flex space-x-1">
+                      <FiChevronDown className={!formData.categoryId || subcategories.length === 0 ? 'text-gray-400' : 'text-black'} />
+                      <FiChevronDown className={!formData.categoryId || subcategories.length === 0 ? 'text-gray-400' : 'text-black'} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Tags */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags
-              </label>
-              <p className="text-xs text-gray-500 mb-2">Add short keywords (max 30 characters each) to help users find your service</p>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={currentTag}
-                  onChange={(e) => setCurrentTag(e.target.value)}
-                  placeholder="e.g., photography, wedding, portrait"
-                  maxLength={30}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                />
-                <Button type="button" onClick={handleAddTag} size="sm">
-                  Add Tag
-                </Button>
+            {/* Service Details Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+                Service Details
+              </h2>
+              <div className="space-y-6">
+                {/* Title */}
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-black mb-2">
+                    Service Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Enter a descriptive title for your service"
+                    className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
+                      errors.title ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
+                    }`}
+                  />
+                  {errors.title && <p className="mt-2 text-sm text-red-600 flex items-center">
+                    <FiX className="w-4 h-4 mr-1" />
+                    {errors.title}
+                  </p>}
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-black mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={5}
+                    placeholder="Describe your service in detail. Include what's included, your experience, and what makes your service unique."
+                    className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 resize-none ${
+                      errors.description ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
+                    }`}
+                  />
+                  {errors.description && <p className="mt-2 text-sm text-red-600 flex items-center">
+                    <FiX className="w-4 h-4 mr-1" />
+                    {errors.description}
+                  </p>}
+                </div>
+
+                {/* Price and Currency */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="price" className="block text-sm font-medium text-black mb-2">
+                      Price *
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
+                        errors.price ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
+                      }`}
+                    />
+                    {errors.price && <p className="mt-2 text-sm text-red-600 flex items-center">
+                      <FiX className="w-4 h-4 mr-1" />
+                      {errors.price}
+                    </p>}
+                  </div>
+
+                  <div>
+                    <label htmlFor="currency" className="block text-sm font-medium text-black mb-2">
+                      Currency
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="currency"
+                        name="currency"
+                        value={formData.currency}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border-2 border-black rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white transition-all duration-200 hover:border-gray-700 appearance-none"
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="LKR">LKR (₨)</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none flex space-x-1">
+                        <FiChevronDown className="text-black" />
+                        <FiChevronDown className="text-black" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800"
+            </div>
+
+            {/* Images Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+                Service Images *
+                <span className="ml-2 text-sm font-normal text-gray-500">(Max 5 images, 5MB each)</span>
+              </h2>
+              
+              {/* Upload Area */}
+              <div className="mb-6">
+                {uploading ? (
+                  <div className="border-2 border-dashed border-blue-300 rounded-xl p-8 text-center bg-blue-50">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-lg font-medium text-blue-600">
+                      Uploading images to Amazon S3...
+                    </p>
+                    <p className="mt-2 text-sm text-blue-500">
+                      {formData.images.length > 0 ? `Processing ${formData.images.length} image(s)` : 'Please wait...'}
+                    </p>
+                  </div>
+                ) : (
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-black rounded-xl p-8 text-center hover:border-gray-700 hover:bg-gray-50 transition-all duration-200 cursor-pointer group"
                   >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-gray-500 hover:text-gray-700"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
+                    <FiUpload className="mx-auto h-12 w-12 text-black group-hover:text-gray-700 transition-colors duration-200" />
+                    <p className="mt-4 text-lg font-medium text-black group-hover:text-gray-700">
+                      Click to upload images
+                    </p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      PNG, JPG, WEBP up to 5MB each
+                    </p>
+                    {formData.images.length + formData.uploadedImageUrls.length > 0 && (
+                      <p className="mt-2 text-sm text-black font-medium">
+                        {formData.images.length + formData.uploadedImageUrls.length}/5 images selected
+                      </p>
+                    )}
+                  </div>
+                )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    aria-label="Upload service images"
+                  />
+                {errors.images && <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <FiX className="w-4 h-4 mr-1" />
+                  At least one image is required
+                </p>}
+              </div>
+
+              {/* Image Previews */}
+              {(formData.images.length > 0 || previewImages.length > 0) && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {formData.images.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-black hover:border-gray-700 transition-all duration-200">
+                        <img
+                          src={previewImages[index] || URL.createObjectURL(file)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-black text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-gray-700 shadow-lg"
+                        aria-label={`Remove image ${index + 1}`}
+                        title={`Remove image ${index + 1}`}
+                      >
+                        <FiX className="w-3 h-3" />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-1 text-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        {file.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Tags Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+                Tags
+              </h2>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={currentTag}
+                    onChange={(e) => setCurrentTag(e.target.value)}
+                    placeholder="e.g., photography, wedding, portrait"
+                    maxLength={30}
+                    className="flex-1 px-4 py-3 border-2 border-black rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 hover:border-gray-700"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleAddTag} 
+                    size="sm"
+                    className="px-6 whitespace-nowrap bg-black hover:bg-gray-800 text-white border-2 border-black"
+                  >
+                    <FiPlus className="w-4 h-4 mr-2" />
+                    Add Tag
+                  </Button>
+                </div>
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-gray-100 text-black border-2 border-black hover:bg-gray-200 transition-colors duration-200"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="ml-2 text-black hover:text-gray-700 hover:bg-gray-300 rounded-full p-1 transition-all duration-200"
+                          aria-label={`Remove tag ${tag}`}
+                          title={`Remove tag ${tag}`}
+                        >
+                          <FiX className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Images */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image URLs
-              </label>
-              <p className="text-xs text-gray-500 mb-2">Add image URLs to showcase your service</p>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="url"
-                  value={currentImage}
-                  onChange={(e) => setCurrentImage(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
-                />
-                <Button type="button" onClick={handleAddImage} size="sm">
-                  Add Image
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {formData.images.map((image, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="text-sm text-gray-600 truncate flex-1">{image}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(image)}
-                      className="ml-2 text-red-500 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
+            {/* Working Hours Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+                Working Hours
+              </h2>
+              <div className="space-y-4">
+                {daysOfWeek.map(({ key, label }) => (
+                  <div key={key} className="flex items-center space-x-4 p-4 bg-white rounded-lg border-2 border-black hover:border-gray-700 transition-colors duration-200">
+                    <div className="flex items-center min-w-[120px]">
+                      <input
+                        type="checkbox"
+                        id={`working-${key}`}
+                        checked={formData.workingTime[key as keyof WorkingHours].enabled}
+                        onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'enabled', e.target.checked)}
+                        className="h-4 w-4 text-black border-2 border-black rounded focus:ring-black accent-black"
+                      />
+                      <label htmlFor={`working-${key}`} className="ml-3 text-sm font-medium text-black">
+                        {label}
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 flex-1">
+                      <div className="flex items-center space-x-2">
+                        <FiClock className="w-4 h-4 text-black" />
+                        <input
+                          type="time"
+                          value={formData.workingTime[key as keyof WorkingHours].startTime}
+                          onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'startTime', e.target.value)}
+                          disabled={!formData.workingTime[key as keyof WorkingHours].enabled}
+                          className={`px-3 py-2 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
+                            formData.workingTime[key as keyof WorkingHours].enabled 
+                              ? 'border-black hover:border-gray-700' 
+                              : 'border-gray-200 bg-gray-100 text-gray-400'
+                          }`}
+                          aria-label={`Start time for ${label}`}
+                        />
+                        <span className="text-black">to</span>
+                        <input
+                          type="time"
+                          value={formData.workingTime[key as keyof WorkingHours].endTime}
+                          onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'endTime', e.target.value)}
+                          disabled={!formData.workingTime[key as keyof WorkingHours].enabled}
+                          className={`px-3 py-2 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
+                            formData.workingTime[key as keyof WorkingHours].enabled 
+                              ? 'border-black hover:border-gray-700' 
+                              : 'border-gray-200 bg-gray-100 text-gray-400'
+                          }`}
+                          aria-label={`End time for ${label}`}
+                        />
+                      </div>
+                      {formData.workingTime[key as keyof WorkingHours].enabled && (
+                        <div className="text-xs text-gray-500 ml-4">
+                          {(() => {
+                            const convertTo12Hour = (time24: string): string => {
+                              const [hours, minutes] = time24.split(':');
+                              const hour24 = parseInt(hours, 10);
+                              const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+                              const ampm = hour24 >= 12 ? 'PM' : 'AM';
+                              return `${hour12}:${minutes} ${ampm}`;
+                            };
+                            const startTime12 = convertTo12Hour(formData.workingTime[key as keyof WorkingHours].startTime);
+                            const endTime12 = convertTo12Hour(formData.workingTime[key as keyof WorkingHours].endTime);
+                            return `${startTime12} - ${endTime12}`;
+                          })()}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
+              {formatWorkingHoursForAPI(formData.workingTime).length > 0 && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Preview (as saved):</p>
+                  <div className="text-sm text-gray-600">
+                    {formatWorkingHoursForAPI(formData.workingTime).map((time, index) => (
+                      <div key={index}>{time}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Working Time */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Working Hours
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {workingTimeSlots.map((time) => (
-                  <label key={time} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.workingTime.includes(time)}
-                      onChange={() => handleWorkingTimeChange(time)}
-                      className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
-                    />
-                    <span className="text-sm text-gray-700">{time}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Service Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            {/* Service Status Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
                 Service Status
-              </label>
-              <div className="flex items-center space-x-3">
+              </h2>
+              <div className="flex items-center justify-between p-4 bg-white rounded-lg border-2 border-black">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg border-2 ${formData.isActive ? 'bg-green-100 border-green-500' : 'bg-gray-100 border-gray-300'}`}>
+                    <FiEye className={`w-5 h-5 ${formData.isActive ? 'text-green-600' : 'text-gray-400'}`} />
+                  </div>
+                  <div>
+                    <p className={`font-medium ${formData.isActive ? 'text-green-700' : 'text-gray-500'}`}>
+                      {formData.isActive ? 'Service Active' : 'Service Inactive'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {formData.isActive 
+                        ? 'Your service will be visible to customers and available for booking'
+                        : 'Your service will be hidden from customers and unavailable for booking'
+                      }
+                    </p>
+                  </div>
+                </div>
                 <label className="flex items-center cursor-pointer">
                   <div className="relative">
                     <input
@@ -472,46 +887,52 @@ export default function CreateService() {
                       checked={formData.isActive}
                       onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                       className="sr-only"
+                      aria-label="Toggle service active status"
                     />
-                    <div className={`w-10 h-6 rounded-full shadow-inner transition-colors duration-300 ${
-                      formData.isActive ? 'bg-green-500' : 'bg-gray-300'
+                    <div className={`w-12 h-6 rounded-full shadow-inner transition-colors duration-300 border-2 ${
+                      formData.isActive ? 'bg-green-500 border-green-600' : 'bg-gray-300 border-gray-400'
                     }`}>
-                      <div className={`w-4 h-4 bg-white rounded-full shadow mt-1 ml-1 transition-transform duration-300 ${
-                        formData.isActive ? 'transform translate-x-4' : ''
+                      <div className={`w-5 h-5 bg-white rounded-full shadow mt-0.5 ml-0.5 transition-transform duration-300 border ${
+                        formData.isActive ? 'transform translate-x-6 border-green-300' : 'border-gray-300'
                       }`}></div>
                     </div>
                   </div>
-                  <span className={`ml-3 text-sm font-medium ${
-                    formData.isActive ? 'text-green-700' : 'text-gray-500'
-                  }`}>
-                    {formData.isActive ? 'Active' : 'Inactive'}
-                  </span>
                 </label>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {formData.isActive 
-                  ? 'Your service will be visible to customers and available for booking'
-                  : 'Your service will be hidden from customers and unavailable for booking'
-                }
-              </p>
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div className="flex justify-end space-x-4 pt-8 border-t-2 border-black">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => navigate('/profile')}
-                disabled={loading}
+                disabled={loading || uploading}
+                className="px-8 py-3 border-2 border-black hover:border-gray-700 text-black hover:text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={loading}
-                className="min-w-[120px]"
+                disabled={loading || uploading}
+                className="px-8 py-3 min-w-[160px] bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl border-2 border-black"
               >
-                {loading ? 'Creating...' : 'Create Service'}
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploading...
+                  </>
+                ) : loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <FiPlus className="w-4 h-4 mr-2" />
+                    Create Service
+                  </>
+                )}
               </Button>
             </div>
           </form>
