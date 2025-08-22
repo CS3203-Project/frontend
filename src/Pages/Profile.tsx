@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -22,8 +22,6 @@ import {
   Save,
   Upload
 } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
@@ -34,6 +32,7 @@ import CompanyModal from '../components/Profile/CompanyModal';
 import { uploadMultipleImages } from '../utils/imageUpload';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const socialMediaLinks = [
   { platform: 'Twitter', username: '@user123', url: 'https://twitter.com/user123', icon: '🐦' },
@@ -43,8 +42,8 @@ const socialMediaLinks = [
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user: authUser, isLoading: authLoading, updateUser } = useAuth();
+  const [localUser, setLocalUser] = useState<UserProfile | null>(null);
   const [showEditProviderModal, setShowEditProviderModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -54,6 +53,13 @@ export default function Profile() {
   const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
   const [services, setServices] = useState<ServiceResponse[]>([]);
+  
+  // Use AuthContext user data and sync with local state for provider-specific data
+  const user = authUser || localUser;
+  const loading = authLoading;
+
+  // Use useMemo to prevent unnecessary re-computations
+  const isProvider = useMemo(() => user?.role === 'PROVIDER', [user?.role]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [showUpdateServiceModal, setShowUpdateServiceModal] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -100,40 +106,33 @@ export default function Profile() {
     }
   }, []);
 
-  const fetchProfile = useCallback(async () => {
+  // Optimized fetch provider data (only when user changes and is a provider)
+  const fetchProviderData = useCallback(async () => {
+    if (!user || user.role !== 'PROVIDER') return;
+    
     try {
-      setLoading(true);
-      const userData = await userApi.getProfile();
-      setUser(userData);
-
-      // If user is a provider, fetch provider profile
-      if (userData.role === 'PROVIDER') {
-        try {
-          const providerData = await userApi.getProviderProfile();
-          console.log('Provider profile data:', providerData);
-          setProviderProfile(providerData);
-          
-          // Fetch services for this provider
-          if (providerData.id) {
-            console.log('Fetching services for provider ID:', providerData.id);
-            await fetchProviderServices(providerData.id);
-          } else {
-            console.log('Provider data does not have an ID:', providerData);
-          }
-        } catch (error) {
-          console.error('Failed to fetch provider profile:', error);
-        }
+      const providerData = await userApi.getProviderProfile();
+      console.log('Provider profile data:', providerData);
+      setProviderProfile(providerData);
+      
+      // Fetch services for this provider
+      if (providerData.id) {
+        console.log('Fetching services for provider ID:', providerData.id);
+        await fetchProviderServices(providerData.id);
+      } else {
+        console.log('Provider data does not have an ID:', providerData);
       }
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to load profile');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch provider profile:', error);
     }
-  }, [fetchProviderServices]);
+  }, [user, fetchProviderServices]);
 
+  // Replace the old fetchProfile useEffect with optimized version
   useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+    if (!authLoading && user) {
+      fetchProviderData();
+    }
+  }, [authLoading, user, fetchProviderData]);
 
   const refreshServices = useCallback(() => {
     if (providerProfile?.id) {
@@ -156,7 +155,10 @@ export default function Profile() {
   }, [providerProfile?.id, refreshServices]);
 
   const handleUpdateProfile = (updatedUser: Partial<UserProfile>) => {
-    setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+    if (user) {
+      const newUser = { ...user, ...updatedUser };
+      updateUser(newUser);
+    }
   };
 
   const handleBecomeProvider = () => {
@@ -167,7 +169,8 @@ export default function Profile() {
     setProviderProfile(updatedProvider);
     // Also update user data if needed
     if (user && updatedProvider.user) {
-      setUser(prev => prev ? { ...prev, role: updatedProvider.user.role } : null);
+      const newUser = { ...user, role: updatedProvider.user.role };
+      updateUser(newUser);
     }
     // Refresh services after provider update
     if (updatedProvider.id) {
@@ -180,7 +183,10 @@ export default function Profile() {
       await userApi.deleteProvider();
       toast.success('Provider profile deleted successfully!');
       setShowDeleteConfirmation(false);
-      fetchProfile(); // Refresh profile to show USER role
+      // Update auth context user data
+      const updatedUser = await userApi.getProfile();
+      updateUser(updatedUser);
+      setProviderProfile(null);
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Failed to delete provider profile');
     }
@@ -277,8 +283,10 @@ export default function Profile() {
       await serviceApi.updateService(selectedService.id, serviceFormData);
       toast.success('Service updated successfully!');
       
-      // Refetch the profile data to get the updated values
-      await fetchProfile();
+      // Refetch services directly instead of full profile
+      if (providerProfile?.id) {
+        await fetchProviderServices(providerProfile.id);
+      }
       
       // Also refetch services if we have a provider profile
       if (providerProfile?.id) {
@@ -329,7 +337,6 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center mt-16">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -343,7 +350,6 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center mt-16">
           <div className="text-center">
             <p className="text-red-600">Failed to load profile. Please try again.</p>
@@ -354,9 +360,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-      <Navbar />
-      
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col" style={{ paddingLeft: '10px', paddingRight: '10px' }}>      
       <main className="flex-1 mx-[30px] px-4 sm:px-6 lg:px-8 mt-20 mb-8">
         {/* Profile Header */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
@@ -1553,7 +1557,6 @@ export default function Profile() {
         </div>
       )}
 
-      <Footer />
       <Toaster />
     </div>
   );
