@@ -1,23 +1,107 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3, LogOut, User } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
-import { userApi } from '../api/userApi';
-import type { UserProfile } from '../api/userApi';
 import { Link } from 'react-router-dom';
 import SpecificSearchCard from './services/SpecificSearchCard';
 import { categoriesData } from '../data/servicesData';
+import { useAuth } from '../contexts/AuthContext';
 
-const Navbar = () => {
+// Move static data outside component to prevent recreation on each render
+const services = [
+  {
+    title: "Home Services",
+    description: "Cleaning, repairs, maintenance",
+    href: "#",
+    icon: Home,
+    gradient: "from-green-400 to-blue-500"
+  },
+  {
+    title: "Professional Services",
+    description: "Tutoring, consulting, coaching",
+    href: "#",
+    icon: Briefcase,
+    gradient: "from-blue-400 to-purple-500"
+  },
+  {
+    title: "Creative Services",
+    description: "Design, photography, writing",
+    href: "#",
+    icon: Sparkles,
+    gradient: "from-purple-400 to-pink-500"
+  },
+  {
+    title: "Technical Services",
+    description: "IT support, web development",
+    href: "#",
+    icon: Globe,
+    gradient: "from-cyan-400 to-blue-500"
+  },
+  {
+    title: "Personal Care",
+    description: "Beauty, wellness, fitness",
+    href: "#",
+    icon: UserCheck,
+    gradient: "from-pink-400 to-red-500"
+  },
+  {
+    title: "Business Services",
+    description: "Accounting, marketing, legal",
+    href: "#",
+    icon: BarChart3,
+    gradient: "from-indigo-400 to-purple-500"
+  },
+];
+
+const providerFeatures = [
+  {
+    title: "Easy Setup",
+    description: "Get your service online in minutes",
+    href: "#",
+    icon: Sparkles,
+    gradient: "from-green-400 to-blue-500"
+  },
+  {
+    title: "Secure Payments",
+    description: "Get paid safely and on time",
+    href: "#",
+    icon: Shield,
+    gradient: "from-blue-400 to-indigo-500"
+  },
+  {
+    title: "Customer Management",
+    description: "Track bookings and communications",
+    href: "#",
+    icon: Users,
+    gradient: "from-purple-400 to-pink-500"
+  },
+  {
+    title: "Analytics Dashboard",
+    description: "Monitor your business performance",
+    href: "#",
+    icon: BarChart3,
+    gradient: "from-orange-400 to-red-500"
+  },
+];
+
+const navLinks = [
+  { name: "How It Works", href: "/howWorks" },
+  { name: "Pricing", href: "#" },
+  { name: "Success Stories", href: "/stories" },
+  { name: "Support", href: "/support" }
+];
+
+const Navbar = memo(() => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [forProvidersOpen, setForProvidersOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [servicesTimeout, setServicesTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  // Use AuthContext instead of local state
+  const { user, isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,34 +109,6 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Check if user is logged in on component mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      console.log('Checking auth, token:', token);
-      if (token) {
-        try {
-          console.log('Making API call to get profile...');
-          const userData = await userApi.getProfile();
-          console.log('Profile response:', userData);
-          setUser(userData);
-          setIsLoggedIn(true);
-          console.log('User logged in:', userData);
-        } catch (error) {
-          console.error('Failed to fetch user profile:', error);
-          localStorage.removeItem('token');
-          setIsLoggedIn(false);
-          setUser(null);
-        }
-      } else {
-        console.log('No token found, user not logged in');
-        setIsLoggedIn(false);
-        setUser(null);
-      }
-    };
-    checkAuth();
   }, []);
 
   // Close user menu when clicking outside
@@ -66,120 +122,35 @@ const Navbar = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [userMenuOpen]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
-      await userApi.logout();
-      setUser(null);
-      setIsLoggedIn(false);
+      await logout();
       setUserMenuOpen(false);
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  };
+  }, [logout]);
 
-  const handleServicesEnter = () => {
+  const handleServicesEnter = useCallback(() => {
     if (servicesTimeout) clearTimeout(servicesTimeout);
     setServicesOpen(true);
-  };
+  }, [servicesTimeout]);
 
-  const handleServicesLeave = () => {
+  const handleServicesLeave = useCallback(() => {
     const timeout = setTimeout(() => setServicesOpen(false), 150);
     setServicesTimeout(timeout);
-  };
+  }, []);
 
-  const handleProvidersEnter = () => {
+  const handleProvidersEnter = useCallback(() => {
     if (providersTimeout) clearTimeout(providersTimeout);
     setForProvidersOpen(true);
-  };
+  }, [providersTimeout]);
 
-  const handleProvidersLeave = () => {
+  const handleProvidersLeave = useCallback(() => {
     const timeout = setTimeout(() => setForProvidersOpen(false), 150);
     setProvidersTimeout(timeout);
-  };
-
-  const services = [
-    {
-      title: "Home Services",
-      description: "Cleaning, repairs, maintenance",
-      href: "#",
-      icon: Home,
-      gradient: "from-green-400 to-blue-500"
-    },
-    {
-      title: "Professional Services",
-      description: "Tutoring, consulting, coaching",
-      href: "#",
-      icon: Briefcase,
-      gradient: "from-blue-400 to-purple-500"
-    },
-    {
-      title: "Creative Services",
-      description: "Design, photography, writing",
-      href: "#",
-      icon: Sparkles,
-      gradient: "from-purple-400 to-pink-500"
-    },
-    {
-      title: "Technical Services",
-      description: "IT support, web development",
-      href: "#",
-      icon: Globe,
-      gradient: "from-cyan-400 to-blue-500"
-    },
-    {
-      title: "Personal Care",
-      description: "Beauty, wellness, fitness",
-      href: "#",
-      icon: UserCheck,
-      gradient: "from-pink-400 to-red-500"
-    },
-    {
-      title: "Business Services",
-      description: "Accounting, marketing, legal",
-      href: "#",
-      icon: BarChart3,
-      gradient: "from-indigo-400 to-purple-500"
-    },
-  ];
-
-  const providerFeatures = [
-    {
-      title: "Easy Setup",
-      description: "Get your service online in minutes",
-      href: "#",
-      icon: Sparkles,
-      gradient: "from-green-400 to-blue-500"
-    },
-    {
-      title: "Secure Payments",
-      description: "Get paid safely and on time",
-      href: "#",
-      icon: Shield,
-      gradient: "from-blue-400 to-indigo-500"
-    },
-    {
-      title: "Customer Management",
-      description: "Track bookings and communications",
-      href: "#",
-      icon: Users,
-      gradient: "from-purple-400 to-pink-500"
-    },
-    {
-      title: "Analytics Dashboard",
-      description: "Monitor your business performance",
-      href: "#",
-      icon: BarChart3,
-      gradient: "from-orange-400 to-red-500"
-    },
-  ];
-
-  const navLinks = [
-    { name: "How It Works", href: "/howWorks" },
-    { name: "Pricing", href: "#" },
-    { name: "Success Stories", href: "/stories" },
-    { name: "Support", href: "/support" }
-  ];
+  }, []);
 
   return (
     <nav className={cn(
@@ -375,7 +346,7 @@ const Navbar = () => {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm">
-                      {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                      {(user.firstName || '').charAt(0)}{(user.lastName || '').charAt(0)}
                     </div>
                   )}
                   <span className="text-gray-700 font-medium">{user.firstName}</span>
@@ -562,7 +533,7 @@ const Navbar = () => {
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                        {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                        {(user.firstName || '').charAt(0)}{(user.lastName || '').charAt(0)}
                       </div>
                     )}
                     <div>
@@ -608,6 +579,8 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';
 
 export default Navbar;

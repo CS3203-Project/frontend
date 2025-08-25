@@ -254,8 +254,8 @@ export default function Provider() {
             user.imageUrl && user.imageUrl.trim() ? 'hidden' : 'flex'
           }`}
             >
-          {(user.firstName?.charAt(0) || 'U').toUpperCase()}
-          {(user.lastName?.charAt(0) || 'S').toUpperCase()}
+          {((user.firstName || '').charAt(0) || 'U').toUpperCase()}
+          {((user.lastName || '').charAt(0) || 'S').toUpperCase()}
             </div>
           </div>
         </div>
