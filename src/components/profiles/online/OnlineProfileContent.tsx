@@ -245,7 +245,9 @@ export default function ProfileContent({
                   className="w-full h-56 object-cover transition-transform hover:scale-105"
                 />
                 <span className="absolute top-4 left-4 px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-semibold rounded-full">
-                  {service.category}
+                  {typeof service.category === 'object' && service.category && 'name' in service.category 
+                    ? (service.category as { name: string }).name 
+                    : service.category || 'Category'}
                 </span>
               </div>
               <div className="p-6">
@@ -286,7 +288,9 @@ export default function ProfileContent({
                   className="w-full h-56 object-cover transition-transform hover:scale-105"
                 />
                 <span className="absolute top-4 left-4 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                  {item.category}
+                  {typeof item.category === 'object' && item.category && 'name' in item.category 
+                    ? (item.category as { name: string }).name 
+                    : item.category || 'Category'}
                 </span>
               </div>
               <div className="p-6">

@@ -16,30 +16,36 @@ export interface CreateServiceRequest {
 
 export interface ServiceResponse {
   id: string;
-  providerId: string;
-  categoryId: string;
+  providerId?: string;
+  categoryId?: string;
   title?: string;
   description?: string;
-  price: number;
+  price: string | number; // API returns string, but we might have number internally
   currency: string;
   tags: string[];
   images: string[];
   isActive: boolean;
-  workingTime: string[];
+  workingTime?: string[];
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   provider?: {
     id: string;
+    averageRating?: number | null;
+    totalReviews?: number | null;
     user: {
       firstName?: string;
       lastName?: string;
-      email: string;
+      email?: string;
+      imageUrl?: string | null;
     };
   };
   category?: {
     id: string;
     name?: string;
     slug: string;
+  };
+  _count?: {
+    reviews: number;
   };
 }
 

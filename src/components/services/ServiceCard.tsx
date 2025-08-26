@@ -22,7 +22,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
 
   // Check if it's a ServiceResponse (real API data) or Service (dummy data)
   const isApiService = (service: Service | ServiceResponse): service is ServiceResponse => {
-    return 'providerId' in service;
+    // API services have category as object, dummy services have category as string
+    return typeof service.category === 'object' && service.category !== null;
   };
 
   const renderDummyService = (service: Service) => (
@@ -40,7 +41,9 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         </button>
       </div>
       <div className="p-4">
-        <p className="text-sm text-gray-500">{service.category} &gt; {service.subcategory}</p>
+        <p className="text-sm text-gray-500">
+          {typeof service.category === 'string' ? service.category : 'Category'} &gt; {service.subcategory || ''}
+        </p>
         <h3 className="text-lg font-semibold text-gray-900 mt-1 truncate">{service.title}</h3>
         
         <div className="flex items-center mt-2">
