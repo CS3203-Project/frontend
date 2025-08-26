@@ -729,7 +729,9 @@ export default function Provider() {
                               className="w-full h-48 object-cover"
                             />
                             <span className="absolute top-4 left-4 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                              {item.category}
+                              {typeof item.category === 'object' && item.category && 'name' in item.category 
+                                ? (item.category as { name: string }).name 
+                                : item.category || 'Category'}
                             </span>
                           </div>
                           <div className="p-6">
