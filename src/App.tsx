@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
+import { AuthProvider } from './contexts/AuthContext';
+import Layout from './components/Layout';
 import Homepage from './Pages/Homepage.js'
 import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
@@ -19,36 +21,42 @@ import Profile from "./Pages/Profile.tsx";
 import BecomeProvider from "./Pages/BecomeProvider.tsx";
 import Provider from "./Pages/Provider.tsx";
 import CreateService from "./Pages/CreateService.tsx";
+import AdminDashboard from "./Pages/AdminDashboard.tsx";
 
 
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/articles" element={<Articles />} />
-        <Route path="/stories" element={<SucessStories />} />
-        <Route path="/howWorks" element={<HowWorks />} />
- 
-        <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
-        <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Homepage />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/articles" element={<Articles />} />
+            <Route path="/stories" element={<SucessStories />} />
+            <Route path="/howWorks" element={<HowWorks />} />
+     
+            <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
 
 
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/services" element={<BrowseServices />} />
-        <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
-        <Route path="/service/:serviceId" element={<ServiceDetailPage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/become-provider" element={<BecomeProvider />} />
-        <Route path="/provider/:id" element={<Provider />} />
-        <Route path="/create-service" element={<CreateService />} />
-        
-        {/* Add more routes as needed */}
-      </Routes>
-    </Router>
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/services" element={<BrowseServices />} />
+            <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
+            <Route path="/service/:serviceId" element={<ServiceDetailPage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/become-provider" element={<BecomeProvider />} />
+            <Route path="/provider/:id" element={<Provider />} />
+            <Route path="/create-service" element={<CreateService />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+
+            {/* Add more routes as needed */}
+          </Routes>
+        </Layout>
+      </Router>
+    </AuthProvider>
   )
 }
 

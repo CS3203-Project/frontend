@@ -16,7 +16,8 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
     bio: '',
     skills: [],
     qualifications: [],
-    logoUrl: ''
+    logoUrl: '',
+    IDCardUrl: '' // Add default value for required field
   });
   const [loading, setLoading] = useState(false);
   const [newSkill, setNewSkill] = useState('');

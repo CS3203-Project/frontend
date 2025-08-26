@@ -12,8 +12,6 @@ import {
   IdCard,
   Upload
 } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import type { CreateProviderData } from '../api/userApi';
@@ -144,9 +142,7 @@ export default function BecomeProvider() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-      <Navbar />
-      
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">      
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-8">
         {/* Header */}
         <div className="mb-8">
@@ -406,8 +402,6 @@ export default function BecomeProvider() {
           </form>
         </div>
       </main>
-
-      <Footer />
       <Toaster />
     </div>
   );

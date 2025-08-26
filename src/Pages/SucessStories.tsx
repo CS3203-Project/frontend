@@ -339,7 +339,9 @@ export default function SuccessStories() {
                       ))}
                     </div>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
-                      {story.category}
+                      {typeof story.category === 'object' && story.category && 'name' in story.category 
+                        ? (story.category as { name: string }).name 
+                        : story.category || 'Category'}
                     </span>
                   </div>
                   
