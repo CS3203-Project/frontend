@@ -101,7 +101,7 @@ const BrowseServices: React.FC = () => {
 
   if (state.loading) {
     return (
-      <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+      <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
@@ -139,7 +139,7 @@ const BrowseServices: React.FC = () => {
 
   if (state.error) {
     return (
-      <div className="bg-gradient-to-br from-red-50 via-white to-pink-50 min-h-screen">
+      <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
@@ -161,17 +161,15 @@ const BrowseServices: React.FC = () => {
         </div>
       </div>
     );
-  }
-
-  return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-gray-50 min-h-screen">
+  }  return (
+    <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="text-center mb-12 mt-20">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-6">
             <Sparkles className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
             Browse Our Services
           </h1>
           <p className="mt-3 max-w-md mx-auto text-lg text-gray-600 sm:text-xl md:mt-5 md:max-w-3xl">
@@ -342,25 +340,25 @@ const BrowseServices: React.FC = () => {
 
         {/* Stats Section */}
         {state.categories.length > 0 && (
-          <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+          <div className="mt-16 bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-4">Trusted by Thousands</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Trusted by Thousands</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="text-4xl font-bold mb-2">
+                  <div className="text-4xl font-bold mb-2 text-blue-600">
                     {state.categories.length}+
                   </div>
-                  <div className="text-blue-100">Service Categories</div>
+                  <div className="text-gray-600">Service Categories</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold mb-2">
+                  <div className="text-4xl font-bold mb-2 text-blue-600">
                     {state.categories.reduce((sum, cat) => sum + (cat._count?.services || 0), 0)}+
                   </div>
-                  <div className="text-blue-100">Active Services</div>
+                  <div className="text-gray-600">Active Services</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold mb-2">4.8</div>
-                  <div className="text-blue-100">Average Rating</div>
+                  <div className="text-4xl font-bold mb-2 text-blue-600">4.8</div>
+                  <div className="text-gray-600">Average Rating</div>
                 </div>
               </div>
             </div>
