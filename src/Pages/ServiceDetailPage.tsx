@@ -136,7 +136,7 @@ const ServiceDetailPage: React.FC = () => {
       id: apiService.id,
       title: apiService.title || 'Untitled Service',
       description: apiService.description,
-      price: apiService.price,
+      price: Number(apiService.price),
       currency: apiService.currency,
       images: apiService.images && apiService.images.length > 0 ? apiService.images : ['https://picsum.photos/seed/service/800/400'],
       category: {
@@ -148,9 +148,8 @@ const ServiceDetailPage: React.FC = () => {
       provider: {
         id: apiService.provider?.id,
         name: apiService.provider?.user ? 
-          `${apiService.provider.user.firstName || ''} ${apiService.provider.user.lastName || ''}`.trim() || 
-          apiService.provider.user.email : 
-          'Unknown Provider',
+          (`${apiService.provider.user.firstName || ''} ${apiService.provider.user.lastName || ''}`.trim() || apiService.provider.user.email || 'Unknown Provider') 
+          : 'Unknown Provider',
         email: apiService.provider?.user?.email,
         avatar: '/api/placeholder/60/60',
         rating: 4.5, // Default rating
@@ -298,14 +297,10 @@ const ServiceDetailPage: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100/30 to-blue-50/20 flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center mt-16">
-          <div className="text-center bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
             <div className="relative">
               <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-              <div className="absolute inset-0 rounded-full border-2 border-gray-200"></div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Loading service details...</h3>
-            <p className="text-gray-500">Please wait while we fetch the information</p>
-          </div>
+
         </div>
         <Footer />
       </div>
