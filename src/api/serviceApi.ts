@@ -77,8 +77,11 @@ export const serviceApi = {
     isActive?: boolean;
     skip?: number;
     take?: number;
-  }): Promise<ServiceListResponse> => {
-    const response = await apiClient.get<ServiceListResponse>('/services', { params });
+  }, abortSignal?: AbortSignal): Promise<ServiceListResponse> => {
+    const response = await apiClient.get<ServiceListResponse>('/services', { 
+      params,
+      signal: abortSignal 
+    });
     return response.data;
   },
 
