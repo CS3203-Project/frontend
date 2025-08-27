@@ -1,12 +1,18 @@
 import HeroSection from '../components/HeroSection';
 import ServicesGrid from '../components/ServicesGrid';
 import useServices from '../hooks/useServices';
+import { useEffect } from 'react';
 
 export default function Homepage() {
   const { services, loading, error, refetch } = useServices({
     isActive: true, // Only show active services
     take: 20 // Limit to 20 services for better performance
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Homepage - Services state:', { services, loading, error });
+  }, [services, loading, error]);
 
   return (
     <div>
@@ -30,15 +36,20 @@ export default function Homepage() {
             error={error} 
           />
           
-          {/* Refresh Button */}
-          {error && (
+          {/* Refresh Button - Show for both errors AND when no services found */}
+          {(error || (!loading && services.length === 0)) && (
             <div className="text-center mt-6">
               <button
                 onClick={refetch}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Try Again
+                {error ? 'Try Again' : 'Refresh Services'}
               </button>
+              {error && (
+                <p className="text-red-600 text-sm mt-2">
+                  Error: {error}
+                </p>
+              )}
             </div>
           )}
         </div>

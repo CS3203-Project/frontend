@@ -9,10 +9,13 @@ interface ServicesGridProps {
 }
 
 const ServicesGrid: React.FC<ServicesGridProps> = ({ services, loading, error }) => {
+  console.log('ServicesGrid render:', { servicesCount: services?.length, loading, error });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">Loading services...</span>
       </div>
     );
   }
@@ -28,7 +31,7 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ services, loading, error })
     );
   }
 
-  if (services.length === 0) {
+  if (!services || services.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
