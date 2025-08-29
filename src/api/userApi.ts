@@ -473,6 +473,30 @@ export const userApi = {
     }
   },
 
+  // Get user by ID
+  getUserById: async (userId: string): Promise<UserProfile> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.get(`/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to fetch user');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
   // You can add more user-related API calls here
   // updateProfile: async (userId: string, data: UpdateUserData): Promise<UserProfile> => { ... },
 };
