@@ -163,7 +163,7 @@ const Navbar = memo(() => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <div className="flex items-center space-x-3 group cursor-pointer">
+            <Link to="/" className="flex items-center space-x-3 group cursor-pointer">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
                 <img 
                   src="/logo_svg_only_dark.svg" 
@@ -187,7 +187,7 @@ const Navbar = memo(() => {
                 </h1>
                 <p className="text-xs text-gray-600 -mt-1">Service Marketplace</p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}

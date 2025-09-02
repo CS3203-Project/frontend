@@ -57,7 +57,9 @@ export const categoryApi = {
   getRootCategories: async (params?: {
     includeChildren?: boolean;
   }): Promise<ApiResponse<Category[]>> => {
-    const response = await apiClient.get<ApiResponse<Category[]>>('/categories/roots', { params });
+    const response = await apiClient.get<ApiResponse<Category[]>>('/categories/roots', { 
+      params: { ...params, includeServices: true }
+    });
     return response.data;
   },
 

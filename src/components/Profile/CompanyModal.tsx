@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { X, Building, MapPin, Phone, Globe, Image } from 'lucide-react';
+import { X, Building, MapPin, Phone, Globe, Image, Upload, Trash2 } from 'lucide-react';
 import Button from '../Button';
 import { userApi } from '../../api/userApi';
 import type { Company, CreateCompanyData, UpdateCompanyData } from '../../api/userApi';
+import { uploadImage } from '../../utils/imageUpload';
 import toast from 'react-hot-toast';
 
 interface CompanyModalProps {
@@ -23,6 +24,7 @@ export default function CompanyModal({ isOpen, onClose, onSuccess, company }: Co
   });
   const [socialMediaInput, setSocialMediaInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   if (!isOpen) return null;
 
@@ -48,6 +50,45 @@ export default function CompanyModal({ isOpen, onClose, onSuccess, company }: Co
     setFormData(prev => ({
       ...prev,
       socialmedia: prev.socialmedia.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      const imageUrl = await uploadImage(file);
+      setFormData(prev => ({
+        ...prev,
+        logo: imageUrl
+      }));
+      toast.success('Logo uploaded successfully!');
+    } catch (error) {
+      toast.error('Failed to upload logo. Please try again.');
+      console.error('Logo upload error:', error);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const removeLogo = () => {
+    setFormData(prev => ({
+      ...prev,
+      logo: ''
     }));
   };
 
@@ -148,22 +189,83 @@ export default function CompanyModal({ isOpen, onClose, onSuccess, company }: Co
             />
           </div>
 
-          {/* Logo URL */}
+          {/* Company Logo Upload */}
           <div>
-            <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-2">
-              Company Logo URL
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Company Logo
             </label>
-            <div className="relative">
-              <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="url"
-                id="logo"
-                name="logo"
-                value={formData.logo}
-                onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://example.com/logo.png"
-              />
+            <div className="space-y-4">
+              {/* Current Logo Preview */}
+              {formData.logo && (
+                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex-shrink-0">
+                    <img
+                      src={formData.logo}
+                      alt="Company logo preview"
+                      className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">Current Logo</p>
+                    <p className="text-xs text-gray-500 truncate">{formData.logo}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    className="flex-shrink-0 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Remove logo"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Upload Section */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <div className="space-y-2">
+                  <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                  <div className="text-sm text-gray-600">
+                    <label htmlFor="logo-upload" className="relative cursor-pointer font-medium text-blue-600 hover:text-blue-500">
+                      <span>Upload a logo</span>
+                      <input
+                        id="logo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        disabled={uploadingLogo}
+                        className="sr-only"
+                      />
+                    </label>
+                    <span> or drag and drop</span>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                  {uploadingLogo && (
+                    <div className="flex items-center justify-center space-x-2 text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span className="text-sm">Uploading...</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Manual URL Input */}
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-2">Or enter logo URL manually:</p>
+                <div className="relative">
+                  <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="url"
+                    name="logo"
+                    value={formData.logo}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://example.com/logo.png"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -265,16 +367,16 @@ export default function CompanyModal({ isOpen, onClose, onSuccess, company }: Co
               variant="ghost"
               onClick={onClose}
               className="flex-1"
-              disabled={loading}
+              disabled={loading || uploadingLogo}
             >
               Cancel
             </Button>
             <Button
               type="submit"
               className="flex-1"
-              disabled={loading || !formData.name.trim()}
+              disabled={loading || uploadingLogo || !formData.name.trim()}
             >
-              {loading ? 'Saving...' : company ? 'Update Company' : 'Create Company'}
+              {loading ? 'Saving...' : uploadingLogo ? 'Uploading...' : company ? 'Update Company' : 'Create Company'}
             </Button>
           </div>
         </form>

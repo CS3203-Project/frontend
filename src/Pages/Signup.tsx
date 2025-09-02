@@ -116,7 +116,9 @@ export default function SignupForm() {
       if (emailExists === true) ne.email = 'Email is already registered';
 
       if (!formData.password) ne.password = 'Password is required';
-      else if (formData.password.length < 8) ne.password = 'Password must be at least 8 characters';
+      else if (formData.password.length < 6) ne.password = '⚠️ Password must have at least 6 characters. Currently: ' + formData.password.length;
+      else if (formData.password.length === 6) ne.password = '⚠️ Password must be more than 6 characters for security';
+      else if (formData.password.length < 8) ne.password = '⚠️ Recommendation: Consider using at least 8 characters for better security';
 
       if (!formData.confirmPassword) ne.confirmPassword = 'Please confirm your password';
       else if (formData.password !== formData.confirmPassword) ne.confirmPassword = 'Passwords do not match';
@@ -232,7 +234,38 @@ export default function SignupForm() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              {/* Password feedback */}
+              {formData.password && (
+                <div className="mt-2 text-xs text-gray-500">
+                  Characters: {formData.password.length} {formData.password.length < 6 ? '(Need at least 6)' : ''}
+                </div>
+              )}
+              {errors.password && (
+                <div className={`mt-2 p-3 border-l-4 rounded-lg animate-pulse ${
+                  formData.password && formData.password.length < 6 
+                    ? 'bg-red-100 border-red-600' 
+                    : 'bg-red-50 border-red-400'
+                }`}>
+                  <p className={`text-sm font-semibold flex items-center ${
+                    formData.password && formData.password.length < 6 
+                      ? 'text-red-800' 
+                      : 'text-red-700'
+                  }`}>
+                    <span className="mr-2 text-lg">
+                      {formData.password && formData.password.length < 6 ? '🚨' : '⚠️'}
+                    </span>
+                    {errors.password}
+                  </p>
+                </div>
+              )}
+              {!errors.password && formData.password && formData.password.length > 6 && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-600 text-sm font-medium flex items-center">
+                    <span className="mr-1">✅</span>
+                    Password is strong enough
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
