@@ -12,7 +12,18 @@ const SubCategorySidebar: React.FC<{
   category: Category;
   selectedSubCategory: string | null;
   onSelectSubCategory: (categoryId: string | null) => void;
-}> = ({ category, selectedSubCategory, onSelectSubCategory }) => {
+  services: ServiceResponse[];
+}> = ({ category, selectedSubCategory, onSelectSubCategory, services }) => {
+  
+  // Calculate service counts for each subcategory
+  const getSubcategoryServiceCount = (subcategoryId: string) => {
+    return services.filter(service => service.category?.id === subcategoryId).length;
+  };
+  
+  const getAllCategoryServiceCount = () => {
+    return services.length;
+  };
+  
   return (
     <div className="w-full md:w-1/4 lg:w-1/5 p-4">
       <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Subcategories</h3>
@@ -26,23 +37,44 @@ const SubCategorySidebar: React.FC<{
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
-            All {category.name}
+            <div className="flex items-center justify-between">
+              <span>All {category.name}</span>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                selectedSubCategory === null 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
+                {getAllCategoryServiceCount()}
+              </span>
+            </div>
           </button>
         </li>
-        {category.children && category.children.map((sub) => (
-          <li key={sub.id}>
-            <button
-              onClick={() => onSelectSubCategory(sub.id)}
-              className={`w-full text-left px-3 py-2 rounded-md transition-colors duration-200 flex items-center justify-between ${
-                selectedSubCategory === sub.id
-                  ? 'bg-blue-600 text-white font-semibold shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <span>{sub.name}</span>
-            </button>
-          </li>
-        ))}
+        {category.children && category.children.map((sub) => {
+          const serviceCount = getSubcategoryServiceCount(sub.id);
+          return (
+            <li key={sub.id}>
+              <button
+                onClick={() => onSelectSubCategory(sub.id)}
+                className={`w-full text-left px-3 py-2 rounded-md transition-colors duration-200 ${
+                  selectedSubCategory === sub.id
+                    ? 'bg-blue-600 text-white font-semibold shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span>{sub.name}</span>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    selectedSubCategory === sub.id 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {serviceCount}
+                  </span>
+                </div>
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -124,20 +156,57 @@ const ServiceCategoryPage: React.FC = () => {
       
       try {
         setServicesLoading(true);
-        const params = {
-          categoryId: selectedSubCategory || category.id,
-          isActive: true,
-          take: 50 // Limit results
-        };
+        let allServices: ServiceResponse[] = [];
         
-        const response = await serviceApi.getServices(params);
-        
-        if (response.success) {
-          setServices(response.data);
+        if (selectedSubCategory) {
+          // Fetch services for the selected subcategory only
+          const params = {
+            categoryId: selectedSubCategory,
+            isActive: true,
+            take: 50
+          };
+          
+          const response = await serviceApi.getServices(params);
+          
+          if (response.success) {
+            allServices = response.data;
+          }
         } else {
-          console.error('Failed to fetch services:', response.message);
-          setServices([]);
+          // Fetch services for main category and all its subcategories
+          const categoryIdsToFetch = [category.id];
+          
+          // Add all subcategory IDs
+          if (category.children && category.children.length > 0) {
+            categoryIdsToFetch.push(...category.children.map(child => child.id));
+          }
+          
+          // Fetch services for all categories in parallel
+          const servicePromises = categoryIdsToFetch.map(categoryId =>
+            serviceApi.getServices({
+              categoryId,
+              isActive: true,
+              take: 50
+            })
+          );
+          
+          const responses = await Promise.all(servicePromises);
+          
+          // Combine all services from different categories
+          responses.forEach(response => {
+            if (response.success) {
+              allServices.push(...response.data);
+            }
+          });
+          
+          // Remove duplicates if any (shouldn't happen, but just in case)
+          const uniqueServices = allServices.filter((service, index, self) =>
+            index === self.findIndex(s => s.id === service.id)
+          );
+          allServices = uniqueServices;
         }
+        
+        setServices(allServices);
+        
       } catch (err) {
         console.error('Failed to fetch services:', err);
         setServices([]);
@@ -155,9 +224,9 @@ const ServiceCategoryPage: React.FC = () => {
     
     switch (sortBy) {
       case 'price-low':
-        return servicesCopy.sort((a, b) => a.price - b.price);
+        return servicesCopy.sort((a, b) => Number(a.price) - Number(b.price));
       case 'price-high':
-        return servicesCopy.sort((a, b) => b.price - a.price);
+        return servicesCopy.sort((a, b) => Number(b.price) - Number(a.price));
       case 'newest':
         return servicesCopy.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       case 'oldest':
@@ -263,6 +332,7 @@ const ServiceCategoryPage: React.FC = () => {
               category={category}
               selectedSubCategory={selectedSubCategory}
               onSelectSubCategory={setSelectedSubCategory}
+              services={services}
             />
           )}
 
@@ -271,12 +341,19 @@ const ServiceCategoryPage: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">
                 {currentCategoryName}
+                {!selectedSubCategory && category.children && category.children.length > 0 && (
+                  <span className="text-sm font-normal text-gray-600 ml-2">
+                    (Including all subcategories)
+                  </span>
+                )}
               </h2>
               <div className="flex items-center space-x-4">
                 {servicesLoading ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                    <span className="text-gray-600">Loading services...</span>
+                    <span className="text-gray-600">
+                      {selectedSubCategory ? 'Loading services...' : 'Loading all services...'}
+                    </span>
                   </div>
                 ) : (
                   <span className="text-gray-600">{sortedServices.length} services</span>
@@ -320,8 +397,16 @@ const ServiceCategoryPage: React.FC = () => {
               <div className="text-center py-16 bg-white rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold text-gray-700">No services found</h3>
                 <p className="text-gray-500 mt-2">
-                  There are currently no active services available in this category.
+                  {selectedSubCategory 
+                    ? `There are currently no active services available in this subcategory.`
+                    : `There are currently no active services available in "${category.name}" or its subcategories.`
+                  }
                 </p>
+                {!selectedSubCategory && category.children && category.children.length > 0 && (
+                  <p className="text-gray-400 text-sm mt-2">
+                    Try selecting a specific subcategory from the sidebar.
+                  </p>
+                )}
               </div>
             )}
           </div>

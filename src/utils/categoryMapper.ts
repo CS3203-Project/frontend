@@ -97,3 +97,16 @@ export const mapCategoriesToNavbarFormat = (categories: Category[]): NavbarCateg
     }))
   }));
 };
+
+// Export utility functions for getting category icons and gradients
+export const getCategoryIcon = (slug: string) => {
+  return categoryIconMap[slug] || Briefcase;
+};
+
+export const getCategoryGradient = (slug: string) => {
+  return categoryGradientMap[slug] || 'from-gray-400 to-gray-600';
+};
+
+export const getSubcategoryIcon = (slug: string) => {
+  return subcategoryIconMap[slug] || Briefcase;
+};
