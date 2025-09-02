@@ -225,8 +225,8 @@ const ServiceDetailPage: React.FC = () => {
   };
 
   const handleBookNow = () => {
-    // TODO: Implement booking functionality
-    toast.success('Booking functionality coming soon!');
+    // Navigate to messaging page when booking
+    navigate('/messaging');
   };
 
   const toggleWishlist = () => {
