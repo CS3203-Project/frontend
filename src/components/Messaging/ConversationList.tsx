@@ -60,11 +60,27 @@ export const ConversationList: React.FC<ConversationListProps> = ({ className = 
       // Fetch profiles in parallel
       const profilePromises = userIds.map(async (userId) => {
         try {
+          console.log('Fetching profile for user:', userId); // Debug log
           const profile = await userApi.getUserById(userId);
           return { userId, profile };
         } catch (error) {
           console.error(`Failed to fetch profile for user ${userId}:`, error);
-          return { userId, profile: null };
+          // Create a fallback profile to prevent retries
+          return { 
+            userId, 
+            profile: {
+              id: userId,
+              firstName: 'Unknown',
+              lastName: 'User',
+              email: 'unknown@example.com',
+              role: 'USER',
+              isActive: false,
+              location: '',
+              phone: '',
+              createdAt: new Date().toISOString(),
+              isEmailVerified: false
+            }
+          };
         }
       });
 
@@ -90,7 +106,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({ className = 
     };
 
     fetchUserProfiles();
-  }, [conversations, currentUserId, userProfiles, loadingProfiles]);
+  }, [conversations, currentUserId]); // Remove userProfiles and loadingProfiles to prevent infinite loop
 
   const getOtherParticipant = (conversation: ConversationWithLastMessage) => {
     return conversation.userIds.find(id => id !== currentUserId) || 'Unknown User';

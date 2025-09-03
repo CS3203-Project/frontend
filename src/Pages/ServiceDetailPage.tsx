@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import { userApi, type ProviderProfile } from '../api/userApi';
+import { messagingApi } from '../api/messagingApi';
+import { debugMessagingState } from '../utils/messagingDebug';
+import { useAuth } from '../contexts/AuthContext';
 import Breadcrumb from '../components/services/Breadcrumb';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -63,10 +66,12 @@ type TabType = 'overview' | 'reviews' | 'chat';
 const ServiceDetailPage: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
+  const { user, isLoggedIn } = useAuth();
   const [service, setService] = useState<DetailedService | null>(null);
   const [provider, setProvider] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [providerLoading, setProviderLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -224,9 +229,127 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
-  const handleBookNow = () => {
-    // TODO: Implement booking functionality
-    toast.success('Booking functionality coming soon!');
+  const handleBookNow = async () => {
+    // Check if user is logged in
+    if (!isLoggedIn || !user) {
+      toast.error('Please log in to book a service');
+      navigate('/signin');
+      return;
+    }
+
+    // Check if provider ID is available
+    if (!service?.provider?.id) {
+      toast.error('Provider information not available');
+      return;
+    }
+
+    // Debug logging
+    console.log('=== BOOK NOW DEBUG ===');
+    console.log('Current user:', user);
+    console.log('Current user ID:', user.id);
+    console.log('Service provider ID:', service.provider.id);
+    console.log('Service:', service);
+
+    // Validate user IDs
+    if (!user.id) {
+      toast.error('Invalid user session. Please log in again.');
+      return;
+    }
+
+    if (!service.provider.id) {
+      toast.error('Invalid provider information.');
+      return;
+    }
+
+    // Get the provider's user ID (not the provider ID)
+    let providerUserId: string;
+    
+    if (provider?.userId) {
+      // We have the provider details, use the userId
+      providerUserId = provider.userId;
+      console.log('Using provider user ID from provider details:', providerUserId);
+    } else {
+      // We need to fetch the provider to get the userId
+      try {
+        console.log('Fetching provider details to get user ID...');
+        const providerData = await userApi.getProviderById(service.provider.id);
+        providerUserId = providerData.userId;
+        console.log('Retrieved provider user ID:', providerUserId);
+      } catch (error) {
+        console.error('Failed to fetch provider details:', error);
+        toast.error('Unable to get provider information. Please try again.');
+        return;
+      }
+    }
+
+    try {
+      setBookingLoading(true);
+      
+      // Check if conversation already exists (use provider's user ID, not provider ID)
+      console.log('Checking for existing conversation between:', user.id, 'and', providerUserId);
+      const existingConversation = await messagingApi.findConversationByParticipants(
+        user.id, 
+        providerUserId
+      );
+
+      if (existingConversation) {
+        console.log('Found existing conversation:', existingConversation);
+        toast.success('Opening existing conversation...');
+        navigate(`/messaging?conversation=${existingConversation.id}`);
+        return;
+      }
+      
+      // Create conversation between user and provider's user ID
+      const conversationData = {
+        userIds: [user.id, providerUserId],
+        title: service.title
+      };
+
+      console.log('Creating conversation with data:', conversationData);
+
+      const conversation = await messagingApi.createConversation(conversationData);
+      
+      console.log('Conversation created:', conversation);
+      
+      // Send initial message (use provider's user ID, not provider ID)
+      const initialMessage = `Hi! I'm interested in your service: ${service.title}`;
+      console.log('Sending initial message...');
+      
+      await messagingApi.sendMessage({
+        content: initialMessage,
+        fromId: user.id,
+        toId: providerUserId,
+        conversationId: conversation.id
+      });
+
+      console.log('Initial message sent successfully');
+      
+      toast.success('Conversation started! Redirecting to messages...');
+      
+      // Navigate to the specific conversation
+      navigate(`/messaging?conversation=${conversation.id}`);
+      
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      
+      // More specific error handling
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes('User not found')) {
+        console.log('=== USER NOT FOUND ERROR ===');
+        console.log('This suggests the user IDs are not valid in the backend database');
+        console.log('User ID:', user.id);
+        console.log('Provider User ID:', providerUserId);
+        debugMessagingState();
+        toast.error('User validation failed. Please try logging out and back in.');
+      } else if (errorMessage.includes('conversation')) {
+        toast.error('Failed to create conversation. Please try again.');
+      } else {
+        toast.error('Failed to start conversation. Please try again.');
+      }
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const toggleWishlist = () => {
@@ -940,9 +1063,17 @@ const ServiceDetailPage: React.FC = () => {
                 <div className="space-y-3">
                   <button
                     onClick={handleBookNow}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600"
+                    disabled={bookingLoading}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    Book Now
+                    {bookingLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Creating conversation...
+                      </div>
+                    ) : (
+                      'Book Now'
+                    )}
                   </button>
                   
                   <button

@@ -54,35 +54,33 @@ export interface SearchUser {
 export const messagingApi = {
   // Conversation endpoints
   async createConversation(data: CreateConversationDto): Promise<ConversationResponse> {
-    try {
-      console.log('Creating conversation with data:', data);
-      const response = await fetch(`${BASE_URL}/conversations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to create conversation: ${response.status} ${errorText}`);
-      }
-      
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-      
-      if (!responseText) {
-        throw new Error('Empty response from server');
-      }
-      
-      return JSON.parse(responseText);
-    } catch (error) {
-      console.error('Error in createConversation:', error);
-      throw error;
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    
+    console.log('Creating conversation with token:', token ? 'Token present' : 'No token');
+    console.log('Request data:', data);
+    
+    const response = await fetch(`${BASE_URL}/conversations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('API Error:', errorData);
+      throw new Error(errorData.message || `HTTP ${response.status}: Failed to create conversation`);
     }
+    
+    const result = await response.json();
+    console.log('Conversation created successfully:', result);
+    return result;
   },
 
   async getConversations(userId: string, page = 1, limit = 10): Promise<PaginatedResponse<ConversationResponse>> {
@@ -150,13 +148,32 @@ export const messagingApi = {
 
   // Message endpoints
   async sendMessage(data: CreateMessageDto): Promise<MessageResponse> {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    
+    console.log('Sending message with token:', token ? 'Token present' : 'No token');
+    console.log('Message data:', data);
+    
     const response = await fetch(`${BASE_URL}/messages`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Failed to send message');
-    return response.json();
+    
+    console.log('Message response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Message API Error:', errorData);
+      throw new Error(errorData.message || `HTTP ${response.status}: Failed to send message`);
+    }
+    
+    const result = await response.json();
+    console.log('Message sent successfully:', result);
+    return result;
   },
 
   async getMessages(conversationId: string, page = 1, limit = 20): Promise<PaginatedResponse<MessageResponse>> {
