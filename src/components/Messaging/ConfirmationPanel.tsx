@@ -15,6 +15,8 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
   const [saving, setSaving] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [serviceFeeInput, setServiceFeeInput] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isCustomer = currentUserRole === 'USER';
   const isProvider = currentUserRole === 'PROVIDER';
 
@@ -23,13 +25,54 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
     (async () => {
       try {
         const rec = await confirmationApi.ensure(conversationId);
-        if (mounted) setRecord(rec);
+        if (mounted) {
+          setRecord(rec);
+          setServiceFeeInput(rec.serviceFee?.toString() || '');
+        }
       } catch (e) {
         console.error('Failed to load confirmation record', e);
       }
     })();
-    return () => { mounted = false; };
+    return () => { 
+      mounted = false;
+    };
   }, [conversationId]);
+
+  // Function to save service fee (called on Enter or blur)
+  const saveServiceFee = async () => {
+    if (!record || !isProvider) return;
+    
+    setSaving(true);
+    setHasUnsavedChanges(false);
+    
+    try {
+      const patch: Partial<ConversationConfirmation> = {};
+      
+      if (serviceFeeInput === '') {
+        patch.serviceFee = null;
+      } else {
+        const numValue = parseFloat(serviceFeeInput);
+        if (!isNaN(numValue) && numValue >= 0) {
+          patch.serviceFee = numValue;
+        } else {
+          // Invalid input, revert to current value
+          setServiceFeeInput(record.serviceFee?.toString() || '');
+          setSaving(false);
+          return;
+        }
+      }
+      
+      const updated = await confirmationApi.upsert(conversationId, patch);
+      setRecord(updated);
+      setServiceFeeInput(updated.serviceFee?.toString() || '');
+    } catch (e) {
+      console.error('Failed to update service fee', e);
+      // Revert to previous value on error
+      setServiceFeeInput(record.serviceFee?.toString() || '');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const update = async (patch: Partial<ConversationConfirmation>) => {
     if (!record) return;
@@ -206,7 +249,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
                 )}
               </div>
               <div className="flex space-x-2">
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <input
                     type="number"
                     placeholder="0.00"
@@ -214,15 +257,54 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
                     step="0.01"
                     className={`w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       !isProvider ? 'bg-gray-100 cursor-not-allowed' : ''
-                    }`}
-                    value={record.serviceFee || ''}
+                    } ${hasUnsavedChanges ? 'border-yellow-400 bg-yellow-50' : ''}`}
+                    value={serviceFeeInput}
                     disabled={!isProvider || saving}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
-                      update({ serviceFee: value });
+                      const inputValue = e.target.value;
+                      setServiceFeeInput(inputValue);
+                      setHasUnsavedChanges(inputValue !== (record?.serviceFee?.toString() || ''));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveServiceFee();
+                      }
+                    }}
+                    onBlur={() => {
+                      if (hasUnsavedChanges) {
+                        saveServiceFee();
+                      }
                     }}
                   />
+                  {hasUnsavedChanges && !saving && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <div className="flex items-center space-x-1 text-xs text-yellow-600">
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                        <span>Press Enter</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
+                {hasUnsavedChanges && isProvider && (
+                  <button
+                    onClick={saveServiceFee}
+                    disabled={saving}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all duration-200"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4" />
+                        <span>Save</span>
+                      </>
+                    )}
+                  </button>
+                )}
                 <select
                   className={`border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     !isProvider ? 'bg-gray-100 cursor-not-allowed' : ''
@@ -238,6 +320,11 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
                   <option value="INR">INR</option>
                 </select>
               </div>
+              {isProvider && (
+                <div className="mt-2 text-xs text-gray-500">
+                  💡 Tip: Press <kbd className="px-1 py-0.5 bg-gray-100 border rounded">Enter</kbd> or click outside to save your changes
+                </div>
+              )}
               {isProvider && !hasServiceFee && (
                 <p className="text-xs text-orange-600 mt-2 flex items-center space-x-1">
                   <AlertCircle className="h-3 w-3" />
