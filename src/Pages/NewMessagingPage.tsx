@@ -5,6 +5,7 @@ import { userApi } from '../api/userApi';
 import type { UserProfile } from '../api/userApi';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ConfirmationPanel from '../components/Messaging/ConfirmationPanel';
 
 const MessagingContent: React.FC<{ currentUser: UserProfile }> = ({ currentUser }) => {
   const [searchParams] = useSearchParams();
@@ -19,12 +20,12 @@ const MessagingContent: React.FC<{ currentUser: UserProfile }> = ({ currentUser 
 
   return (
     <MessagingProvider userId={currentUser.id}>
-      <MessagingContentInner conversationId={conversationId} />
+      <MessagingContentInner conversationId={conversationId} currentUserRole={currentUser.role as any} />
     </MessagingProvider>
   );
 };
 
-const MessagingContentInner: React.FC<{ conversationId: string | null }> = ({ conversationId }) => {
+const MessagingContentInner: React.FC<{ conversationId: string | null; currentUserRole: 'USER'|'PROVIDER'|string }> = ({ conversationId, currentUserRole }) => {
   const { 
     conversations, 
     activeConversation, 
@@ -46,11 +47,7 @@ const MessagingContentInner: React.FC<{ conversationId: string | null }> = ({ co
   useEffect(() => {
     const handleAutoSelection = async () => {
       if (!conversationId) return;
-      
-      // If already selected the right conversation, don't reselect
       if (activeConversation?.id === conversationId) return;
-      
-      // If conversations are loaded and we have a conversation ID from URL
       if (conversations.length > 0) {
         const targetConversation = conversations.find((conv: any) => conv.id === conversationId);
         if (targetConversation && targetConversation.id !== activeConversation?.id) {
@@ -58,14 +55,7 @@ const MessagingContentInner: React.FC<{ conversationId: string | null }> = ({ co
           selectConversation(targetConversation);
         } else if (!targetConversation) {
           console.warn('Conversation not found in list:', conversationId);
-          // The conversation might not be in the list yet, it could be a newly created one
-          // Let's try to refresh conversations
-          console.log('Refreshing conversations to find new conversation...');
-          try {
-            await loadConversations();
-          } catch (error) {
-            console.error('Failed to refresh conversations:', error);
-          }
+          try { await loadConversations(); } catch (error) { console.error('Failed to refresh conversations:', error); }
         }
       }
     };
@@ -97,34 +87,47 @@ const MessagingContentInner: React.FC<{ conversationId: string | null }> = ({ co
             )}
           </div>
           
-          <div className="bg-white rounded-lg shadow-md overflow-hidden h-[600px] flex">
+          <div className="bg-white rounded-lg shadow-md overflow-hidden h-[700px] flex">
             {/* Conversations sidebar */}
-            <div className="w-1/3 border-r border-gray-200">
+            <div className="w-1/3 border-r border-gray-200 flex flex-col">
               <ConversationList />
             </div>
             
             {/* Message thread */}
-            <div className="flex-1">
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading messages...</p>
-                  </div>
-                </div>
-              ) : activeConversation ? (
-                <MessageThread />
-              ) : conversationId ? (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-lg">Finding your conversation...</p>
-                    <p className="text-sm text-gray-400 mt-2">Please wait while we load your conversation</p>
-                  </div>
-                </div>
-              ) : (
-                <MessageThread />
+            <div className="flex-1 flex flex-col relative overflow-hidden">
+              {activeConversation && (
+                <ConfirmationPanel
+                  conversationId={activeConversation.id}
+                  currentUserRole={currentUserRole}
+                />
               )}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {loading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading messages...</p>
+                    </div>
+                  </div>
+                ) : activeConversation ? (
+                  <MessageThread />
+                ) : conversationId ? (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                      <p className="text-lg">Finding your conversation...</p>
+                      <p className="text-sm text-gray-400 mt-2">Please wait while we load your conversation</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="text-center">
+                      <p className="text-lg">Select a conversation to start messaging</p>
+                      <p className="text-sm text-gray-400 mt-2">Choose from your conversations on the left</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import toast, { Toaster } from 'react-hot-toast';
 import { cn } from '../utils/utils';
+import { confirmationApi } from '../api/confirmationApi';
 
 interface DetailedService {
   id: string;
@@ -325,6 +326,13 @@ const ServiceDetailPage: React.FC = () => {
       console.log('Initial message sent successfully');
       
       toast.success('Conversation started! Redirecting to messages...');
+      
+      // Ensure confirmation record exists for this conversation
+      try {
+        await confirmationApi.ensure(conversation.id);
+      } catch (ensureErr) {
+        console.warn('Failed to ensure confirmation record (non-blocking):', ensureErr);
+      }
       
       // Navigate to the specific conversation
       navigate(`/messaging?conversation=${conversation.id}`);

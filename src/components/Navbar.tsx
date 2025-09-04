@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3, LogOut, User } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
-import { userApi } from '../api/userApi';
+import { useAuth } from '../contexts/AuthContext';
 import { clearMessages } from '../utils/messageDB';
-import type { UserProfile } from '../api/userApi';
 import { Link } from 'react-router-dom';
 import SpecificSearchCard from './services/SpecificSearchCard';
 import { categoriesData } from '../data/servicesData';
@@ -16,9 +15,10 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [servicesTimeout, setServicesTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  // Use AuthContext instead of managing local state
+  const { user, isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,34 +26,6 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Check if user is logged in on component mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      console.log('Checking auth, token:', token);
-      if (token) {
-        try {
-          console.log('Making API call to get profile...');
-          const userData = await userApi.getProfile();
-          console.log('Profile response:', userData);
-          setUser(userData);
-          setIsLoggedIn(true);
-          console.log('User logged in:', userData);
-        } catch (error) {
-          console.error('Failed to fetch user profile:', error);
-          localStorage.removeItem('token');
-          setIsLoggedIn(false);
-          setUser(null);
-        }
-      } else {
-        console.log('No token found, user not logged in');
-        setIsLoggedIn(false);
-        setUser(null);
-      }
-    };
-    checkAuth();
   }, []);
 
   // Close user menu when clicking outside
@@ -69,10 +41,8 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await userApi.logout();
       await clearMessages(); // Clear IndexedDB messages on logout
-      setUser(null);
-      setIsLoggedIn(false);
+      await logout(); // Use AuthContext logout
       setUserMenuOpen(false);
       window.location.href = '/';
     } catch (error) {
