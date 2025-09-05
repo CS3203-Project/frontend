@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { MessagingProvider, ConversationList, MessageThread, useMessaging } from '../components/Messaging';
 import { userApi } from '../api/userApi';
 import type { UserProfile } from '../api/userApi';
@@ -33,6 +33,7 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
     loadConversations,
     loading 
   } = useMessaging();
+  const navigate = useNavigate();
 
   // Debug logging for messaging state
   useEffect(() => {
@@ -42,6 +43,12 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
     console.log('Conversations:', conversations.map((c: any) => ({ id: c.id, title: c.title })));
     console.log('Loading:', loading);
   }, [activeConversation, conversations, loading]);
+
+  // Log the active conversation object whenever it changes
+  useEffect(() => {
+    console.log('=== ACTIVE CONVERSATION OBJECT ===');
+    console.log(activeConversation);
+  }, [activeConversation]);
 
   // Auto-select conversation from URL parameter
   useEffect(() => {
@@ -74,6 +81,34 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
     }
   }, [conversations]);
 
+  // Button always visible if there is an active conversation
+  const showReviewButton = !!activeConversation;
+
+  const handleReviewClick = async () => {
+    if (!activeConversation) return;
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      // Add cache-busting param to always get fresh data
+      const res = await fetch(`/api/confirmations/${activeConversation.id}?t=${Date.now()}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (!res.ok) throw new Error('Failed to fetch confirmation status');
+      const data = await res.json();
+      if (data.customerConfirmation && data.providerConfirmation) {
+        if (currentUserRole === 'USER') {
+          navigate(`/rate-service/${activeConversation.id}`);
+        } else if (currentUserRole === 'PROVIDER') {
+          navigate(`/rate-customer/${activeConversation.id}`);
+        }
+      } else {
+        alert('Both customer and provider must confirm the booking before rating.');
+      }
+    } catch (error) {
+      alert('Failed to check confirmation status. Please try again.');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
@@ -96,10 +131,22 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
             {/* Message thread */}
             <div className="flex-1 flex flex-col relative overflow-hidden">
               {activeConversation && (
-                <ConfirmationPanel
-                  conversationId={activeConversation.id}
-                  currentUserRole={currentUserRole}
-                />
+                <>
+                  <ConfirmationPanel
+                    conversationId={activeConversation.id}
+                    currentUserRole={currentUserRole}
+                  />
+                  {showReviewButton && (
+                    <button
+                      className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      onClick={handleReviewClick}
+                    >
+                      {currentUserRole === 'USER'
+                        ? 'Rate Service & Provider'
+                        : 'Rate Customer'}
+                    </button>
+                  )}
+                </>
               )}
               <div className="flex-1 flex flex-col overflow-hidden">
                 {loading ? (
