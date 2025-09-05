@@ -6,6 +6,7 @@ import {
   CheckCircle, Users, ThumbsUp
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
+import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
 import { userApi, type ProviderProfile } from '../api/userApi';
 import { messagingApi } from '../api/messagingApi';
 import { debugMessagingState } from '../utils/messagingDebug';
@@ -91,38 +92,13 @@ const ServiceDetailPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   
   // Reviews state  
-  const [reviews] = useState<Review[]>([
-    {
-      id: '1',
-      rating: 5,
-      comment: 'Excellent service! Very professional and delivered exactly what I needed. Highly recommend!',
-      clientName: 'Sarah Johnson',
-      clientAvatar: 'https://picsum.photos/seed/client1/60/60',
-      date: '2025-08-15',
-      helpful: 12,
-      service: 'Web Development'
-    },
-    {
-      id: '2',
-      rating: 4,
-      comment: 'Great work quality and timely delivery. Communication could be improved but overall very satisfied.',
-      clientName: 'Michael Chen',
-      clientAvatar: 'https://picsum.photos/seed/client2/60/60',
-      date: '2025-08-10',
-      helpful: 8,
-      service: 'Logo Design'
-    },
-    {
-      id: '3',
-      rating: 5,
-      comment: 'Outstanding! Exceeded my expectations. Will definitely work with this provider again.',
-      clientName: 'Emma Davis',
-      clientAvatar: 'https://picsum.photos/seed/client3/60/60',
-      date: '2025-08-05',
-      helpful: 15,
-      service: 'Content Writing'
-    }
-  ]);
+  const [reviews, setReviews] = useState<ServiceReview[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  });
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState('all');
 
   // Auto-slide effect for images
@@ -181,6 +157,37 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
+  // Fetch service reviews
+  const fetchServiceReviews = async (serviceId: string) => {
+    try {
+      setReviewsLoading(true);
+      const ratingFilter = reviewFilter === 'all' ? undefined : parseInt(reviewFilter);
+      
+      const response = await serviceReviewApi.getServiceReviewsDetailed(serviceId, {
+        page: 1,
+        limit: 20,
+        rating: ratingFilter
+      });
+      
+      if (response.success) {
+        setReviews(response.data.reviews);
+        setReviewStats(response.data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch service reviews:', error);
+      // Don't show error toast as reviews are not critical for page function
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Refetch reviews when filter changes
+  useEffect(() => {
+    if (service) {
+      fetchServiceReviews(service.id);
+    }
+  }, [reviewFilter, service?.id]);
+
   useEffect(() => {
     const fetchService = async () => {
       if (!serviceId) return;
@@ -211,6 +218,9 @@ const ServiceDetailPage: React.FC = () => {
           if (response.data.provider?.id) {
             await fetchProviderDetails(response.data.provider.id);
           }
+          
+          // Fetch service reviews
+          await fetchServiceReviews(response.data.id);
         } else {
           toast.error('Service not found');
           navigate('/services');
@@ -426,14 +436,14 @@ const ServiceDetailPage: React.FC = () => {
     ? reviews 
     : reviews.filter(review => review.rating === parseInt(reviewFilter));
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-    : 0;
+  const averageRating = reviewStats.averageRating;
 
   const ratingDistribution = [5, 4, 3, 2, 1].map(rating => ({
     rating,
-    count: reviews.filter(r => r.rating === rating).length,
-    percentage: reviews.length > 0 ? (reviews.filter(r => r.rating === rating).length / reviews.length) * 100 : 0
+    count: reviewStats.ratingDistribution[rating as keyof typeof reviewStats.ratingDistribution],
+    percentage: reviewStats.totalReviews > 0 
+      ? (reviewStats.ratingDistribution[rating as keyof typeof reviewStats.ratingDistribution] / reviewStats.totalReviews) * 100 
+      : 0
   }));
 
   if (loading) {
@@ -627,7 +637,7 @@ const ServiceDetailPage: React.FC = () => {
                       <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-200">
                         <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                         <span className="font-medium text-gray-800">{averageRating.toFixed(1)}</span>
-                        <span className="text-gray-500 ml-1">({reviews.length} reviews)</span>
+                        <span className="text-gray-500 ml-1">({reviewStats.totalReviews} reviews)</span>
                       </div>
                       <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-200">
                         <Eye className="w-4 h-4 mr-1 text-blue-500" />
@@ -666,7 +676,7 @@ const ServiceDetailPage: React.FC = () => {
                   <nav className="flex space-x-1 px-6">
                     {[
                       { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' },
-                      { id: 'reviews', label: `Reviews (${reviews.length})`, icon: Star, color: 'yellow' },
+                      { id: 'reviews', label: `Reviews (${reviewStats.totalReviews})`, icon: Star, color: 'yellow' },
                       { id: 'chat', label: 'Chat with Provider', icon: MessageCircle, color: 'green' }
                     ].map((tab) => {
                       const IconComponent = tab.icon;
@@ -800,7 +810,7 @@ const ServiceDetailPage: React.FC = () => {
                                 />
                               ))}
                             </div>
-                            <p className="text-gray-600 font-medium">Based on {reviews.length} reviews</p>
+                            <p className="text-gray-600 font-medium">Based on {reviewStats.totalReviews} reviews</p>
                           </div>
                           <div className="space-y-3">
                             {ratingDistribution.map((dist) => (
@@ -846,7 +856,23 @@ const ServiceDetailPage: React.FC = () => {
 
                       {/* Reviews List */}
                       <div className="space-y-4">
-                        {filteredReviews.map((review) => (
+                        {reviewsLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="ml-2 text-gray-600">Loading reviews...</span>
+                          </div>
+                        ) : filteredReviews.length === 0 ? (
+                          <div className="text-center py-8 bg-gray-50 rounded-xl">
+                            <div className="text-gray-500 mb-2">No reviews found</div>
+                            <div className="text-sm text-gray-400">
+                              {reviewFilter === 'all' 
+                                ? 'Be the first to review this service!' 
+                                : `No ${reviewFilter}-star reviews yet.`
+                              }
+                            </div>
+                          </div>
+                        ) : (
+                          filteredReviews.map((review) => (
                           <div key={review.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-200 group">
                             <div className="flex items-start space-x-4">
                               <div className="relative">
@@ -895,7 +921,8 @@ const ServiceDetailPage: React.FC = () => {
                               </div>
                             </div>
                           </div>
-                        ))}
+                        ))
+                        )}
                       </div>
                     </div>
                   )}
