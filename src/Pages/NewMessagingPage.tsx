@@ -20,12 +20,12 @@ const MessagingContent: React.FC<{ currentUser: UserProfile }> = ({ currentUser 
 
   return (
     <MessagingProvider userId={currentUser.id}>
-      <MessagingContentInner conversationId={conversationId} currentUserRole={currentUser.role as any} />
+      <MessagingContentInner conversationId={conversationId} currentUserRole={currentUser.role as any} currentUserId={currentUser.id} />
     </MessagingProvider>
   );
 };
 
-const MessagingContentInner: React.FC<{ conversationId: string | null; currentUserRole: 'USER'|'PROVIDER'|string }> = ({ conversationId, currentUserRole }) => {
+const MessagingContentInner: React.FC<{ conversationId: string | null; currentUserRole: 'USER'|'PROVIDER'|string; currentUserId: string }> = ({ conversationId, currentUserRole, currentUserId }) => {
   const { 
     conversations, 
     activeConversation, 
@@ -99,7 +99,9 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
         if (currentUserRole === 'USER') {
           navigate(`/rate-service/${activeConversation.id}`);
         } else if (currentUserRole === 'PROVIDER') {
-          navigate(`/rate-customer/${activeConversation.id}`);
+          // Find the customerId from the conversation
+          const customerId = activeConversation.userIds.find((id: string) => id !== currentUserId);
+          navigate(`/rate-customer/${activeConversation.id}`, { state: { customerId } });
         }
       } else {
         alert('Both customer and provider must confirm the booking before rating.');
