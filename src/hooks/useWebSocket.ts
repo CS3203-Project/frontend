@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { socket } from '../api/socket';
+import type { Socket } from 'socket.io-client';
 
 export interface UseWebSocketOptions {
   url: string;
@@ -19,8 +20,31 @@ export interface UseWebSocketReturn {
 
 export const useWebSocket = (options: UseWebSocketOptions): UseWebSocketReturn => {
   const { url, userId, autoConnect = true } = options;
-  const socketRef = useRef<Socket | null>(null);
+  // Use shared socket instance
+  const socketRef = useRef<Socket | null>(socket);
   const [isConnected, setIsConnected] = useState(false);
+
+  // Listen for connect/disconnect events to update isConnected
+  useEffect(() => {
+    const sock = socketRef.current;
+    if (!sock) return;
+    const handleConnect = () => {
+      setIsConnected(true);
+      console.log('✅ WebSocket connected');
+    };
+    const handleDisconnect = () => {
+      setIsConnected(false);
+      console.log('❌ WebSocket disconnected');
+    };
+    sock.on('connect', handleConnect);
+    sock.on('disconnect', handleDisconnect);
+    // Set initial state
+    setIsConnected(sock.connected);
+    return () => {
+      sock.off('connect', handleConnect);
+      sock.off('disconnect', handleDisconnect);
+    };
+  }, []);
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) {
@@ -29,45 +53,14 @@ export const useWebSocket = (options: UseWebSocketOptions): UseWebSocketReturn =
 
     console.log('🔌 Connecting to WebSocket:', url);
     
-    socketRef.current = io(url, {
-      transports: ['websocket', 'polling'],
-      autoConnect: false,
-    });
-
-    const socket = socketRef.current;
-
-    socket.on('connect', () => {
-      console.log('✅ WebSocket connected');
-      setIsConnected(true);
-      
-      // Join with user ID if provided
-      if (userId) {
-        socket.emit('user:join', { userId });
-      }
-    });
-
-    socket.on('disconnect', () => {
-      console.log('❌ WebSocket disconnected');
-      setIsConnected(false);
-    });
-
-    socket.on('connect_error', (error) => {
-      console.error('❌ WebSocket connection error:', error);
-      setIsConnected(false);
-    });
-
-    socket.on('user:joined', (data) => {
-      console.log('👤 User joined WebSocket:', data);
-    });
-
-    socket.connect();
+    // Only connect if not already
+    socketRef.current?.connect();
   }, [url, userId]);
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
       console.log('🔌 Disconnecting WebSocket');
       socketRef.current.disconnect();
-      socketRef.current = null;
       setIsConnected(false);
     }
   }, []);

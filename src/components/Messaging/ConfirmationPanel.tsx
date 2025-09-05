@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import confirmationApi from '../../api/confirmationApi';
 import type { ConversationConfirmation } from '../../types/confirmation';
+import { useConfirmationSocket } from '../../hooks/useConfirmationSocket';
+import { useAuth } from '../../contexts/AuthContext';
 
 type Role = 'USER' | 'PROVIDER' | string;
 
@@ -11,6 +13,7 @@ interface Props {
 }
 
 const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole }) => {
+  const { user } = useAuth();
   const [record, setRecord] = useState<ConversationConfirmation | null>(null);
   const [saving, setSaving] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -86,6 +89,11 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
       setSaving(false);
     }
   };
+
+  useConfirmationSocket(conversationId, (confirmation) => {
+    setRecord(confirmation);
+    setServiceFeeInput(confirmation.serviceFee?.toString() || '');
+  }, user?.id || '');
 
   if (!record) return null;
 

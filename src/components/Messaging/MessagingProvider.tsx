@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { messagingApi } from '../../api/messagingApi';
@@ -134,7 +133,10 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
 
     try {
       setError(null);
-      
+      // Ensure socket is connected before sending
+      if (!webSocket.isConnected) {
+        webSocket.connect();
+      }
       // Determine the recipient (the other user in the conversation)
       const recipientId = activeConversation.userIds.find(id => id !== userId);
       if (!recipientId) throw new Error('Could not determine recipient');
@@ -142,7 +144,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       // Check if WebSocket is connected, use WebSocket if available, fallback to REST
       if (webSocket.isConnected) {
         console.log('📤 Sending message via WebSocket');
-        
         // Send via WebSocket
         webSocket.emit('message:send', {
           content,
@@ -150,13 +151,10 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
           toId: recipientId,
           conversationId: activeConversation.id,
         });
-        
         // Note: The actual message will be added to the UI when we receive the 'message:sent' confirmation
         // or when the backend broadcasts it back to us
-        
       } else {
         console.log('📤 Sending message via REST API (WebSocket not connected)');
-        
         // Fallback to REST API
         const newMessage = await messagingApi.sendMessage({
           content,
@@ -164,10 +162,8 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
           toId: recipientId,
           conversationId: activeConversation.id,
         });
-
         // Add message to current messages
         setMessages(prev => [...prev, newMessage]);
-        
         // Update the conversation's last message
         setConversations(prev => 
           prev.map(conv => 
@@ -176,13 +172,11 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
               : conv
           )
         );
-        
         // Update active conversation
         setActiveConversation(prev => 
           prev ? { ...prev, lastMessage: newMessage } : null
         );
       }
-      
     } catch (error) {
       handleError(error, 'Failed to send message');
     }
@@ -331,7 +325,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     // Handle incoming messages
     const handleMessageReceived = (messageData: MessageResponse) => {
       console.log('📥 Received real-time message:', messageData);
-      
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
@@ -343,7 +336,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
           return prev;
         });
       }
-      
       // Update conversations list with new last message
       setConversations(prev => 
         prev.map(conv => 
@@ -352,7 +344,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
             : conv
         )
       );
-      
       // Update unread count
       loadUnreadCount();
     };
@@ -360,7 +351,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     // Handle message sent confirmation
     const handleMessageSent = (messageData: MessageResponse) => {
       console.log('📤 Message sent confirmation:', messageData);
-      
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
@@ -372,7 +362,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
           return prev;
         });
       }
-      
       // Update conversations list with new last message
       setConversations(prev => 
         prev.map(conv => 
@@ -381,7 +370,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
             : conv
         )
       );
-      
       // Update active conversation
       setActiveConversation(prev => 
         prev && prev.id === messageData.conversationId 
@@ -399,7 +387,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     // Handle read receipts
     const handleMessageReadReceipt = (data: { messageId: string; readBy: string; readAt: string }) => {
       console.log('📖 Message read receipt received:', data);
-      
       // Update message status in current conversation
       if (activeConversation) {
         setMessages(prev => 
@@ -415,7 +402,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     // Handle conversation marked as read confirmation
     const handleConversationMarkedRead = (data: { conversationId: string; success: boolean }) => {
       console.log('📖 Conversation marked as read:', data);
-      
       if (data.success) {
         // Update conversations list
         setConversations(prev =>
@@ -425,7 +411,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
               : conv
           )
         );
-        
         // Update unread count
         loadUnreadCount();
       }
@@ -434,7 +419,6 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     // Handle auto-read notification
     const handleMessageAutoRead = (data: { messageId: string; conversationId: string }) => {
       console.log('📖 Message auto-marked as read:', data);
-      
       // Update message read status in current messages
       if (activeConversation && data.conversationId === activeConversation.id) {
         setMessages(prev => 
@@ -465,6 +449,14 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       webSocket.off('conversation:marked-read', handleConversationMarkedRead);
     };
   }, [webSocket.socket, activeConversation]);
+
+  // Ensure user joins and enters conversation on connect or when activeConversation changes
+  useEffect(() => {
+    if (webSocket.isConnected && userId && activeConversation?.id) {
+      webSocket.emit('user:join', { userId });
+      webSocket.emit('conversation:enter', { userId, conversationId: activeConversation.id });
+    }
+  }, [webSocket.isConnected, userId, activeConversation]);
 
   // Cleanup: Leave conversation when component unmounts or user changes
   useEffect(() => {
