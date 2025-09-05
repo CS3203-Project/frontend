@@ -902,7 +902,7 @@ const ServiceDetailPage: React.FC = () => {
                                       <span className="text-sm text-gray-500">• {review.date}</span>
                                       {review.service && (
                                         <span className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs px-3 py-1 rounded-full border border-blue-200">
-                                          {review.service}
+                                          {typeof review.service === 'string' ? review.service : review.service.title}
                                         </span>
                                       )}
                                     </div>
