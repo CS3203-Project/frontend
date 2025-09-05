@@ -9,7 +9,12 @@ export interface ServiceReview {
   clientAvatar: string;
   date: string;
   helpful: number;
-  service?: string;
+  service?: string | {
+    id: string;
+    title: string;
+    image?: string | null;
+    category: string;
+  };
   reviewerId: string;
   createdAt: string;
   updatedAt: string;
@@ -53,6 +58,26 @@ export interface CreateReviewRequest {
 export interface UpdateReviewRequest {
   rating?: number;
   comment?: string;
+}
+
+// Provider review types
+export interface ProviderServiceReview extends ServiceReview {
+  service: {
+    id: string;
+    title: string;
+    image?: string | null;
+    category: string;
+  };
+}
+
+export interface ProviderReviewsResponse {
+  reviews: ProviderServiceReview[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 // Service Review API functions
@@ -115,6 +140,34 @@ export const serviceReviewApi = {
   // Get a single review by ID (requires authentication)
   getServiceReviewById: async (reviewId: string): Promise<any> => {
     const response = await apiClient.get(`/service-reviews/${reviewId}`);
+    return response.data;
+  },
+
+  // Provider review functions
+  // Get all reviews for all services of a provider
+  getProviderServiceReviews: async (
+    providerId: string, 
+    options?: {
+      page?: number;
+      limit?: number;
+      rating?: number;
+    }
+  ): Promise<ApiResponse<ProviderReviewsResponse>> => {
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.rating) params.append('rating', options.rating.toString());
+    
+    const queryString = params.toString();
+    const url = `/service-reviews/provider/${providerId}${queryString ? `?${queryString}` : ''}`;
+    
+    const response = await apiClient.get<ApiResponse<ProviderReviewsResponse>>(url);
+    return response.data;
+  },
+
+  // Get review statistics for all services of a provider
+  getProviderReviewStats: async (providerId: string): Promise<ApiResponse<ReviewStats>> => {
+    const response = await apiClient.get<ApiResponse<ReviewStats>>(`/service-reviews/provider/${providerId}/stats`);
     return response.data;
   }
 };
