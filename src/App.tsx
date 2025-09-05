@@ -24,6 +24,7 @@ import CreateService from "./Pages/CreateService.tsx";
 import MessagingPage from "./Pages/NewMessagingPage.tsx";
 import AdminDashboard from "./Pages/AdminDashboard.tsx";
 import RateCustomerPage from "./Pages/RateCustomerPage.tsx";
+import RateServicePage from "./Pages/RateServicePage.tsx";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path="/create-service" element={<CreateService />} />
             <Route path="/messaging" element={<MessagingPage />} />
             <Route path="/rate-customer/:conversationId" element={<RateCustomerPage />} />
+            <Route path="/rate-service/:serviceId" element={<RateServicePage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             
             <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />

@@ -188,8 +188,20 @@ const ServiceDetailPage: React.FC = () => {
       try {
         setLoading(true);
         
-        // Fetch service from API
-        const response = await serviceApi.getServiceById(serviceId);
+        // Try to fetch service directly first
+        let response;
+        try {
+          response = await serviceApi.getServiceById(serviceId);
+        } catch (directError) {
+          console.log('Failed to get service by ID, trying conversation ID:', directError);
+          // If direct service fetch fails, try getting service by conversation ID
+          try {
+            response = await serviceApi.getServiceByConversationId(serviceId);
+          } catch (conversationError) {
+            console.error('Failed to get service by conversation ID:', conversationError);
+            throw conversationError;
+          }
+        }
         
         if (response.success) {
           const transformedService = transformApiService(response.data);
@@ -300,10 +312,11 @@ const ServiceDetailPage: React.FC = () => {
         return;
       }
       
-      // Create conversation between user and provider's user ID
+      // Create conversation between user and provider's user ID, including serviceId
       const conversationData = {
         userIds: [user.id, providerUserId],
-        title: service.title
+        title: service.title,
+        serviceId: service.id // Pass the serviceId to backend
       };
 
       console.log('Creating conversation with data:', conversationData);

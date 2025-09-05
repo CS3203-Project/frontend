@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { MessagingProvider, ConversationList, MessageThread, useMessaging } from '../components/Messaging';
 import { userApi } from '../api/userApi';
+import { serviceApi } from '../api/serviceApi';
 import type { UserProfile } from '../api/userApi';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -97,7 +98,18 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
       const data = await res.json();
       if (data.customerConfirmation && data.providerConfirmation) {
         if (currentUserRole === 'USER') {
-          navigate(`/rate-service/${activeConversation.id}`);
+          // Get the service ID from the conversation
+          try {
+            const serviceResponse = await serviceApi.getServiceByConversationId(activeConversation.id);
+            if (serviceResponse.success && serviceResponse.data) {
+              navigate(`/rate-service/${serviceResponse.data.id}`);
+            } else {
+              alert('Service information not found for this conversation.');
+            }
+          } catch (serviceError) {
+            console.error('Failed to get service from conversation:', serviceError);
+            alert('Failed to get service information. Please try again.');
+          }
         } else if (currentUserRole === 'PROVIDER') {
           // Find the customerId from the conversation
           const customerId = activeConversation.userIds.find((id: string) => id !== currentUserId);

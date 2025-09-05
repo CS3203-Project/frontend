@@ -91,6 +91,12 @@ export const serviceApi = {
     return response.data;
   },
 
+  // Get service by conversation ID
+  getServiceByConversationId: async (conversationId: string): Promise<ApiResponse<ServiceResponse>> => {
+    const response = await apiClient.get<ApiResponse<ServiceResponse>>(`/services/conversation/${conversationId}`);
+    return response.data;
+  },
+
   // Update service
   updateService: async (id: string, serviceData: Partial<CreateServiceRequest>): Promise<ApiResponse<ServiceResponse>> => {
     const response = await apiClient.put<ApiResponse<ServiceResponse>>(`/services/${id}`, serviceData);
