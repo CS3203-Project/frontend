@@ -51,50 +51,85 @@ const Footer = ({
     title: "Zia",
   },
   sections = defaultSections,
-  description = "A collection of components for your startup business or side project.",
+  description = "Your premier service marketplace connecting customers with trusted professionals.",
   socialLinks = defaultSocialLinks,
   copyright = `© ${new Date().getFullYear()} Zia. All rights reserved.`,
   legalLinks = defaultLegalLinks,
 }) => {
   return (
-    <section className="py-20 bg-white border-t border-gray-200 mt-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex w-full flex-col justify-between gap-10 lg:flex-row lg:items-start lg:text-left">
-          <div className="flex w-full flex-col justify-between gap-6 lg:items-start">
+    <footer className="relative bg-black/95 backdrop-blur-xl border-t border-white/10 mt-20 overflow-hidden">
+      {/* Glittering top border */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      
+      {/* Background gradient effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse"></div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          {/* Brand Section */}
+          <div className="space-y-6">
             {/* Logo */}
-            <div className="flex items-center gap-2 lg:justify-start">
-              <a href={logo.url}>
-                <img
-                  src={logo.src}
-                  alt={logo.alt}
-                  title={logo.title}
-                  className="h-8"
-                />
+            <div className="flex items-center gap-3 group">
+              <a href={logo.url} className="flex items-center gap-3">
+                <div className="relative w-10 h-10 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
+                  {/* Glittering background effect */}
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/10 to-white/5 group-hover:from-white/20 group-hover:to-white/10 transition-all duration-300"></div>
+                  <div className="absolute inset-0 rounded-xl animate-pulse bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                  
+                  <img
+                    src={logo.src}
+                    alt={logo.alt}
+                    title={logo.title}
+                    className="h-8 w-8 relative z-10 filter brightness-0 invert"
+                  />
+                </div>
+                <h2 className="text-2xl font-bold text-white group-hover:text-gray-100 transition-colors duration-300">{logo.title}</h2>
               </a>
-            <h2 className="text-xl font-semibold text-gray-900">{logo.title}</h2>
             </div>
-            <p className="max-w-[70%] text-sm text-gray-500">{description}</p>
-            <ul className="flex items-center space-x-6 text-gray-500">
+            
+            <p className="text-gray-400 text-sm leading-relaxed max-w-md">{description}</p>
+            
+            {/* Social Links */}
+            <div className="flex items-center space-x-4">
               {socialLinks.map((social, idx) => (
-                <li key={idx} className="font-medium hover:text-blue-600">
-                  <a href={social.href} aria-label={social.label} target="_blank" rel="noopener noreferrer">
+                <a
+                  key={idx}
+                  href={social.href}
+                  aria-label={social.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-all duration-300 group border border-white/10 hover:border-white/30 relative overflow-hidden"
+                >
+                  {/* Glitter effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                  <span className="relative z-10 group-hover:scale-110 transition-transform duration-300">
                     {social.icon}
-                  </a>
-                </li>
+                  </span>
+                </a>
               ))}
-            </ul>
+            </div>
           </div>
-          <div className="grid w-full gap-6 md:grid-cols-3 lg:gap-20">
+
+          {/* Links Section */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             {sections.map((section, sectionIdx) => (
-              <div key={sectionIdx}>
-                <h3 className="mb-4 font-bold text-gray-900">{section.title}</h3>
-                <ul className="space-y-3 text-sm text-gray-500">
+              <div key={sectionIdx} className="space-y-4">
+                <h3 className="text-white font-semibold text-sm tracking-wide relative group">
+                  {section.title}
+                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
+                </h3>
+                <ul className="space-y-2">
                   {section.links.map((link, linkIdx) => (
-                    <li
-                      key={linkIdx}
-                      className="font-medium hover:text-blue-600"
-                    >
-                      <a href={link.href}>{link.name}</a>
+                    <li key={linkIdx}>
+                      <a 
+                        href={link.href}
+                        className="text-gray-400 hover:text-white text-sm transition-colors duration-300 relative group py-1 block"
+                      >
+                        <span className="relative">
+                          {link.name}
+                          <div className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-white/50 to-gray-300/50 group-hover:w-full transition-all duration-300"></div>
+                        </span>
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -102,18 +137,27 @@ const Footer = ({
             ))}
           </div>
         </div>
-        <div className="mt-8 flex flex-col justify-between gap-4 border-t border-gray-200 py-8 text-xs font-medium text-gray-500 md:flex-row md:items-center md:text-left">
-          <p className="order-2 lg:order-1">{copyright}</p>
-          <ul className="order-1 flex flex-col gap-2 md:order-2 md:flex-row">
+
+        {/* Bottom Section */}
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-sm">{copyright}</p>
+          <div className="flex items-center gap-6">
             {legalLinks.map((link, idx) => (
-              <li key={idx} className="hover:text-blue-600">
-                <a href={link.href}> {link.name}</a>
-              </li>
+              <a
+                key={idx}
+                href={link.href}
+                className="text-gray-400 hover:text-white text-sm transition-colors duration-300 relative group"
+              >
+                <span className="relative">
+                  {link.name}
+                  <div className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-white/50 to-gray-300/50 group-hover:w-full transition-all duration-300"></div>
+                </span>
+              </a>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
-    </section>
+    </footer>
   );
 };
 
