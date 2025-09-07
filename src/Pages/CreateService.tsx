@@ -21,6 +21,8 @@ interface FormData {
   tags: string[];
   images: File[];
   uploadedImageUrls: string[];
+  video: File | null;
+  uploadedVideoUrl: string;
   workingTime: WorkingHours;
   isActive: boolean;
 }
@@ -84,6 +86,8 @@ export default function CreateService() {
     tags: [],
     images: [],
     uploadedImageUrls: [],
+    video: null,
+    uploadedVideoUrl: '',
     workingTime: defaultWorkingHours,
     isActive: true,
   });
@@ -194,6 +198,45 @@ export default function CreateService() {
       } else {
         // Something else happened
         throw new Error(`Failed to upload ${file.name}: ${error.message || 'Unknown error'}`);
+      }
+    }
+  };
+
+  // Upload video to S3 using backend endpoint
+  const uploadVideoToS3 = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('video', file);
+
+    try {
+      // Use axios with authentication (handled by interceptor)
+      const response = await apiClient.post('/users/upload-video', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      if (response.data && response.data.videoUrl) {
+        console.log(`Successfully uploaded ${file.name} to S3:`, response.data.videoUrl);
+        return response.data.videoUrl;
+      } else {
+        throw new Error('No video URL returned from server');
+      }
+    } catch (error: any) {
+      console.error('Error uploading video to S3:', error);
+      
+      if (error.response) {
+        // Server responded with error status
+        if (error.response.status === 401) {
+          throw new Error(`Authentication required. Please log in again.`);
+        } else if (error.response.status === 413) {
+          throw new Error(`File ${file.name} is too large. Please select a smaller video (max 100MB).`);
+        } else {
+          throw new Error(`Failed to upload ${file.name}. Server error: ${error.response.data?.message || 'Unknown error'}`);
+        }
+      } else if (error.request) {
+        throw new Error(`Network error. Please check your connection and try again.`);
+      } else {
+        throw new Error(`Upload failed: ${error.message}`);
       }
     }
   };
@@ -351,9 +394,27 @@ export default function CreateService() {
     setLoading(true);
     
     try {
-      // Upload images to S3 first
+      // Upload images and video to S3 first
       setUploading(true);
       const uploadedUrls: string[] = [...formData.uploadedImageUrls];
+      let videoUrl = formData.uploadedVideoUrl;
+      
+      // Upload video if present
+      if (formData.video) {
+        showSuccessToast('Uploading video to S3...');
+        try {
+          console.log(`Uploading video: ${formData.video.name}`);
+          videoUrl = await uploadVideoToS3(formData.video);
+          console.log(`Successfully uploaded video to:`, videoUrl);
+          showSuccessToast('Video uploaded successfully!');
+        } catch (error) {
+          console.error('Failed to upload video:', formData.video.name, error);
+          showErrorToast(`Failed to upload video: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          setLoading(false);
+          setUploading(false);
+          return;
+        }
+      }
       
       if (formData.images.length > 0) {
         showSuccessToast(`Uploading ${formData.images.length} image(s) to S3...`);
@@ -391,6 +452,7 @@ export default function CreateService() {
         currency: formData.currency,
         tags: formData.tags,
         images: uploadedUrls,
+        videoUrl: videoUrl || undefined,
         workingTime: formatWorkingHoursForAPI(formData.workingTime),
         isActive: formData.isActive,
       };
@@ -435,6 +497,44 @@ export default function CreateService() {
       setLoading(false);
       setUploading(false);
     }
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      showErrorToast(`${file.name} is not a valid video file`);
+      return;
+    }
+
+    // Validate file size (100MB limit)
+    if (file.size > 100 * 1024 * 1024) {
+      showErrorToast(`${file.name} is too large. Maximum size is 100MB`);
+      return;
+    }
+
+    // Check video duration (optional - basic check via file size as proxy)
+    // For a more robust solution, you'd want to use video element to check duration
+
+    setFormData(prev => ({
+      ...prev,
+      video: file
+    }));
+
+    // Reset file input
+    if (e.target) {
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    setFormData(prev => ({
+      ...prev,
+      video: null,
+      uploadedVideoUrl: ''
+    }));
   };
 
   return (
@@ -721,6 +821,91 @@ export default function CreateService() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Video Section */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black">
+              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
+                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+                Service Video
+                <span className="ml-2 text-sm font-normal text-gray-500">(Optional, Max 100MB)</span>
+              </h2>
+              
+              {/* Video Upload Area */}
+              <div className="mb-6">
+                {uploading ? (
+                  <div className="border-2 border-dashed border-blue-300 rounded-xl p-8 text-center bg-blue-50">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-lg font-medium text-blue-600">
+                      Uploading video to Amazon S3...
+                    </p>
+                  </div>
+                ) : !formData.video && !formData.uploadedVideoUrl ? (
+                  <div className="border-2 border-dashed border-black rounded-xl p-8 text-center hover:border-gray-700 hover:bg-gray-50 transition-all duration-200 cursor-pointer group">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoChange}
+                      className="hidden"
+                      id="video-upload"
+                      aria-label="Upload service video"
+                    />
+                    <label htmlFor="video-upload" className="cursor-pointer block">
+                      <FiUpload className="mx-auto h-12 w-12 text-black group-hover:text-gray-700 transition-colors duration-200" />
+                      <p className="mt-4 text-lg font-medium text-black group-hover:text-gray-700">
+                        Click to upload a service video
+                      </p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        MP4, WebM, MOV up to 100MB
+                      </p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        A short video showcasing your service (optional)
+                      </p>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="border-2 border-black rounded-xl p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-black text-white rounded-lg flex items-center justify-center">
+                          <FiEye className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-black">
+                            {formData.video ? formData.video.name : 'Uploaded Video'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {formData.video 
+                              ? `${(formData.video.size / (1024 * 1024)).toFixed(1)} MB`
+                              : 'Video ready'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveVideo}
+                        className="p-2 text-gray-400 hover:text-red-600 transition-colors duration-200"
+                        aria-label="Remove video"
+                        title="Remove video"
+                      >
+                        <FiX className="w-5 h-5" />
+                      </button>
+                    </div>
+                    {formData.video && (
+                      <div className="mt-4">
+                        <video 
+                          controls 
+                          className="w-full max-w-md h-48 bg-black rounded-lg"
+                          src={URL.createObjectURL(formData.video)}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Tags Section */}
