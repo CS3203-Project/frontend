@@ -1,97 +1,14 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3, LogOut, User } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
+import { useAuth } from '../contexts/AuthContext';
+import { clearMessages } from '../utils/messageDB';
 import { Link } from 'react-router-dom';
 import SpecificSearchCard from './services/SpecificSearchCard';
 import { categoriesData } from '../data/servicesData';
-import { useAuth } from '../contexts/AuthContext';
 
-// Move static data outside component to prevent recreation on each render
-const services = [
-  {
-    title: "Home Services",
-    description: "Cleaning, repairs, maintenance",
-    href: "#",
-    icon: Home,
-    gradient: "from-green-400 to-blue-500"
-  },
-  {
-    title: "Professional Services",
-    description: "Tutoring, consulting, coaching",
-    href: "#",
-    icon: Briefcase,
-    gradient: "from-blue-400 to-purple-500"
-  },
-  {
-    title: "Creative Services",
-    description: "Design, photography, writing",
-    href: "#",
-    icon: Sparkles,
-    gradient: "from-purple-400 to-pink-500"
-  },
-  {
-    title: "Technical Services",
-    description: "IT support, web development",
-    href: "#",
-    icon: Globe,
-    gradient: "from-cyan-400 to-blue-500"
-  },
-  {
-    title: "Personal Care",
-    description: "Beauty, wellness, fitness",
-    href: "#",
-    icon: UserCheck,
-    gradient: "from-pink-400 to-red-500"
-  },
-  {
-    title: "Business Services",
-    description: "Accounting, marketing, legal",
-    href: "#",
-    icon: BarChart3,
-    gradient: "from-indigo-400 to-purple-500"
-  },
-];
-
-const providerFeatures = [
-  {
-    title: "Easy Setup",
-    description: "Get your service online in minutes",
-    href: "#",
-    icon: Sparkles,
-    gradient: "from-green-400 to-blue-500"
-  },
-  {
-    title: "Secure Payments",
-    description: "Get paid safely and on time",
-    href: "#",
-    icon: Shield,
-    gradient: "from-blue-400 to-indigo-500"
-  },
-  {
-    title: "Customer Management",
-    description: "Track bookings and communications",
-    href: "#",
-    icon: Users,
-    gradient: "from-purple-400 to-pink-500"
-  },
-  {
-    title: "Analytics Dashboard",
-    description: "Monitor your business performance",
-    href: "#",
-    icon: BarChart3,
-    gradient: "from-orange-400 to-red-500"
-  },
-];
-
-const navLinks = [
-  { name: "How It Works", href: "/howWorks" },
-  { name: "Pricing", href: "#" },
-  { name: "Success Stories", href: "/stories" },
-  { name: "Support", href: "/support" }
-];
-
-const Navbar = memo(() => {
+const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [forProvidersOpen, setForProvidersOpen] = useState(false);
@@ -100,7 +17,7 @@ const Navbar = memo(() => {
   const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // Use AuthContext instead of local state
+  // Use AuthContext instead of managing local state
   const { user, isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
@@ -122,35 +39,120 @@ const Navbar = memo(() => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [userMenuOpen]);
 
-  const handleLogout = useCallback(async () => {
+  const handleLogout = async () => {
     try {
-      await logout();
+      await clearMessages(); // Clear IndexedDB messages on logout
+      await logout(); // Use AuthContext logout
       setUserMenuOpen(false);
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  }, [logout]);
+  };
 
-  const handleServicesEnter = useCallback(() => {
+  const handleServicesEnter = () => {
     if (servicesTimeout) clearTimeout(servicesTimeout);
     setServicesOpen(true);
-  }, [servicesTimeout]);
+  };
 
-  const handleServicesLeave = useCallback(() => {
+  const handleServicesLeave = () => {
     const timeout = setTimeout(() => setServicesOpen(false), 150);
     setServicesTimeout(timeout);
-  }, []);
+  };
 
-  const handleProvidersEnter = useCallback(() => {
+  const handleProvidersEnter = () => {
     if (providersTimeout) clearTimeout(providersTimeout);
     setForProvidersOpen(true);
-  }, [providersTimeout]);
+  };
 
-  const handleProvidersLeave = useCallback(() => {
+  const handleProvidersLeave = () => {
     const timeout = setTimeout(() => setForProvidersOpen(false), 150);
     setProvidersTimeout(timeout);
-  }, []);
+  };
+
+  const services = [
+    {
+      title: "Home Services",
+      description: "Cleaning, repairs, maintenance",
+      href: "#",
+      icon: Home,
+      gradient: "from-green-400 to-blue-500"
+    },
+    {
+      title: "Professional Services",
+      description: "Tutoring, consulting, coaching",
+      href: "#",
+      icon: Briefcase,
+      gradient: "from-blue-400 to-purple-500"
+    },
+    {
+      title: "Creative Services",
+      description: "Design, photography, writing",
+      href: "#",
+      icon: Sparkles,
+      gradient: "from-purple-400 to-pink-500"
+    },
+    {
+      title: "Technical Services",
+      description: "IT support, web development",
+      href: "#",
+      icon: Globe,
+      gradient: "from-cyan-400 to-blue-500"
+    },
+    {
+      title: "Personal Care",
+      description: "Beauty, wellness, fitness",
+      href: "#",
+      icon: UserCheck,
+      gradient: "from-pink-400 to-red-500"
+    },
+    {
+      title: "Business Services",
+      description: "Accounting, marketing, legal",
+      href: "#",
+      icon: BarChart3,
+      gradient: "from-indigo-400 to-purple-500"
+    },
+  ];
+
+  const providerFeatures = [
+    {
+      title: "Easy Setup",
+      description: "Get your service online in minutes",
+      href: "#",
+      icon: Sparkles,
+      gradient: "from-green-400 to-blue-500"
+    },
+    {
+      title: "Secure Payments",
+      description: "Get paid safely and on time",
+      href: "#",
+      icon: Shield,
+      gradient: "from-blue-400 to-indigo-500"
+    },
+    {
+      title: "Customer Management",
+      description: "Track bookings and communications",
+      href: "#",
+      icon: Users,
+      gradient: "from-purple-400 to-pink-500"
+    },
+    {
+      title: "Analytics Dashboard",
+      description: "Monitor your business performance",
+      href: "#",
+      icon: BarChart3,
+      gradient: "from-orange-400 to-red-500"
+    },
+  ];
+
+  const navLinks = [
+    { name: "How It Works", href: "/howWorks" },
+    { name: "Pricing", href: "#" },
+    { name: "Success Stories", href: "/stories" },
+    { name: "Support", href: "/support" },
+    { name: "Messages", href: "/messaging" }
+  ];
 
   return (
     <nav className={cn(
@@ -346,7 +348,7 @@ const Navbar = memo(() => {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm">
-                      {(user.firstName || '').charAt(0)}{(user.lastName || '').charAt(0)}
+                      {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                     </div>
                   )}
                   <span className="text-gray-700 font-medium">{user.firstName}</span>
@@ -533,7 +535,7 @@ const Navbar = memo(() => {
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                        {(user.firstName || '').charAt(0)}{(user.lastName || '').charAt(0)}
+                        {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                       </div>
                     )}
                     <div>
@@ -579,8 +581,6 @@ const Navbar = memo(() => {
       </div>
     </nav>
   );
-});
-
-Navbar.displayName = 'Navbar';
+};
 
 export default Navbar;

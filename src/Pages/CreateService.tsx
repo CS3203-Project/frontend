@@ -169,9 +169,9 @@ export default function CreateService() {
         },
       });
       
-      if (response.data && response.data.data && response.data.data.imageUrl) {
-        console.log(`Successfully uploaded ${file.name} to S3:`, response.data.data.imageUrl);
-        return response.data.data.imageUrl;
+      if (response.data && response.data.imageUrl) {
+        console.log(`Successfully uploaded ${file.name} to S3:`, response.data.imageUrl);
+        return response.data.imageUrl;
       } else {
         throw new Error('No image URL returned from server');
       }

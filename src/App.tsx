@@ -21,9 +21,10 @@ import Profile from "./Pages/Profile.tsx";
 import BecomeProvider from "./Pages/BecomeProvider.tsx";
 import Provider from "./Pages/Provider.tsx";
 import CreateService from "./Pages/CreateService.tsx";
+import MessagingPage from "./Pages/NewMessagingPage.tsx";
 import AdminDashboard from "./Pages/AdminDashboard.tsx";
-
-
+import RateCustomerPage from "./Pages/RateCustomerPage.tsx";
+import RateServicePage from "./Pages/RateServicePage.tsx";
 
 function App() {
   return (
@@ -36,11 +37,6 @@ function App() {
             <Route path="/articles" element={<Articles />} />
             <Route path="/stories" element={<SucessStories />} />
             <Route path="/howWorks" element={<HowWorks />} />
-     
-            <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
-            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
-
-
             <Route path="/signup" element={<Signup />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/services" element={<BrowseServices />} />
@@ -49,10 +45,16 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/become-provider" element={<BecomeProvider />} />
             <Route path="/provider/:id" element={<Provider />} />
+            <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
             <Route path="/create-service" element={<CreateService />} />
+            <Route path="/messaging" element={<MessagingPage />} />
+            <Route path="/rate-customer/:conversationId" element={<RateCustomerPage />} />
+            <Route path="/rate-service/:serviceId" element={<RateServicePage />} />
             <Route path="/admin" element={<AdminDashboard />} />
-
-            {/* Add more routes as needed */}
+            
+            <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />          
           </Routes>
         </Layout>
       </Router>
