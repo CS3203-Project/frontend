@@ -10,6 +10,7 @@ export interface CreateServiceRequest {
   currency?: string;
   tags?: string[];
   images?: string[];
+  videoUrl?: string;
   isActive?: boolean;
   workingTime?: string[];
 }
@@ -24,6 +25,7 @@ export interface ServiceResponse {
   currency: string;
   tags: string[];
   images: string[];
+  videoUrl?: string;
   isActive: boolean;
   workingTime?: string[];
   createdAt: string;
@@ -91,6 +93,12 @@ export const serviceApi = {
     return response.data;
   },
 
+  // Get service by conversation ID
+  getServiceByConversationId: async (conversationId: string): Promise<ApiResponse<ServiceResponse>> => {
+    const response = await apiClient.get<ApiResponse<ServiceResponse>>(`/services/conversation/${conversationId}`);
+    return response.data;
+  },
+
   // Update service
   updateService: async (id: string, serviceData: Partial<CreateServiceRequest>): Promise<ApiResponse<ServiceResponse>> => {
     const response = await apiClient.put<ApiResponse<ServiceResponse>>(`/services/${id}`, serviceData);
@@ -100,6 +108,20 @@ export const serviceApi = {
   // Delete service
   deleteService: async (id: string): Promise<ApiResponse<void>> => {
     const response = await apiClient.delete<ApiResponse<void>>(`/services/${id}`);
+    return response.data;
+  },
+
+  // Video upload function
+  uploadVideo: async (videoFile: File): Promise<{ videoUrl: string }> => {
+    const formData = new FormData();
+    formData.append('video', videoFile);
+
+    const response = await apiClient.post('/users/upload-video', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     return response.data;
   }
 };

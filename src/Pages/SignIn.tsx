@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { userApi } from '../api/userApi';
+import { useAuth } from '../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Mail, Lock, Loader, Eye, EyeOff } from 'lucide-react';
 
@@ -9,6 +10,8 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +22,15 @@ export default function SignIn() {
       if (result && result.token) {
         toast.success('Signed in successfully!');
         localStorage.setItem('token', result.token);
+        
+        // Get user profile and update AuthContext
+        try {
+          const userData = await userApi.getProfile();
+          login(userData); // Update AuthContext with user data
+        } catch (profileError) {
+          console.error('Failed to fetch user profile after login:', profileError);
+        }
+        
         setTimeout(() => (window.location.href = '/'), 1200);
       } else {
         setError(result?.message || 'Sign in failed');

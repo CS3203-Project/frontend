@@ -16,8 +16,8 @@ export const uploadImage = async (file: File): Promise<string> => {
       }
     });
 
-    // The backend returns imageUrl in response.data.data.imageUrl
-    return response.data.data.imageUrl;
+    // The backend returns imageUrl directly in response.data.imageUrl
+    return response.data.imageUrl;
   } catch (error: any) {
     console.error('Error uploading image:', error);
     throw new Error(error.response?.data?.message || 'Failed to upload image');

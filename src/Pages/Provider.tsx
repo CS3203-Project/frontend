@@ -22,8 +22,10 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { userApi } from '../api/userApi';
 import { serviceApi } from '../api/serviceApi';
+import { serviceReviewApi } from '../api/serviceReviewApi';
 import type { UserProfile, ProviderProfile } from '../api/userApi';
 import type { ServiceResponse } from '../api/serviceApi';
+import type { ProviderServiceReview, ReviewStats } from '../api/serviceReviewApi';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
@@ -37,6 +39,13 @@ export default function Provider() {
   const [servicesLoading, setServicesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [reviewFilter, setReviewFilter] = useState('all');
+  
+  // Real review data state
+  const [reviews, setReviews] = useState<ProviderServiceReview[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [hasMoreReviews, setHasMoreReviews] = useState(false);
 
   // Mock data for demonstration - in real app this would come from API
   const mockPortfolio = [
@@ -59,39 +68,6 @@ export default function Provider() {
       completedDate: '2024-11-20',
       clientRating: 5,
       technologies: ['Figma', 'Adobe XD', 'Principle']
-    }
-  ];
-
-  const mockReviews = [
-    {
-      id: 'review-1',
-      clientName: 'John Smith',
-      clientAvatar: 'https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?q=80&w=100&auto=format&fit=crop',
-      rating: 5,
-      comment: 'Excellent work! The project was delivered on time and exceeded expectations. Great communication throughout.',
-      date: '2024-12-20',
-      projectTitle: 'E-commerce Website Development',
-      helpful: 12
-    },
-    {
-      id: 'review-2',
-      clientName: 'Maria Garcia',
-      clientAvatar: 'https://images.unsplash.com/photo-1464863979621-258859e62245?w=100&auto=format&fit=crop',
-      rating: 5,
-      comment: 'Amazing work on our mobile app design. The user experience is intuitive and the design is modern.',
-      date: '2024-12-18',
-      projectTitle: 'Mobile App UI/UX Design',
-      helpful: 8
-    },
-    {
-      id: 'review-3',
-      clientName: 'David Johnson',
-      clientAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop',
-      rating: 4,
-      comment: 'Great developer with excellent technical skills. Very professional and responsive.',
-      date: '2024-12-10',
-      projectTitle: 'Custom Web Application',
-      helpful: 6
     }
   ];
 
@@ -121,6 +97,53 @@ export default function Provider() {
     }
   };
 
+  // Fetch reviews for the current provider
+  const fetchProviderReviews = async (providerId: string, page = 1, reset = false) => {
+    try {
+      setReviewsLoading(true);
+      
+      const ratingFilter = reviewFilter === 'all' ? undefined : parseInt(reviewFilter);
+      const response = await serviceReviewApi.getProviderServiceReviews(providerId, {
+        page,
+        limit: 10,
+        rating: ratingFilter
+      });
+      
+      if (response.success) {
+        if (reset) {
+          setReviews(response.data.reviews);
+        } else {
+          setReviews(prev => [...prev, ...response.data.reviews]);
+        }
+        setReviewPage(page);
+        setHasMoreReviews(page < response.data.pagination.totalPages);
+      } else {
+        console.error('Failed to fetch reviews:', response.message);
+        if (reset) setReviews([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch provider reviews:', error);
+      toast.error('Failed to load reviews');
+      if (reset) setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Fetch review statistics for the provider
+  const fetchProviderReviewStats = async (providerId: string) => {
+    try {
+      const response = await serviceReviewApi.getProviderReviewStats(providerId);
+      if (response.success) {
+        setReviewStats(response.data);
+      } else {
+        console.error('Failed to fetch review stats:', response.message);
+      }
+    } catch (error) {
+      console.error('Failed to fetch provider review stats:', error);
+    }
+  };
+
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -145,6 +168,9 @@ export default function Provider() {
         // Fetch services for this provider
         if (providerData.id) {
           await fetchServices(providerData.id);
+          // Fetch reviews and stats for this provider
+          await fetchProviderReviews(providerData.id, 1, true);
+          await fetchProviderReviewStats(providerData.id);
         }
       } catch (error) {
         console.error('Failed to fetch provider profile:', error);
@@ -169,6 +195,13 @@ export default function Provider() {
   useEffect(() => {
     fetchProfile();
   }, [providerId, fetchProfile]);
+
+  // Effect to refetch reviews when filter changes
+  useEffect(() => {
+    if (providerProfile?.id && activeTab === 'reviews') {
+      fetchProviderReviews(providerProfile.id, 1, true);
+    }
+  }, [reviewFilter, activeTab, providerProfile?.id]);
 
   if (loading) {
     return (
@@ -507,7 +540,7 @@ export default function Provider() {
                         <div className="bg-white rounded-xl shadow-lg p-6 text-center">
                           <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
                           <p className="text-2xl font-bold text-gray-900">
-                            {providerProfile.averageRating?.toFixed(1) || 'N/A'}
+                            {reviewStats?.averageRating?.toFixed(1) || 'N/A'}
                           </p>
                           <p className="text-sm text-gray-500">Average Rating</p>
                         </div>
@@ -515,7 +548,7 @@ export default function Provider() {
                         <div className="bg-white rounded-xl shadow-lg p-6 text-center">
                           <Award className="h-8 w-8 text-blue-500 mx-auto mb-2" />
                           <p className="text-2xl font-bold text-gray-900">
-                            {providerProfile.totalReviews || 0}
+                            {reviewStats?.totalReviews || 0}
                           </p>
                           <p className="text-sm text-gray-500">Total Reviews</p>
                         </div>
@@ -523,7 +556,7 @@ export default function Provider() {
                         <div className="bg-white rounded-xl shadow-lg p-6 text-center">
                           <Briefcase className="h-8 w-8 text-green-500 mx-auto mb-2" />
                           <p className="text-2xl font-bold text-gray-900">
-                            {providerProfile.services?.length || 0}
+                            {services.filter(s => s.isActive).length}
                           </p>
                           <p className="text-sm text-gray-500">Active Services</p>
                         </div>
@@ -570,7 +603,7 @@ export default function Provider() {
                       )}
 
                       {/* Recent Reviews */}
-                      {mockReviews && mockReviews.length > 0 && (
+                      {reviews && reviews.length > 0 && (
                         <div className="bg-white rounded-xl shadow-lg p-6">
                           <div className="flex items-center justify-between mb-4">
                             <h2 className="text-xl font-semibold text-gray-900">Recent Reviews</h2>
@@ -583,13 +616,16 @@ export default function Provider() {
                             </button>
                           </div>
                           <div className="space-y-4">
-                            {mockReviews.slice(0, 2).map((review) => (
+                            {reviews.slice(0, 2).map((review) => (
                               <div key={review.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
                                 <div className="flex items-start space-x-3">
                                   <img 
                                     src={review.clientAvatar} 
                                     alt={review.clientName}
                                     className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                                    onError={(e) => {
+                                      e.currentTarget.src = `https://picsum.photos/seed/${review.reviewerId}/60/60`;
+                                    }}
                                   />
                                   <div className="flex-1">
                                     <div className="flex items-center space-x-2 mb-1">
@@ -606,7 +642,12 @@ export default function Provider() {
                                       </div>
                                     </div>
                                     <p className="text-gray-700 text-sm mb-1">{review.comment}</p>
-                                    <p className="text-xs text-gray-500">{review.date}</p>
+                                    <div className="flex items-center justify-between text-xs text-gray-500">
+                                      <span>
+                                        Service: {typeof review.service === 'object' ? review.service?.title : review.service}
+                                      </span>
+                                      <span>{review.date}</span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -777,7 +818,7 @@ export default function Provider() {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                           <div>
                             <h3 className="text-xl font-bold text-gray-900">
-                              Reviews ({mockReviews.length})
+                              Reviews ({reviewStats?.totalReviews || 0})
                             </h3>
                             <div className="flex items-center space-x-2 mt-2">
                               <div className="flex items-center">
@@ -785,14 +826,16 @@ export default function Provider() {
                                   <Star 
                                     key={i} 
                                     className={`w-5 h-5 ${
-                                      i < Math.floor(4.7) 
+                                      i < Math.floor(reviewStats?.averageRating || 0) 
                                         ? "text-yellow-400 fill-current" 
                                         : "text-gray-300"
                                     }`} 
                                   />
                                 ))}
                               </div>
-                              <span className="text-sm text-gray-600">4.7 out of 5</span>
+                              <span className="text-sm text-gray-600">
+                                {reviewStats?.averageRating?.toFixed(1) || 0} out of 5
+                              </span>
                             </div>
                           </div>
                           <div className="mt-4 md:mt-0">
@@ -800,6 +843,7 @@ export default function Provider() {
                               value={reviewFilter}
                               onChange={(e) => setReviewFilter(e.target.value)}
                               className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                              disabled={reviewsLoading}
                             >
                               <option value="all">All Reviews</option>
                               <option value="5">5 Stars</option>
@@ -811,41 +855,114 @@ export default function Provider() {
                           </div>
                         </div>
                       </div>
-                      <div className="divide-y divide-gray-100">
-                        {mockReviews.map((review) => (
-                          <div key={review.id} className="p-6 hover:bg-gray-50 transition-colors">
-                            <div className="flex items-start space-x-4">
-                              <img 
-                                src={review.clientAvatar} 
-                                alt={review.clientName}
-                                className="w-12 h-12 rounded-full border border-gray-200 object-cover"
-                              />
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div>
-                                    <h4 className="font-semibold text-gray-900">{review.clientName}</h4>
-                                    <div className="flex items-center space-x-2 mt-1">
-                                      <div className="flex items-center">
-                                        {[...Array(review.rating)].map((_, i) => (
-                                          <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                                        ))}
+                      
+                      {/* Loading State */}
+                      {reviewsLoading && (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="text-center">
+                            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+                            <p className="text-gray-600">Loading reviews...</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Reviews List */}
+                      {!reviewsLoading && (
+                        <div className="divide-y divide-gray-100">
+                          {reviews.length > 0 ? (
+                            reviews.map((review) => (
+                              <div key={review.id} className="p-6 hover:bg-gray-50 transition-colors">
+                                <div className="flex items-start space-x-4">
+                                  <img 
+                                    src={review.clientAvatar} 
+                                    alt={review.clientName}
+                                    className="w-12 h-12 rounded-full border border-gray-200 object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.src = `https://picsum.photos/seed/${review.reviewerId}/60/60`;
+                                    }}
+                                  />
+                                  <div className="flex-1">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900">{review.clientName}</h4>
+                                        <div className="flex items-center space-x-2 mt-1">
+                                          <div className="flex items-center">
+                                            {[...Array(5)].map((_, i) => (
+                                              <Star 
+                                                key={i} 
+                                                className={`w-4 h-4 ${
+                                                  i < review.rating 
+                                                    ? "text-yellow-400 fill-current" 
+                                                    : "text-gray-300"
+                                                }`} 
+                                              />
+                                            ))}
+                                          </div>
+                                          <span className="text-sm text-gray-400">{review.date}</span>
+                                        </div>
                                       </div>
-                                      <span className="text-sm text-gray-400">{review.date}</span>
+                                      {/* Service Info */}
+                                      {typeof review.service === 'object' && review.service && (
+                                        <div className="ml-4 text-right">
+                                          <div className="flex items-center space-x-2">
+                                            {review.service.image && (
+                                              <img 
+                                                src={review.service.image} 
+                                                alt={review.service.title}
+                                                className="w-8 h-8 rounded object-cover"
+                                                onError={(e) => {
+                                                  e.currentTarget.style.display = 'none';
+                                                }}
+                                              />
+                                            )}
+                                            <div>
+                                              <p className="text-sm font-medium text-gray-900 truncate max-w-32">
+                                                {review.service.title}
+                                              </p>
+                                              <p className="text-xs text-gray-500">{review.service.category}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <p className="text-gray-600 text-sm leading-relaxed mb-3">{review.comment}</p>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm text-gray-500">
+                                        Service: {typeof review.service === 'object' ? review.service?.title : review.service}
+                                      </span>
+                                      <button className="text-sm text-gray-500 hover:text-blue-600 transition-colors">
+                                        Helpful ({review.helpful})
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
-                                <p className="text-gray-600 text-sm leading-relaxed mb-3">{review.comment}</p>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-gray-500">Project: {review.projectTitle}</span>
-                                  <button className="text-sm text-gray-500 hover:text-blue-600 transition-colors">
-                                    Helpful ({review.helpful})
-                                  </button>
-                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12">
+                              <div className="text-gray-500">
+                                <Star className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No Reviews Yet</h3>
+                                <p className="text-gray-600 mb-4">
+                                  This provider hasn't received any reviews yet.
+                                </p>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          )}
+                          
+                          {/* Load More Button */}
+                          {hasMoreReviews && !reviewsLoading && (
+                            <div className="p-6 text-center border-t border-gray-100">
+                              <button
+                                onClick={() => fetchProviderReviews(providerProfile?.id!, reviewPage + 1, false)}
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                              >
+                                Load More Reviews
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 

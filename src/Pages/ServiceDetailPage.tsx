@@ -6,12 +6,17 @@ import {
   CheckCircle, Users, ThumbsUp
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
+import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
 import { userApi, type ProviderProfile } from '../api/userApi';
+import { messagingApi } from '../api/messagingApi';
+import { debugMessagingState } from '../utils/messagingDebug';
+import { useAuth } from '../contexts/AuthContext';
 import Breadcrumb from '../components/services/Breadcrumb';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import toast, { Toaster } from 'react-hot-toast';
 import { cn } from '../utils/utils';
+import { confirmationApi } from '../api/confirmationApi';
 
 interface DetailedService {
   id: string;
@@ -20,6 +25,7 @@ interface DetailedService {
   price: number;
   currency: string;
   images: string[];
+  videoUrl?: string;
   category: {
     name: string;
     slug: string;
@@ -63,10 +69,12 @@ type TabType = 'overview' | 'reviews' | 'chat';
 const ServiceDetailPage: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
+  const { user, isLoggedIn } = useAuth();
   const [service, setService] = useState<DetailedService | null>(null);
   const [provider, setProvider] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [providerLoading, setProviderLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -85,38 +93,13 @@ const ServiceDetailPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   
   // Reviews state  
-  const [reviews] = useState<Review[]>([
-    {
-      id: '1',
-      rating: 5,
-      comment: 'Excellent service! Very professional and delivered exactly what I needed. Highly recommend!',
-      clientName: 'Sarah Johnson',
-      clientAvatar: 'https://picsum.photos/seed/client1/60/60',
-      date: '2025-08-15',
-      helpful: 12,
-      service: 'Web Development'
-    },
-    {
-      id: '2',
-      rating: 4,
-      comment: 'Great work quality and timely delivery. Communication could be improved but overall very satisfied.',
-      clientName: 'Michael Chen',
-      clientAvatar: 'https://picsum.photos/seed/client2/60/60',
-      date: '2025-08-10',
-      helpful: 8,
-      service: 'Logo Design'
-    },
-    {
-      id: '3',
-      rating: 5,
-      comment: 'Outstanding! Exceeded my expectations. Will definitely work with this provider again.',
-      clientName: 'Emma Davis',
-      clientAvatar: 'https://picsum.photos/seed/client3/60/60',
-      date: '2025-08-05',
-      helpful: 15,
-      service: 'Content Writing'
-    }
-  ]);
+  const [reviews, setReviews] = useState<ServiceReview[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  });
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState('all');
 
   // Auto-slide effect for images
@@ -139,6 +122,7 @@ const ServiceDetailPage: React.FC = () => {
       price: Number(apiService.price),
       currency: apiService.currency,
       images: apiService.images && apiService.images.length > 0 ? apiService.images : ['https://picsum.photos/seed/service/800/400'],
+      videoUrl: apiService.videoUrl,
       category: {
         name: apiService.category?.name || 'Service',
         slug: apiService.category?.slug || 'general'
@@ -175,6 +159,37 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
+  // Fetch service reviews
+  const fetchServiceReviews = async (serviceId: string) => {
+    try {
+      setReviewsLoading(true);
+      const ratingFilter = reviewFilter === 'all' ? undefined : parseInt(reviewFilter);
+      
+      const response = await serviceReviewApi.getServiceReviewsDetailed(serviceId, {
+        page: 1,
+        limit: 20,
+        rating: ratingFilter
+      });
+      
+      if (response.success) {
+        setReviews(response.data.reviews);
+        setReviewStats(response.data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch service reviews:', error);
+      // Don't show error toast as reviews are not critical for page function
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Refetch reviews when filter changes
+  useEffect(() => {
+    if (service) {
+      fetchServiceReviews(service.id);
+    }
+  }, [reviewFilter, service?.id]);
+
   useEffect(() => {
     const fetchService = async () => {
       if (!serviceId) return;
@@ -182,8 +197,20 @@ const ServiceDetailPage: React.FC = () => {
       try {
         setLoading(true);
         
-        // Fetch service from API
-        const response = await serviceApi.getServiceById(serviceId);
+        // Try to fetch service directly first
+        let response;
+        try {
+          response = await serviceApi.getServiceById(serviceId);
+        } catch (directError) {
+          console.log('Failed to get service by ID, trying conversation ID:', directError);
+          // If direct service fetch fails, try getting service by conversation ID
+          try {
+            response = await serviceApi.getServiceByConversationId(serviceId);
+          } catch (conversationError) {
+            console.error('Failed to get service by conversation ID:', conversationError);
+            throw conversationError;
+          }
+        }
         
         if (response.success) {
           const transformedService = transformApiService(response.data);
@@ -193,6 +220,9 @@ const ServiceDetailPage: React.FC = () => {
           if (response.data.provider?.id) {
             await fetchProviderDetails(response.data.provider.id);
           }
+          
+          // Fetch service reviews
+          await fetchServiceReviews(response.data.id);
         } else {
           toast.error('Service not found');
           navigate('/services');
@@ -224,9 +254,135 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
-  const handleBookNow = () => {
-    // TODO: Implement booking functionality
-    toast.success('Booking functionality coming soon!');
+  const handleBookNow = async () => {
+    // Check if user is logged in
+    if (!isLoggedIn || !user) {
+      toast.error('Please log in to book a service');
+      navigate('/signin');
+      return;
+    }
+
+    // Check if provider ID is available
+    if (!service?.provider?.id) {
+      toast.error('Provider information not available');
+      return;
+    }
+
+    // Debug logging
+    console.log('=== BOOK NOW DEBUG ===');
+    console.log('Current user:', user);
+    console.log('Current user ID:', user.id);
+    console.log('Service provider ID:', service.provider.id);
+    console.log('Service:', service);
+
+    // Validate user IDs
+    if (!user.id) {
+      toast.error('Invalid user session. Please log in again.');
+      return;
+    }
+
+    if (!service.provider.id) {
+      toast.error('Invalid provider information.');
+      return;
+    }
+
+    // Get the provider's user ID (not the provider ID)
+    let providerUserId: string;
+    
+    if (provider?.userId) {
+      // We have the provider details, use the userId
+      providerUserId = provider.userId;
+      console.log('Using provider user ID from provider details:', providerUserId);
+    } else {
+      // We need to fetch the provider to get the userId
+      try {
+        console.log('Fetching provider details to get user ID...');
+        const providerData = await userApi.getProviderById(service.provider.id);
+        providerUserId = providerData.userId;
+        console.log('Retrieved provider user ID:', providerUserId);
+      } catch (error) {
+        console.error('Failed to fetch provider details:', error);
+        toast.error('Unable to get provider information. Please try again.');
+        return;
+      }
+    }
+
+    try {
+      setBookingLoading(true);
+      
+      // Check if conversation already exists (use provider's user ID, not provider ID)
+      console.log('Checking for existing conversation between:', user.id, 'and', providerUserId);
+      const existingConversation = await messagingApi.findConversationByParticipants(
+        user.id, 
+        providerUserId
+      );
+
+      if (existingConversation) {
+        console.log('Found existing conversation:', existingConversation);
+        toast.success('Opening existing conversation...');
+        navigate(`/messaging?conversation=${existingConversation.id}`);
+        return;
+      }
+      
+      // Create conversation between user and provider's user ID, including serviceId
+      const conversationData = {
+        userIds: [user.id, providerUserId],
+        title: service.title,
+        serviceId: service.id // Pass the serviceId to backend
+      };
+
+      console.log('Creating conversation with data:', conversationData);
+
+      const conversation = await messagingApi.createConversation(conversationData);
+      
+      console.log('Conversation created:', conversation);
+      
+      // Send initial message (use provider's user ID, not provider ID)
+      const initialMessage = `Hi! I'm interested in your service: ${service.title}`;
+      console.log('Sending initial message...');
+      
+      await messagingApi.sendMessage({
+        content: initialMessage,
+        fromId: user.id,
+        toId: providerUserId,
+        conversationId: conversation.id
+      });
+
+      console.log('Initial message sent successfully');
+      
+      toast.success('Conversation started! Redirecting to messages...');
+      
+      // Ensure confirmation record exists for this conversation
+      try {
+        await confirmationApi.ensure(conversation.id);
+      } catch (ensureErr) {
+        console.warn('Failed to ensure confirmation record (non-blocking):', ensureErr);
+      }
+      
+      // Navigate to the specific conversation
+      navigate(`/messaging?conversation=${conversation.id}`);
+      
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      
+      // More specific error handling
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes('User not found')) {
+        console.log('=== USER NOT FOUND ERROR ===');
+        console.log('This suggests the user IDs are not valid in the backend database');
+        console.log('User ID:', user.id);
+        console.log('Provider User ID:', providerUserId);
+        debugMessagingState();
+        toast.error('User validation failed. Please try logging out and back in.');
+      } else if (errorMessage.includes('conversation')) {
+        toast.error('Failed to create conversation. Please try again.');
+      } else {
+        toast.error('Failed to start conversation. Please try again.');
+      }
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const toggleWishlist = () => {
@@ -282,14 +438,14 @@ const ServiceDetailPage: React.FC = () => {
     ? reviews 
     : reviews.filter(review => review.rating === parseInt(reviewFilter));
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-    : 0;
+  const averageRating = reviewStats.averageRating;
 
   const ratingDistribution = [5, 4, 3, 2, 1].map(rating => ({
     rating,
-    count: reviews.filter(r => r.rating === rating).length,
-    percentage: reviews.length > 0 ? (reviews.filter(r => r.rating === rating).length / reviews.length) * 100 : 0
+    count: reviewStats.ratingDistribution[rating as keyof typeof reviewStats.ratingDistribution],
+    percentage: reviewStats.totalReviews > 0 
+      ? (reviewStats.ratingDistribution[rating as keyof typeof reviewStats.ratingDistribution] / reviewStats.totalReviews) * 100 
+      : 0
   }));
 
   if (loading) {
@@ -355,6 +511,58 @@ const ServiceDetailPage: React.FC = () => {
           <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <Breadcrumb items={breadcrumbItems} />
           </div>
+
+          {/* Service Video Background Section */}
+          {(service.videoUrl || true) && (
+            <div className="mb-6 relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+              {/* Video Background */}
+              <div className="absolute inset-0 z-0">
+                {service.videoUrl ? (
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src={service.videoUrl} type="video/mp4" />
+                    <source src={service.videoUrl} type="video/webm" />
+                  </video>
+                ) : (
+                  // Default video (using HeroSection video as fallback)
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src="https://sg.fiverrcdn.com/packages_lp/cover_video.mp4" type="video/mp4" />
+                  </video>
+                )}
+                <div className="absolute inset-0 bg-black/50"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-purple-900/30"></div>
+              </div>
+
+              {/* Service Info Overlay */}
+              <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                  {service.title}
+                </h1>
+                <p className="text-lg md:text-xl text-white mb-6 max-w-2xl mx-auto leading-relaxed">
+                  {service.description || 'Professional service by verified provider'}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 text-white font-semibold">
+                    <span className="text-2xl">{service.currency} {service.price}</span>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 text-white">
+                    <span className="text-sm">by {service.provider.name}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
             {/* Main Content - Takes 3 columns */}
@@ -483,7 +691,7 @@ const ServiceDetailPage: React.FC = () => {
                       <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-200">
                         <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                         <span className="font-medium text-gray-800">{averageRating.toFixed(1)}</span>
-                        <span className="text-gray-500 ml-1">({reviews.length} reviews)</span>
+                        <span className="text-gray-500 ml-1">({reviewStats.totalReviews} reviews)</span>
                       </div>
                       <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-200">
                         <Eye className="w-4 h-4 mr-1 text-blue-500" />
@@ -522,7 +730,7 @@ const ServiceDetailPage: React.FC = () => {
                   <nav className="flex space-x-1 px-6">
                     {[
                       { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' },
-                      { id: 'reviews', label: `Reviews (${reviews.length})`, icon: Star, color: 'yellow' },
+                      { id: 'reviews', label: `Reviews (${reviewStats.totalReviews})`, icon: Star, color: 'yellow' },
                       { id: 'chat', label: 'Chat with Provider', icon: MessageCircle, color: 'green' }
                     ].map((tab) => {
                       const IconComponent = tab.icon;
@@ -656,7 +864,7 @@ const ServiceDetailPage: React.FC = () => {
                                 />
                               ))}
                             </div>
-                            <p className="text-gray-600 font-medium">Based on {reviews.length} reviews</p>
+                            <p className="text-gray-600 font-medium">Based on {reviewStats.totalReviews} reviews</p>
                           </div>
                           <div className="space-y-3">
                             {ratingDistribution.map((dist) => (
@@ -702,7 +910,23 @@ const ServiceDetailPage: React.FC = () => {
 
                       {/* Reviews List */}
                       <div className="space-y-4">
-                        {filteredReviews.map((review) => (
+                        {reviewsLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="ml-2 text-gray-600">Loading reviews...</span>
+                          </div>
+                        ) : filteredReviews.length === 0 ? (
+                          <div className="text-center py-8 bg-gray-50 rounded-xl">
+                            <div className="text-gray-500 mb-2">No reviews found</div>
+                            <div className="text-sm text-gray-400">
+                              {reviewFilter === 'all' 
+                                ? 'Be the first to review this service!' 
+                                : `No ${reviewFilter}-star reviews yet.`
+                              }
+                            </div>
+                          </div>
+                        ) : (
+                          filteredReviews.map((review) => (
                           <div key={review.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-200 group">
                             <div className="flex items-start space-x-4">
                               <div className="relative">
@@ -732,7 +956,7 @@ const ServiceDetailPage: React.FC = () => {
                                       <span className="text-sm text-gray-500">• {review.date}</span>
                                       {review.service && (
                                         <span className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs px-3 py-1 rounded-full border border-blue-200">
-                                          {review.service}
+                                          {typeof review.service === 'string' ? review.service : review.service.title}
                                         </span>
                                       )}
                                     </div>
@@ -751,7 +975,8 @@ const ServiceDetailPage: React.FC = () => {
                               </div>
                             </div>
                           </div>
-                        ))}
+                        ))
+                        )}
                       </div>
                     </div>
                   )}
@@ -940,9 +1165,17 @@ const ServiceDetailPage: React.FC = () => {
                 <div className="space-y-3">
                   <button
                     onClick={handleBookNow}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600"
+                    disabled={bookingLoading}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    Book Now
+                    {bookingLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Creating conversation...
+                      </div>
+                    ) : (
+                      'Book Now'
+                    )}
                   </button>
                   
                   <button
