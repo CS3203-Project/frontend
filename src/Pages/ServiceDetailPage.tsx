@@ -252,6 +252,10 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
+ Umesha_mid
+  const handleBookNow = () => {
+    // Navigate to messaging page when booking
+    navigate('/messaging');
   const handleBookNow = async () => {
     // Check if user is logged in
     if (!isLoggedIn || !user) {
@@ -381,6 +385,7 @@ const ServiceDetailPage: React.FC = () => {
     } finally {
       setBookingLoading(false);
     }
+ yasith_new
   };
 
   const toggleWishlist = () => {
