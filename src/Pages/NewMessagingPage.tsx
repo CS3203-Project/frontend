@@ -147,6 +147,7 @@ const MessagingContentInner: React.FC<{ conversationId: string | null; currentUs
               {activeConversation && (
                 <>
                   <ConfirmationPanel
+                    key={activeConversation.id}
                     conversationId={activeConversation.id}
                     currentUserRole={currentUserRole}
                   />

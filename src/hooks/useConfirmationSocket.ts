@@ -11,6 +11,8 @@ export function useConfirmationSocket(conversationId: string, onUpdate: (confirm
   useEffect(() => {
     if (!conversationId || !userId) return;
 
+    console.log('🔌 Setting up confirmation socket for conversation:', conversationId);
+
     // Connect if not already
     if (!socket.connected) socket.connect();
 
@@ -20,15 +22,20 @@ export function useConfirmationSocket(conversationId: string, onUpdate: (confirm
 
     // Listen for confirmation updates
     const handler = (data: { conversationId: string; confirmation: any }) => {
-      console.log('Received confirmation_updated event:', data); // Debug log
+      console.log('📡 Received confirmation_updated event:', data);
+      // Only call onUpdate for the current conversation
       if (data.conversationId === conversationId) {
+        console.log('✅ Confirmation update is for current conversation:', conversationId);
         onUpdate(data.confirmation);
+      } else {
+        console.log('🚫 Ignoring confirmation update for different conversation:', data.conversationId, 'current:', conversationId);
       }
     };
     socket.on('confirmation_updated', handler);
 
     // Cleanup on unmount or conversation change
     return () => {
+      console.log('🧹 Cleaning up confirmation socket for conversation:', conversationId);
       socket.emit('conversation:leave', { userId });
       socket.off('confirmation_updated', handler);
     };

@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { messagingApi } from '../../api/messagingApi';
+import { userApi } from '../../api/userApi';
 import type { ConversationWithLastMessage, MessageResponse } from '../../api/messagingApi';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MessagingContextType {
   conversations: ConversationWithLastMessage[];
@@ -34,6 +36,7 @@ interface MessagingProviderProps {
 }
 
 export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, userId }) => {
+  const { user: currentUser } = useAuth(); // Get current user data for email notifications
   const [conversations, setConversations] = useState<ConversationWithLastMessage[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationWithLastMessage | null>(null);
   const [messages, setMessages] = useState<MessageResponse[]>([]);
@@ -144,13 +147,51 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       // Check if WebSocket is connected, use WebSocket if available, fallback to REST
       if (webSocket.isConnected) {
         console.log('📤 Sending message via WebSocket');
-        // Send via WebSocket
+        
+        // Prepare user data for email notifications
+        let senderName: string | undefined;
+        let senderEmail: string | undefined;
+        let recipientName: string | undefined;
+        let recipientEmail: string | undefined;
+
+        // Get sender data from current user
+        if (currentUser) {
+          senderName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
+          senderEmail = currentUser.email;
+        }
+
+        // Get recipient data - try to fetch from API
+        try {
+          const recipientUser = await userApi.getUserById(recipientId);
+          if (recipientUser) {
+            recipientName = `${recipientUser.firstName} ${recipientUser.lastName}`.trim();
+            recipientEmail = recipientUser.email;
+          }
+        } catch (error) {
+          console.warn('Failed to fetch recipient user data:', error);
+          // Continue without recipient data - message will still send but no email notification
+        }
+
+        // Send via WebSocket with user data for email notifications
         webSocket.emit('message:send', {
           content,
           fromId: userId,
           toId: recipientId,
           conversationId: activeConversation.id,
+          // Include user data for email notifications
+          senderName,
+          senderEmail,
+          recipientName,
+          recipientEmail,
         });
+        
+        console.log('📧 WebSocket message sent with email data:', {
+          senderName,
+          senderEmail,
+          recipientName,
+          recipientEmail,
+        });
+        
         // Note: The actual message will be added to the UI when we receive the 'message:sent' confirmation
         // or when the backend broadcasts it back to us
       } else {

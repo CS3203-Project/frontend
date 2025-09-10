@@ -20,26 +20,38 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
   const [isMinimized, setIsMinimized] = useState(false);
   const [serviceFeeInput, setServiceFeeInput] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const isCustomer = currentUserRole === 'USER';
   const isProvider = currentUserRole === 'PROVIDER';
+
+  // Clear state when conversation changes
+  useEffect(() => {
+    if (conversationId !== currentConversationId) {
+      setRecord(null);
+      setServiceFeeInput('');
+      setHasUnsavedChanges(false);
+      setSaving(false);
+      setCurrentConversationId(conversationId);
+    }
+  }, [conversationId, currentConversationId]);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         const rec = await confirmationApi.ensure(conversationId);
-        if (mounted) {
+        if (mounted && conversationId === currentConversationId) {
           setRecord(rec);
           setServiceFeeInput(rec.serviceFee?.toString() || '');
         }
       } catch (e) {
-        console.error('Failed to load confirmation record', e);
+        console.error('Failed to load confirmation record:', e);
       }
     })();
     return () => { 
       mounted = false;
     };
-  }, [conversationId]);
+  }, [conversationId, currentConversationId]);
 
   // Function to save service fee (called on Enter or blur)
   const saveServiceFee = async () => {
@@ -91,8 +103,11 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole })
   };
 
   useConfirmationSocket(conversationId, (confirmation) => {
-    setRecord(confirmation);
-    setServiceFeeInput(confirmation.serviceFee?.toString() || '');
+    // Only update if it's for the current conversation
+    if (confirmation.conversationId === conversationId) {
+      setRecord(confirmation);
+      setServiceFeeInput(confirmation.serviceFee?.toString() || '');
+    }
   }, user?.id || '');
 
   if (!record) return null;
