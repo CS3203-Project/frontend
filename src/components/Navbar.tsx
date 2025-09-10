@@ -151,7 +151,7 @@ const Navbar = () => {
     { name: "Pricing", href: "#" },
     { name: "Success Stories", href: "/stories" },
     { name: "Support", href: "/support" },
-    { name: "Messages", href: "/messaging" }
+    { name: "Messages", href: "/conversation-hub" }
   ];
 
   return (

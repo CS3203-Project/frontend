@@ -320,7 +320,7 @@ const ServiceDetailPage: React.FC = () => {
       if (existingConversation) {
         console.log('Found existing conversation:', existingConversation);
         toast.success('Opening existing conversation...');
-        navigate(`/messaging?conversation=${existingConversation.id}`);
+        navigate(`/conversation/${existingConversation.id}`);
         return;
       }
       
@@ -360,7 +360,7 @@ const ServiceDetailPage: React.FC = () => {
       }
       
       // Navigate to the specific conversation
-      navigate(`/messaging?conversation=${conversation.id}`);
+      navigate(`/conversation/${conversation.id}`);
       
     } catch (error) {
       console.error('Failed to create conversation:', error);
