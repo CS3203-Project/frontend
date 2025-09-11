@@ -27,6 +27,7 @@ import ConversationView from "./Pages/ConversationView.tsx";
 import AdminDashboard from "./Pages/AdminDashboard.tsx";
 import RateCustomerPage from "./Pages/RateCustomerPage.tsx";
 import RateServicePage from "./Pages/RateServicePage.tsx";
+import AdminLogin from "./Pages/AdminLogin.tsx";
 
 function App() {
   return (
@@ -56,9 +57,11 @@ function App() {
             <Route path="/rate-customer/:conversationId" element={<RateCustomerPage />} />
             <Route path="/rate-service/:serviceId" element={<RateServicePage />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            
+            <Route path="/admin-login" element={<AdminLogin/>} />
+
             <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
-            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />          
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />  
+                    
           </Routes>
         </Layout>
       </Router>
