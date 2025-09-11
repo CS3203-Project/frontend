@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
+import { Chatbot } from './components/Chatbot';
 import Homepage from './Pages/Homepage.js'
 import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
@@ -60,6 +61,9 @@ function App() {
             <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
             <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />          
           </Routes>
+          
+          {/* Global Chatbot - appears on all pages */}
+          <Chatbot />
         </Layout>
       </Router>
     </AuthProvider>
