@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar, 
   Shield, Award, ChevronLeft, ChevronRight, Send, Bookmark, Share2, Eye,
-  CheckCircle, Users, ThumbsUp
+  CheckCircle, Users, ThumbsUp, User, GraduationCap
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
@@ -104,6 +104,21 @@ const ServiceDetailPage: React.FC = () => {
 
   // Transform ServiceResponse (API data) to DetailedService format
   const transformApiService = (apiService: ServiceResponse): DetailedService => {
+    console.log('🔄 Transforming API service data:', apiService);
+    console.log('🏢 Service provider data from API:');
+    console.log('  - Provider ID:', apiService.provider?.id);
+    console.log('  - Provider User Data:', apiService.provider?.user);
+    if (apiService.provider?.user) {
+      console.log('    - First Name:', apiService.provider.user.firstName);
+      console.log('    - Last Name:', apiService.provider.user.lastName);
+      console.log('    - Email:', apiService.provider.user.email);
+      console.log('    - Image URL:', apiService.provider.user.imageUrl);
+      console.log('    - Location:', (apiService.provider.user as any).location);
+      console.log('    - Phone:', (apiService.provider.user as any).phone);
+    }
+    console.log('  - Average Rating:', apiService.provider?.averageRating);
+    console.log('  - Total Reviews:', apiService.provider?.totalReviews);
+    
     return {
       id: apiService.id,
       title: apiService.title || 'Untitled Service',
@@ -124,7 +139,7 @@ const ServiceDetailPage: React.FC = () => {
           (`${apiService.provider.user.firstName || ''} ${apiService.provider.user.lastName || ''}`.trim() || apiService.provider.user.email || 'Unknown Provider') 
           : 'Unknown Provider',
         email: apiService.provider?.user?.email,
-        avatar: '/api/placeholder/60/60',
+        avatar: 'https://ui-avatars.com/api/?name=Provider&background=6366f1&color=fff&size=60',
         rating: 4.5, // Default rating
         reviews: 23 // Default reviews
       },
@@ -138,10 +153,29 @@ const ServiceDetailPage: React.FC = () => {
   const fetchProviderDetails = async (providerId: string) => {
     try {
       setProviderLoading(true);
+      console.log('🔍 Fetching provider details for ID:', providerId);
       const providerData = await userApi.getProviderById(providerId);
+      console.log('✅ Provider data received:', providerData);
+      console.log('📋 Provider fields breakdown:');
+      console.log('  - Provider ID:', providerData?.id);
+      console.log('  - User ID:', providerData?.userId);
+      console.log('  - Bio:', providerData?.bio);
+      console.log('  - Skills:', providerData?.skills);
+      console.log('  - Qualifications:', providerData?.qualifications);
+      console.log('  - Logo URL:', providerData?.logoUrl);
+      console.log('  - Average Rating:', providerData?.averageRating);
+      console.log('  - Total Reviews:', providerData?.totalReviews);
+      console.log('  - Is Verified:', providerData?.isVerified);
+      console.log('👤 User details (via relation):');
+      console.log('  - First Name:', providerData?.user?.firstName);
+      console.log('  - Last Name:', providerData?.user?.lastName);
+      console.log('  - Email:', providerData?.user?.email);
+      console.log('  - Image URL:', providerData?.user?.imageUrl);
+      console.log('  - Location:', providerData?.user?.location);
+      console.log('  - Phone:', providerData?.user?.phone);
       setProvider(providerData);
     } catch (error) {
-      console.error('Failed to fetch provider details:', error);
+      console.error('❌ Failed to fetch provider details:', error);
       // Don't show error toast for provider details failure as it's not critical
     } finally {
       setProviderLoading(false);
@@ -482,7 +516,7 @@ const ServiceDetailPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100/30 to-blue-50/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100/30 to-blue-50/20 dark:from-black dark:via-gray-900/50 dark:to-blue-950/30 flex flex-col">
       <Navbar />
       
       <main className="flex-1 mt-16">
@@ -490,14 +524,14 @@ const ServiceDetailPage: React.FC = () => {
           {/* Enhanced Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-blue-700 mb-4 transition-all duration-300 group bg-white rounded-xl px-4 py-2 shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300"
+            className="flex items-center text-gray-600 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400 mb-4 transition-all duration-300 group bg-white dark:bg-black/80 rounded-xl px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600"
           >
             <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back</span>
           </button>
 
           {/* Enhanced Breadcrumb */}
-          <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="mb-6 bg-white dark:bg-black/80 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
@@ -553,12 +587,11 @@ const ServiceDetailPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-            {/* Main Content - Takes 3 columns */}
-            <div className="xl:col-span-3">
+          {/* Main Content - Full Width */}
+          <div>
               {/* Enhanced Compact Image Gallery */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6 group border border-gray-100">
-                <div className="aspect-[16/10] relative bg-gradient-to-br from-gray-50 to-blue-50">
+              <div className="bg-white dark:bg-black/90 rounded-2xl shadow-lg overflow-hidden mb-6 group border border-gray-100 dark:border-gray-700">
+                <div className="aspect-[16/10] relative bg-gradient-to-br from-gray-50 to-blue-50 dark:from-black/70 dark:to-blue-950/30">
                   <img
                     src={service.images[selectedImage]}
                     alt={service.title}
@@ -576,24 +609,24 @@ const ServiceDetailPage: React.FC = () => {
                         "p-2.5 rounded-xl backdrop-blur-md border transition-all duration-300 hover:scale-110 shadow-lg",
                         isWishlisted 
                           ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-400 shadow-red-200' 
-                          : 'bg-white/95 text-gray-700 border-white/70 hover:bg-red-50 hover:text-red-500 hover:border-red-200'
+                          : 'bg-white/95 dark:bg-black/80 text-gray-700 dark:text-gray-300 border-white/70 dark:border-gray-600/70 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 hover:border-red-200 dark:hover:border-red-600'
                       )}
                     >
                       <Heart className={cn("w-4 h-4", isWishlisted && "fill-current")} />
                     </button>
-                    <button className="p-2.5 rounded-xl bg-white/95 backdrop-blur-md border border-white/70 text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-300 hover:scale-110 shadow-lg">
+                    <button className="p-2.5 rounded-xl bg-white/95 dark:bg-black/80 backdrop-blur-md border border-white/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-600 transition-all duration-300 hover:scale-110 shadow-lg">
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button className="p-2.5 rounded-xl bg-white/95 backdrop-blur-md border border-white/70 text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 hover:border-yellow-200 transition-all duration-300 hover:scale-110 shadow-lg">
+                    <button className="p-2.5 rounded-xl bg-white/95 dark:bg-black/80 backdrop-blur-md border border-white/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 dark:hover:text-yellow-400 hover:border-yellow-200 dark:hover:border-yellow-600 transition-all duration-300 hover:scale-110 shadow-lg">
                       <Bookmark className="w-4 h-4" />
                     </button>
                   </div>
 
                   {/* Refined slide indicator */}
                   <div className="absolute top-4 left-4">
-                    <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-md rounded-xl px-3 py-2 border border-white/50 shadow-lg">
-                      <Eye className="w-4 h-4 text-blue-600" />
-                      <span className="text-gray-700 text-sm font-medium">{selectedImage + 1}/{service.images.length}</span>
+                    <div className="flex items-center space-x-2 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-xl px-3 py-2 border border-white/50 dark:border-gray-600/50 shadow-lg">
+                      <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{selectedImage + 1}/{service.images.length}</span>
                       {autoSlide && (
                         <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse" />
                       )}
@@ -605,13 +638,13 @@ const ServiceDetailPage: React.FC = () => {
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 backdrop-blur-md rounded-xl text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 hover:scale-110 shadow-lg border border-white/50"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-black/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-lg border border-white/50 dark:border-gray-600/50"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 backdrop-blur-md rounded-xl text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 hover:scale-110 shadow-lg border border-white/50"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-black/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-lg border border-white/50 dark:border-gray-600/50"
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -643,7 +676,7 @@ const ServiceDetailPage: React.FC = () => {
                 
                 {/* Compact Image Thumbnails */}
                 {service.images.length > 1 && (
-                  <div className="flex space-x-2 p-3 overflow-x-auto scrollbar-hide bg-gradient-to-r from-gray-50 to-blue-50">
+                  <div className="flex space-x-2 p-3 overflow-x-auto scrollbar-hide bg-gradient-to-r from-gray-50 to-blue-50 dark:from-black/60 dark:to-blue-950/30">
                     {service.images.map((image, index) => (
                       <button
                         key={index}
@@ -655,8 +688,8 @@ const ServiceDetailPage: React.FC = () => {
                         className={cn(
                           "flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110",
                           selectedImage === index 
-                            ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg transform scale-105' 
-                            : 'border-gray-200 hover:border-blue-300 shadow-sm'
+                            ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-600/50 shadow-lg transform scale-105' 
+                            : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 shadow-sm'
                         )}
                       >
                         <img src={image} alt={`${service.title} ${index + 1}`} className="w-full h-full object-cover" />
@@ -667,24 +700,24 @@ const ServiceDetailPage: React.FC = () => {
               </div>
 
               {/* Enhanced Service Header */}
-              <div className="bg-gradient-to-br from-white to-gray-50/30 rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+              <div className="bg-gradient-to-br from-white to-gray-50/30 dark:from-black/90 dark:to-gray-900/30 rounded-2xl shadow-lg p-6 mb-6 border border-gray-100 dark:border-gray-700">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent mb-3">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-100 bg-clip-text text-transparent mb-3">
                       {service.title}
                     </h1>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                      <span className="bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 px-4 py-2 rounded-full font-medium shadow-sm border border-blue-200">
+                    <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      <span className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full font-medium shadow-sm border border-blue-200 dark:border-blue-700">
                         {service.category?.name}
                       </span>
-                      <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-200">
+                      <div className="flex items-center bg-white dark:bg-black/70 rounded-full px-3 py-1.5 shadow-sm border border-gray-200 dark:border-gray-700">
                         <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                        <span className="font-medium text-gray-800">{averageRating.toFixed(1)}</span>
-                        <span className="text-gray-500 ml-1">({reviewStats.totalReviews} reviews)</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{averageRating.toFixed(1)}</span>
+                        <span className="text-gray-500 dark:text-gray-400 ml-1">({reviewStats.totalReviews} reviews)</span>
                       </div>
-                      <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-200">
-                        <Eye className="w-4 h-4 mr-1 text-blue-500" />
-                        <span className="text-gray-700">1.2k views</span>
+                      <div className="flex items-center bg-white dark:bg-black/70 rounded-full px-3 py-1.5 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <Eye className="w-4 h-4 mr-1 text-blue-500 dark:text-blue-400" />
+                        <span className="text-gray-700 dark:text-gray-300">1.2k views</span>
                       </div>
                     </div>
                     {service.tags && service.tags.length > 0 && (
@@ -692,7 +725,7 @@ const ServiceDetailPage: React.FC = () => {
                         {service.tags.map((tag, index) => (
                           <span 
                             key={index} 
-                            className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded-full hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700 transition-all duration-300 cursor-default border border-gray-200 shadow-sm"
+                            className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-black/50 dark:to-gray-900/80 text-gray-700 dark:text-gray-300 text-xs px-3 py-1.5 rounded-full hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-950/50 dark:hover:to-cyan-950/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 cursor-default border border-gray-200 dark:border-gray-600 shadow-sm"
                           >
                             {tag}
                           </span>
@@ -700,12 +733,12 @@ const ServiceDetailPage: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <div className="text-right ml-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                  <div className="text-right ml-6 bg-white dark:bg-black/80 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
                       {service.currency} {service.price.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-500 mb-2">Starting price</div>
-                    <div className="flex items-center justify-center text-green-600 bg-green-50 rounded-lg px-3 py-1.5 border border-green-200">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Starting price</div>
+                    <div className="flex items-center justify-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-1.5 border border-green-200 dark:border-green-700">
                       <CheckCircle className="w-4 h-4 mr-1" />
                       <span className="text-sm font-medium">Available now</span>
                     </div>
@@ -714,8 +747,8 @@ const ServiceDetailPage: React.FC = () => {
               </div>
 
               {/* Modern Tabs Navigation */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6 border border-gray-100">
-                <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50/30">
+              <div className="bg-white dark:bg-black/90 rounded-2xl shadow-lg overflow-hidden mb-6 border border-gray-100 dark:border-gray-700">
+                <div className="border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-black/50 dark:to-blue-950/30">
                   <nav className="flex space-x-1 px-6">
                     {[
                       { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' },
@@ -731,15 +764,15 @@ const ServiceDetailPage: React.FC = () => {
                           className={cn(
                             "flex items-center py-4 px-4 border-b-3 font-medium text-sm transition-all duration-300 relative group",
                             isActive
-                              ? "border-blue-500 text-blue-600 bg-white rounded-t-xl shadow-sm"
-                              : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-white/50 rounded-t-lg"
+                              ? "border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 bg-white dark:bg-black/80 rounded-t-xl shadow-sm"
+                              : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-t-lg"
                           )}
                         >
                           <div className={cn(
                             "p-1.5 rounded-lg mr-2 transition-all duration-300",
                             isActive 
-                              ? "bg-blue-100 text-blue-600" 
-                              : "bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-500"
+                              ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400" 
+                              : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-500 dark:group-hover:text-blue-400"
                           )}>
                             <IconComponent className="w-4 h-4" />
                           </div>
@@ -754,38 +787,38 @@ const ServiceDetailPage: React.FC = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="p-6 bg-gradient-to-br from-white to-blue-50/20">
+                <div className="p-6 bg-gradient-to-br from-white to-blue-50/20 dark:from-black/80 dark:to-blue-950/20">
                   {/* Overview Tab */}
                   {activeTab === 'overview' && (
                     <div className="space-y-6">
                       {/* Description */}
-                      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center">
+                      <div className="bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
                           <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full mr-3"></div>
                           About this service
                         </h3>
-                        <p className="text-gray-700 leading-relaxed text-lg">
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
                           {service.description || 'No description available for this service.'}
                         </p>
                       </div>
 
                       {/* Working Hours */}
                       {service.workingTime && service.workingTime.length > 0 && (
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                            <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg mr-3">
-                              <Clock className="w-5 h-5 text-green-600" />
+                        <div className="bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                            <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg mr-3">
+                              <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
                             Working Hours
                           </h3>
-                          <div className="bg-gradient-to-r from-gray-50 to-blue-50/50 rounded-xl p-4 border border-gray-100">
+                          <div className="bg-gradient-to-r from-gray-50 to-blue-50/50 dark:from-black/40 dark:to-blue-950/30 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               {service.workingTime.map((time, index) => (
-                                <div key={index} className="flex items-center bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-                                  <div className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg mr-3">
-                                    <Calendar className="w-4 h-4 text-blue-600" />
+                                <div key={index} className="flex items-center bg-white dark:bg-black/70 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-300">
+                                  <div className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-lg mr-3">
+                                    <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                   </div>
-                                  <span className="text-gray-700 font-medium">{time}</span>
+                                  <span className="text-gray-700 dark:text-gray-300 font-medium">{time}</span>
                                 </div>
                               ))}
                             </div>
@@ -794,8 +827,8 @@ const ServiceDetailPage: React.FC = () => {
                       )}
 
                       {/* Service Features */}
-                      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                      <div className="bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                           <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full mr-3"></div>
                           What's included
                         </h3>
@@ -804,12 +837,12 @@ const ServiceDetailPage: React.FC = () => {
                             { icon: Shield, label: "Verified Provider", desc: "Background checked and verified", gradient: "from-blue-500 to-cyan-500" },
                             { icon: Award, label: "Quality Guaranteed", desc: "100% satisfaction guarantee", gradient: "from-yellow-500 to-orange-500" },
                             { icon: MessageCircle, label: "24/7 Support", desc: "Round the clock customer support", gradient: "from-green-500 to-emerald-500" },
-                            { icon: Users, label: "Experienced Team", desc: "5+ years of industry experience", gradient: "from-purple-500 to-pink-500" }
+                            { icon: Users, label: "Experienced Team", desc: "years of industry experience", gradient: "from-purple-500 to-pink-500" }
                           ].map((feature, index) => {
                             const IconComponent = feature.icon;
                             return (
                               <div key={index} className="group">
-                                <div className="flex items-start bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-xl p-4 hover:from-blue-50 hover:to-purple-50 transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:shadow-md">
+                                <div className="flex items-start bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-black/40 dark:to-blue-950/30 rounded-xl p-4 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950/40 dark:hover:to-purple-950/40 transition-all duration-300 border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md">
                                   <div className={cn(
                                     "w-12 h-12 bg-gradient-to-r rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg",
                                     feature.gradient
@@ -817,8 +850,8 @@ const ServiceDetailPage: React.FC = () => {
                                     <IconComponent className="w-5 h-5 text-white" />
                                   </div>
                                   <div>
-                                    <span className="font-semibold text-gray-900 group-hover:text-blue-900 transition-colors duration-300">{feature.label}</span>
-                                    <p className="text-sm text-gray-600 mt-1 group-hover:text-gray-700 transition-colors duration-300">{feature.desc}</p>
+                                    <span className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-900 dark:group-hover:text-blue-300 transition-colors duration-300">{feature.label}</span>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">{feature.desc}</p>
                                   </div>
                                 </div>
                               </div>
@@ -833,7 +866,7 @@ const ServiceDetailPage: React.FC = () => {
                   {activeTab === 'reviews' && (
                     <div className="space-y-6">
                       {/* Review Summary */}
-                      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100 shadow-sm">
+                      <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-2xl p-6 border border-blue-100 dark:border-blue-800 shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="text-center">
                             <div className="relative inline-block">
@@ -848,27 +881,27 @@ const ServiceDetailPage: React.FC = () => {
                                   key={i}
                                   className={cn(
                                     "w-5 h-5 transition-all duration-300",
-                                    i < Math.floor(averageRating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                                    i < Math.floor(averageRating) ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"
                                   )}
                                 />
                               ))}
                             </div>
-                            <p className="text-gray-600 font-medium">Based on {reviewStats.totalReviews} reviews</p>
+                            <p className="text-gray-600 dark:text-gray-400 font-medium">Based on {reviewStats.totalReviews} reviews</p>
                           </div>
                           <div className="space-y-3">
                             {ratingDistribution.map((dist) => (
                               <div key={dist.rating} className="flex items-center space-x-3">
-                                <span className="text-sm font-medium w-10 flex items-center">
+                                <span className="text-sm font-medium w-10 flex items-center text-gray-700 dark:text-gray-300">
                                   {dist.rating}
                                   <Star className="w-3 h-3 text-yellow-400 fill-current ml-0.5" />
                                 </span>
-                                <div className="flex-1 bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
                                   <div 
                                     className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2.5 rounded-full transition-all duration-500 ease-out"
                                     style={{ width: `${dist.percentage}%` }}
                                   />
                                 </div>
-                                <span className="text-sm text-gray-600 w-8 text-right">{dist.count}</span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">{dist.count}</span>
                               </div>
                             ))}
                           </div>
@@ -876,8 +909,8 @@ const ServiceDetailPage: React.FC = () => {
                       </div>
 
                       {/* Review Filters */}
-                      <div className="flex flex-wrap items-center gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                        <span className="text-sm font-semibold text-gray-700 flex items-center">
+                      <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-black/80 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
                           <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                           Filter by rating:
                         </span>
@@ -889,7 +922,7 @@ const ServiceDetailPage: React.FC = () => {
                               "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border",
                               reviewFilter === filter
                                 ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600 shadow-lg transform scale-105"
-                                : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border-gray-200 hover:border-blue-300 shadow-sm"
+                                : "bg-white dark:bg-black/70 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-400 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 shadow-sm"
                             )}
                           >
                             {filter === 'all' ? 'All' : `${filter} Stars`}
@@ -974,36 +1007,36 @@ const ServiceDetailPage: React.FC = () => {
                   {activeTab === 'chat' && (
                     <div className="space-y-4">
                       {/* Enhanced Chat Header */}
-                      <div className="flex items-center justify-between pb-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 -m-6 p-6 rounded-t-2xl">
+                      <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 -m-6 p-6 rounded-t-2xl">
                         <div className="flex items-center space-x-3">
                           <div className="relative">
                             <img
-                              src={provider?.user?.imageUrl || "/api/placeholder/40/40"}
+                              src={provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' : 'Provider') + '&background=6366f1&color=fff&size=40'}
                               alt="Provider"
-                              className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-lg"
+                              className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-600 shadow-lg"
                             />
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></div>
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900">
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                               {provider?.user ? 
                                 `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email :
                                 service?.provider?.name || 'Provider'
                               }
                             </h3>
-                            <p className="text-sm text-green-600 flex items-center">
+                            <p className="text-sm text-green-600 dark:text-green-400 flex items-center">
                               <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                               Online now
                             </p>
                           </div>
                         </div>
-                        <div className="text-sm text-gray-600 bg-white rounded-lg px-3 py-2 shadow-sm border">
+                        <div className="text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-black/80 rounded-lg px-3 py-2 shadow-sm border border-gray-200 dark:border-gray-600">
                           Usually responds within 1 hour
                         </div>
                       </div>
 
                       {/* Enhanced Chat Messages */}
-                      <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-transparent rounded-xl p-4 border border-gray-100">
+                      <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-transparent dark:from-black/30 dark:to-transparent rounded-xl p-4 border border-gray-100 dark:border-gray-700">
                         {chatMessages.map((message) => (
                           <div
                             key={message.id}
@@ -1017,14 +1050,14 @@ const ServiceDetailPage: React.FC = () => {
                                 "max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-md",
                                 message.sender === 'user'
                                   ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600"
-                                  : "bg-white text-gray-900 border-gray-200 hover:border-gray-300"
+                                  : "bg-white dark:bg-black/70 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
                               )}
                             >
                               <p className="text-sm leading-relaxed">{message.message}</p>
                               <div className="flex items-center justify-between mt-2">
                                 <p className={cn(
                                   "text-xs",
-                                  message.sender === 'user' ? "text-blue-100" : "text-gray-500"
+                                  message.sender === 'user' ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
                                 )}>
                                   {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
@@ -1041,17 +1074,17 @@ const ServiceDetailPage: React.FC = () => {
                       </div>
 
                       {/* Enhanced Chat Input */}
-                      <div className="flex space-x-3 pt-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50/30 -m-6 p-6 rounded-b-2xl">
+                      <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-black/30 dark:to-blue-950/30 -m-6 p-6 rounded-b-2xl">
                         <div className="flex-1 relative">
                           <input
                             type="text"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder="Type your message..."
-                            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+                            className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-black/80 dark:text-gray-100 dark:placeholder-gray-400 shadow-sm transition-all duration-300 hover:shadow-md"
                             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                           />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                             
                           </div>
                         </div>
@@ -1062,7 +1095,7 @@ const ServiceDetailPage: React.FC = () => {
                             "px-6 py-3 rounded-2xl font-medium transition-all duration-300 flex items-center shadow-sm border",
                             newMessage.trim()
                               ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 border-blue-600 hover:shadow-lg transform hover:scale-105"
-                              : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                              : "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-200 dark:border-gray-600"
                           )}
                         >
                           <Send className="w-4 h-4 mr-2" />
@@ -1073,171 +1106,207 @@ const ServiceDetailPage: React.FC = () => {
                   )}
                 </div>
               </div>
-            </div>
+          </div>
 
-            {/* Enhanced Modern Sidebar */}
-            <div className="xl:col-span-1">
-              {/* Enhanced Provider Card */}
-              <div className="bg-gradient-to-br from-white to-gray-50/30 rounded-2xl shadow-lg p-6 mb-6 sticky top-24 border border-gray-100">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-6 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-3"></div>
-                  Service Provider
-                </h3>
-                
-                {providerLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center mb-6">
+          {/* Provider Section - Now at Bottom */}
+          <div className="mt-8">
+            {/* Enhanced Provider Card */}
+            <div className="bg-gradient-to-br from-white to-gray-50/30 dark:from-black/90 dark:to-gray-900/30 rounded-2xl shadow-lg p-6 mb-6 border border-gray-100 dark:border-gray-700 max-w-4xl mx-auto">
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+                <div className="w-2 h-6 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-3"></div>
+                Service Provider
+              </h3>
+              
+              {providerLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <>
+                  {console.log('🎨 Rendering provider in UI. Current provider state:', provider)}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    {/* Provider Info */}
+                    <div className="flex items-center">
                       <div className="relative">
                         <img
-                          src={provider?.user?.imageUrl || "/api/placeholder/60/60"}
+                          src={provider?.logoUrl || provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider') + '&background=6366f1&color=fff&size=100'}
                           alt="Provider"
-                          className="w-20 h-20 rounded-2xl mr-4 object-cover border-3 border-white shadow-lg ring-2 ring-gray-100"
+                          className="w-24 h-24 rounded-2xl mr-4 object-cover border-3 border-white shadow-lg ring-2 ring-gray-100"
                         />
-                        <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-md"></div>
+                        {provider?.isVerified && (
+                          <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                        )}
                       </div>
                       <div>
-                        <h4 className="text-lg font-bold text-gray-900 mb-1">
+                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                           {provider?.user ? 
-                            `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email :
-                            service?.provider?.name || 'Unknown Provider'
+                            `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' :
+                            'Provider'
                           }
                         </h4>
-                        <div className="flex items-center mb-2">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="text-gray-700 ml-1 font-medium">
-                            {provider?.averageRating?.toFixed(1) || '4.5'}
-                          </span>
-                          <span className="text-gray-500 ml-1">({provider?.totalReviews || 0} reviews)</span>
-                        </div>
+                        {provider?.isVerified && (
+                          <div className="flex items-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-1.5 text-sm font-medium mb-2">
+                            <Shield className="w-4 h-4 mr-1" />
+                            Verified Provider
+                          </div>
+                        )}
                         <div className="flex items-center">
-                          <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                          <span className="text-sm text-green-600 font-medium">Online now</span>
+                          <Star className="w-5 h-5 text-yellow-400 fill-current mr-1" />
+                          <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                            {provider?.averageRating ? provider.averageRating.toFixed(1) : 'New'}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400 ml-2">
+                            ({provider?.totalReviews || 0} reviews)
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-4 mb-6">
-                      <div className="flex items-center text-gray-600 bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-                        <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                          <MapPin className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <span className="font-medium">{provider?.user?.location || 'Location not specified'}</span>
-                      </div>
-                      <div className="flex items-center text-gray-600 bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-                        <div className="p-2 bg-purple-100 rounded-lg mr-3">
-                          <Clock className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <span className="font-medium">Usually responds within 1 hour</span>
-                      </div>
-                      <div className="flex items-center text-gray-600 bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-                        <div className="p-2 bg-green-100 rounded-lg mr-3">
-                          <Shield className="w-4 h-4 text-green-600" />
-                        </div>
-                        <span className="font-medium">Verified provider since 2023</span>
-                      </div>
-                    </div>
-
-                    {provider?.bio && (
-                      <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                        <p className="text-sm text-gray-600 leading-relaxed italic">
-                          "{provider.bio}"
-                        </p>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <div className="space-y-3">
-                  <button
-                    onClick={handleBookNow}
-                    disabled={bookingLoading}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-4 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    {bookingLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Creating conversation...
-                      </div>
-                    ) : (
-                      'Book Now'
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={handleContactProvider}
-                    className="w-full border-2 border-gray-300 text-gray-700 py-4 px-4 rounded-2xl font-semibold hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-md"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Contact Provider
-                  </button>
-                </div>
-
-                {/* Enhanced Quick Stats */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">150+</div>
-                      <div className="text-sm text-gray-600 font-medium">Orders</div>
-                    </div>
-                    <div className="text-center bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">98%</div>
-                      <div className="text-sm text-gray-600 font-medium">Positive</div>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col space-y-3 justify-center">
+                      <button
+                        onClick={handleBookNow}
+                        disabled={bookingLoading}
+                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {bookingLoading ? (
+                          <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Creating conversation...
+                          </div>
+                        ) : (
+                          'Book Now'
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={handleContactProvider}
+                        className="w-full border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-md"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Contact Provider
+                      </button>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Enhanced Quick Contact */}
-              <div className="bg-gradient-to-br from-white to-gray-50/30 rounded-2xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-full mr-3"></div>
-                  Quick Contact
-                </h3>
-                
-                <div className="space-y-4">
-                  {provider?.user?.phone && (
-                    <div className="flex items-center bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-                      <div className="p-2 bg-green-100 rounded-lg mr-3">
-                        <Phone className="w-4 h-4 text-green-600" />
+                  {/* Provider Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Contact Information */}
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                        <Phone className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
+                        Contact Info
+                      </h4>
+                      {provider?.user?.email && (
+                        <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white dark:bg-black/70 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg mr-3">
+                            <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <span className="text-sm font-medium">{provider.user.email}</span>
+                        </div>
+                      )}
+                      {provider?.user?.phone && (
+                        <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white dark:bg-black/70 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg mr-3">
+                            <Phone className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          </div>
+                          <span className="text-sm font-medium">{provider.user.phone}</span>
+                        </div>
+                      )}
+                      {provider?.user?.location && (
+                        <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white dark:bg-black/70 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                          <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg mr-3">
+                            <MapPin className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          </div>
+                          <span className="text-sm font-medium">{provider.user.location}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Skills */}
+                    {provider?.skills && provider.skills.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                          <Award className="w-4 h-4 mr-2 text-orange-500 dark:text-orange-400" />
+                          Skills
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {provider.skills.map((skill: string, index: number) => (
+                            <span 
+                              key={index}
+                              className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/50 dark:to-cyan-900/50 text-blue-800 dark:text-blue-200 text-xs px-3 py-1.5 rounded-full font-medium border border-blue-200 dark:border-blue-700"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <span className="text-gray-700 font-medium">{provider.user.phone}</span>
+                    )}
+
+                    {/* Quick Stats */}
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                        <Users className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
+                        Statistics
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
+                          <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            {provider?.services?.length || 0}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Services</div>
+                        </div>
+                        {/* <div className="text-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 border border-green-100 dark:border-green-800">
+                          <div className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                            {provider?.totalReviews || 0}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Reviews</div>
+                        </div> */}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* About Section */}
+                  {provider?.bio && (
+                    <div className="mt-6 bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                        <User className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
+                        About the Provider
+                      </h4>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                        {provider.bio}
+                      </p>
                     </div>
                   )}
-                  
-                  <div className="flex items-center bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-                    <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                      <Mail className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <span className="text-gray-700 font-medium text-sm">
-                      {provider?.user?.email || service?.provider?.email || 'Contact via platform'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
-                    <div className="p-2 bg-orange-100 rounded-lg mr-3">
-                      <MapPin className="w-4 h-4 text-orange-600" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 font-medium">Service Area</div>
-                      <span className="text-gray-700 font-medium">
-                        {provider?.user?.location || 'Location not specified'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-                  <p className="text-sm text-blue-800">
-                    <strong>Pro Tip:</strong> Message the provider for a custom quote or to discuss your specific requirements.
-                  </p>
-                </div>
-              </div>
+                  {/* Qualifications */}
+                  {provider?.qualifications && provider.qualifications.length > 0 && (
+                    <div className="mt-6 bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                        <GraduationCap className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                        Qualifications & Certifications
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {provider.qualifications.map((qualification: string, index: number) => (
+                          <div 
+                            key={index}
+                            className="flex items-center bg-gradient-to-r from-gray-50 to-blue-50 dark:from-black/40 dark:to-blue-950/40 rounded-lg p-3 border border-gray-200 dark:border-gray-600"
+                          >
+                            <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400 mr-3 flex-shrink-0" />
+                            <span className="text-gray-700 dark:text-gray-300">{qualification}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
+
+            {/* Remove the sidebar structure - it will be replaced by the above */}
         </div>
       </main>
 
