@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FiSearch, FiMail, FiPhone, FiMessageCircle, FiBook, FiUsers, FiShield, FiDollarSign, FiHelpCircle, FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import { FiMail, FiPhone, FiMessageCircle, FiBook, FiUsers, FiShield, FiDollarSign, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { showSuccessToast } from '../utils/toastUtils'
@@ -7,7 +7,6 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 export default function Support() {
-  const [searchQuery, setSearchQuery] = useState('')
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)

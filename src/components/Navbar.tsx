@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, ChevronDown, X, Search, Shield, Users, Globe, Sparkles, ArrowRight, Home, Briefcase, UserCheck, BarChart3, LogOut, User } from 'lucide-react';
+import { Menu, ChevronDown, Shield, Users, Sparkles, ArrowRight, BarChart3, LogOut, User } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -69,51 +69,6 @@ const Navbar = () => {
     const timeout = setTimeout(() => setForProvidersOpen(false), 150);
     setProvidersTimeout(timeout);
   };
-
-  const services = [
-    {
-      title: "Home Services",
-      description: "Cleaning, repairs, maintenance",
-      href: "#",
-      icon: Home,
-      gradient: "from-green-400 to-blue-500"
-    },
-    {
-      title: "Professional Services",
-      description: "Tutoring, consulting, coaching",
-      href: "#",
-      icon: Briefcase,
-      gradient: "from-blue-400 to-purple-500"
-    },
-    {
-      title: "Creative Services",
-      description: "Design, photography, writing",
-      href: "#",
-      icon: Sparkles,
-      gradient: "from-purple-400 to-pink-500"
-    },
-    {
-      title: "Technical Services",
-      description: "IT support, web development",
-      href: "#",
-      icon: Globe,
-      gradient: "from-cyan-400 to-blue-500"
-    },
-    {
-      title: "Personal Care",
-      description: "Beauty, wellness, fitness",
-      href: "#",
-      icon: UserCheck,
-      gradient: "from-pink-400 to-red-500"
-    },
-    {
-      title: "Business Services",
-      description: "Accounting, marketing, legal",
-      href: "#",
-      icon: BarChart3,
-      gradient: "from-indigo-400 to-purple-500"
-    },
-  ];
 
   const providerFeatures = [
     {

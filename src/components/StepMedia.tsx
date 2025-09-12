@@ -18,8 +18,6 @@ type Props = {
   // Step labels (optional but nice)
   stepTitles?: string[];
   stepSubtitles?: string[];
-
-  logoLightSrc?: string;        // small logo on overlay (optional)
 };
 
 export default function StepMedia({
@@ -34,7 +32,6 @@ export default function StepMedia({
   poster,
   stepTitles = [],
   stepSubtitles = [],
-  logoLightSrc = '/logo_svg_only_light.svg',
 }: Props) {
   const title = stepTitles[currentStep - 1] ?? '';
   const subtitle = stepSubtitles[currentStep - 1] ?? '';

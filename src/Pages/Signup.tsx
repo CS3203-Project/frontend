@@ -531,7 +531,6 @@ export default function SignupForm() {
           poster="/media/profile-poster.png"
           stepTitles={stepTitles}
           stepSubtitles={stepSubtitles}
-          logoLightSrc="/logo_svg_only_light.svg"
         />
       </div>
     </div>

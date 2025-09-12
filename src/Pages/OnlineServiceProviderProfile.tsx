@@ -10,14 +10,10 @@ import type { ServiceProviderProfile } from '../components/profiles/shared/types
 
 export default function ServiceProviderProfile() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedService, setSelectedService] = useState<any>(null);
-  const [selectedPortfolio, setSelectedPortfolio] = useState<any>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [reviewFilter, setReviewFilter] = useState('all');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showBannerUpload, setShowBannerUpload] = useState(false);
 
   // Mock data - in real app this would come from API
   const provider: ServiceProviderProfile = {
@@ -279,8 +275,7 @@ export default function ServiceProviderProfile() {
               setShowLocationModal={setShowLocationModal}
               isFollowing={isFollowing}
               setIsFollowing={setIsFollowing}
-              showBannerUpload={showBannerUpload}
-              setShowBannerUpload={setShowBannerUpload}
+              setShowBannerUpload={() => console.log('Banner upload requested')}
             />
           </div>
         </section>
@@ -299,10 +294,6 @@ export default function ServiceProviderProfile() {
                 provider={provider}
                 reviewFilter={reviewFilter}
                 setReviewFilter={setReviewFilter}
-                selectedService={selectedService}
-                setSelectedService={setSelectedService}
-                selectedPortfolio={selectedPortfolio}
-                setSelectedPortfolio={setSelectedPortfolio}
               />
             </div>
           </div>
