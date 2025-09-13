@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Loader2, Search, Filter, Grid3X3, List, Sparkles, Star, Users } from 'lucide-react';
 import SpecificSearchCard from '../components/services/SpecificSearchCard';
 import { categoryApi, type Category } from '../api/categoryApi';
 import { getCategoryIcon, getCategoryGradient } from '../utils/categoryMapper';
+import { semanticSearchApi, type SemanticSearchResult } from '../api/semanticSearchApi';
 
 interface BrowseServicesState {
   categories: Category[];
@@ -12,6 +13,9 @@ interface BrowseServicesState {
   searchTerm: string;
   viewMode: 'grid' | 'list';
   sortBy: 'name' | 'services' | 'popular';
+  semanticSearchResults: SemanticSearchResult[];
+  isSemanticSearchActive: boolean;
+  isSemanticSearching: boolean;
 }
 
 const BrowseServices: React.FC = () => {
@@ -21,8 +25,12 @@ const BrowseServices: React.FC = () => {
     error: null,
     searchTerm: '',
     viewMode: 'grid',
-    sortBy: 'name'
+    sortBy: 'name',
+    semanticSearchResults: [],
+    isSemanticSearchActive: false,
+    isSemanticSearching: false
   });
+  const navigate = useNavigate();
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -87,8 +95,53 @@ const BrowseServices: React.FC = () => {
     return filtered;
   }, [state.categories, state.searchTerm, state.sortBy]);
 
-  const handleSearch = (value: string) => {
+  const handleSearch = async (value: string) => {
     setState(prev => ({ ...prev, searchTerm: value }));
+    
+    // If the search term is substantial, also perform semantic search
+    if (value.trim().length >= 3) {
+      await performSemanticSearch(value.trim());
+    } else {
+      // Clear semantic search results for short queries
+      setState(prev => ({ 
+        ...prev, 
+        semanticSearchResults: [],
+        isSemanticSearchActive: false 
+      }));
+    }
+  };
+
+  const performSemanticSearch = async (query: string) => {
+    try {
+      setState(prev => ({ ...prev, isSemanticSearching: true }));
+      
+      const response = await semanticSearchApi.searchServices({
+        query,
+        threshold: 0.4,
+        limit: 12
+      });
+
+      if (response.success) {
+        setState(prev => ({ 
+          ...prev, 
+          semanticSearchResults: response.data.results,
+          isSemanticSearchActive: true,
+          isSemanticSearching: false
+        }));
+      }
+    } catch (error) {
+      console.error('Semantic search failed:', error);
+      setState(prev => ({ ...prev, isSemanticSearching: false }));
+    }
+  };
+
+  const clearSemanticSearch = () => {
+    setState(prev => ({ 
+      ...prev, 
+      semanticSearchResults: [],
+      isSemanticSearchActive: false,
+      searchTerm: ''
+    }));
   };
 
   const handleSortChange = (sortBy: 'name' | 'services' | 'popular') => {
@@ -190,11 +243,16 @@ const BrowseServices: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search categories..."
+                placeholder="Search categories or services (e.g., 'photography', 'marketing')..."
                 value={state.searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              {state.isSemanticSearching && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                </div>
+              )}
             </div>
 
             {/* Sort Options */}
@@ -236,6 +294,87 @@ const BrowseServices: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Semantic Search Results */}
+        {state.isSemanticSearchActive && state.semanticSearchResults.length > 0 && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Smart Search Results for "{state.searchTerm}"
+                </h3>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                  {state.semanticSearchResults.length} found
+                </span>
+              </div>
+              <button
+                onClick={clearSemanticSearch}
+                className="text-sm text-gray-500 hover:text-gray-700 font-medium"
+              >
+                Clear
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {state.semanticSearchResults.map((service) => (
+                <Link
+                  key={service.id}
+                  to={`/services/detail/${service.id}`}
+                  className="group block bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                >
+                  <div className="flex items-start space-x-3">
+                    {service.images && service.images.length > 0 ? (
+                      <img
+                        src={service.images[0]}
+                        alt={service.title}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg flex items-center justify-center">
+                        <Star className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                        {service.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                        {service.description}
+                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-sm font-medium text-green-600">
+                          {service.currency} {service.price}
+                        </span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                          {Math.round(service.similarity * 100)}% match
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {service.category.name} • {service.provider.user.firstName} {service.provider.user.lastName}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => navigate('/services/search', { 
+                  state: { 
+                    results: state.semanticSearchResults, 
+                    query: state.searchTerm,
+                    searchType: 'semantic'
+                  } 
+                })}
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+              >
+                View all {state.semanticSearchResults.length} results →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Categories Grid/List */}
         {filteredAndSortedCategories.length === 0 ? (

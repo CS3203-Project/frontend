@@ -10,7 +10,6 @@ interface ProfileHeaderProps {
   setShowLocationModal: (value: boolean) => void;
   isFollowing: boolean;
   setIsFollowing: (value: boolean) => void;
-  showBannerUpload: boolean;
   setShowBannerUpload: (value: boolean) => void;
 }
 
@@ -20,7 +19,6 @@ export default function ProfileHeader({
   setShowLocationModal,
   isFollowing,
   setIsFollowing,
-  showBannerUpload,
   setShowBannerUpload
 }: ProfileHeaderProps) {
   const getAvailabilityColor = (status: string) => {

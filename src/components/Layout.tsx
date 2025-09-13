@@ -1,6 +1,5 @@
 import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
-import Footer from './Footer';
 import type { ReactNode } from 'react';
 
 interface LayoutProps {

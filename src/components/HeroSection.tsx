@@ -1,8 +1,10 @@
 
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, MapPin, Play, Pause, ChevronDown, Globe, Map, Home, X } from 'lucide-react';
+import { Search, MapPin, Play, Pause, ChevronDown, Globe, Map, Home, X, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from './Button';
+import { semanticSearchApi } from '../api/semanticSearchApi';
 
 type LocationData = {
   [country: string]: {
@@ -26,7 +28,9 @@ const HeroSection: React.FC = () => {
   const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
   const [locationStep, setLocationStep] = useState<'country' | 'province' | 'city'>('country');
   const [videoPlaying, setVideoPlaying] = useState<boolean>(true);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const navigate = useNavigate();
 
 const locationData: LocationData = {
     'Sri Lanka': {
@@ -97,8 +101,44 @@ const locationData: LocationData = {
   };
 
   // For input Enter key
-  const doSearch = () => {
-    console.log('Searching for:', searchQuery, 'in', selectedLocation);
+  const doSearch = async () => {
+    if (!searchQuery.trim()) {
+      console.log('Empty search query');
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      console.log('🔍 Performing semantic search for:', searchQuery, 'in', selectedLocation);
+      
+      const response = await semanticSearchApi.searchServices({
+        query: searchQuery.trim(),
+        threshold: 0.4, // Lower threshold for broader results
+        limit: 20
+      });
+
+      if (response.success) {
+        console.log('✅ Search results:', response.data);
+        
+        // Navigate to search results page with results
+        navigate('/services/search', { 
+          state: { 
+            results: response.data.results, 
+            query: searchQuery.trim(),
+            location: selectedLocation,
+            searchType: 'semantic'
+          } 
+        });
+      } else {
+        console.error('❌ Search failed:', response.message);
+        alert('Search failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('❌ Semantic search error:', error);
+      alert('Search failed. Please check your connection and try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const toggleVideo = () => {
@@ -247,10 +287,20 @@ return (
                 {/* Search Button */}
                 <Button 
                   onClick={handleSearch}
-                  className="px-8 h-14 py-4 text-base font-semibold bg-black hover:bg-neutral-900 text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl border border-black"
+                  disabled={isSearching}
+                  className="px-8 h-14 py-4 text-base font-semibold bg-black hover:bg-neutral-900 text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl border border-black disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Search className="mr-2 h-5 w-5" />
-                  Search
+                  {isSearching ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-5 w-5" />
+                      Search
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

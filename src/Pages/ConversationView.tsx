@@ -234,9 +234,8 @@ const ConversationViewInner: React.FC<{
                   <ConfirmationPanel
                     key={activeConversation.id}
                     conversationId={activeConversation.id}
-                    currentUserRole={currentUserRole}
+                    currentUserRole={currentUserRole as 'USER' | 'PROVIDER'}
                     onReviewClick={handleReviewClick}
-                    currentUserId={currentUserId}
                   />
                 </div>
               </>
