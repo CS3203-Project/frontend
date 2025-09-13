@@ -22,6 +22,8 @@ import {
   LogOut
 } from 'lucide-react';
 import Button from '../components/Button';
+import ReportGenerator from '../components/ReportGenerator';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import { adminApi, type AdminStats, type PendingProvider, type AdminProfile } from '../api/adminApi';
 import { showSuccessToast, showErrorToast } from '../utils/toastUtils';
 import { mockAdminStats, mockPendingProviders } from '../data/mockAdminData';
@@ -597,6 +599,8 @@ const AdminDashboard: React.FC = () => {
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<PendingProvider | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReportGeneratorOpen, setIsReportGeneratorOpen] = useState(false);
+  const [isAnalyticsDashboardOpen, setIsAnalyticsDashboardOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'providers' | 'profile'>('overview');
@@ -763,10 +767,6 @@ const AdminDashboard: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
-              </Button>
               <Button 
                 variant="outline" 
                 size="sm"
@@ -867,10 +867,73 @@ const AdminDashboard: React.FC = () => {
                     </span>
                   )}
                 </Button>
-                <Button className="justify-start" variant="outline">
+                <Button 
+                  onClick={() => setIsReportGeneratorOpen(true)}
+                  className="justify-start" 
+                  variant="outline"
+                >
                   <Filter className="w-5 h-5 mr-3" />
                   Generate Reports
                 </Button>
+              </div>
+            </div>
+
+            {/* Quick Reports */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <Download className="w-5 h-5 mr-2 text-blue-600" />
+                Quick Reports
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setIsReportGeneratorOpen(true)}
+                  className="flex items-center justify-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-all group"
+                >
+                  <TrendingUp className="w-4 h-4 text-blue-600 mr-2" />
+                  <span className="text-sm font-medium text-blue-700">Analytics Report</span>
+                </button>
+                <button
+                  onClick={() => setIsReportGeneratorOpen(true)}
+                  className="flex items-center justify-center p-3 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg hover:from-green-100 hover:to-green-200 transition-all group"
+                >
+                  <Users className="w-4 h-4 text-green-600 mr-2" />
+                  <span className="text-sm font-medium text-green-700">User Report</span>
+                </button>
+                <button
+                  onClick={() => setIsReportGeneratorOpen(true)}
+                  className="flex items-center justify-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all group"
+                >
+                  <ShoppingBag className="w-4 h-4 text-purple-600 mr-2" />
+                  <span className="text-sm font-medium text-purple-700">Service Report</span>
+                </button>
+                <button
+                  onClick={() => setIsReportGeneratorOpen(true)}
+                  className="flex items-center justify-center p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg hover:from-yellow-100 hover:to-yellow-200 transition-all group"
+                >
+                  <UserCheck className="w-4 h-4 text-yellow-600 mr-2" />
+                  <span className="text-sm font-medium text-yellow-700">Provider Report</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Analytics Dashboard */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
+                Live Analytics
+              </h2>
+              <div className="space-y-4">
+                <p className="text-gray-600">
+                  View real-time charts and performance metrics for comprehensive business insights.
+                </p>
+                <button
+                  onClick={() => setIsAnalyticsDashboardOpen(true)}
+                  className="w-full flex items-center justify-center p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg hover:from-indigo-100 hover:to-purple-100 transition-all group"
+                >
+                  <TrendingUp className="w-5 h-5 text-indigo-600 mr-3" />
+                  <span className="text-lg font-medium text-indigo-700">Open Analytics Dashboard</span>
+                  <ExternalLink className="w-4 h-4 text-indigo-500 ml-2" />
+                </button>
               </div>
             </div>
 
@@ -983,6 +1046,18 @@ const AdminDashboard: React.FC = () => {
         }}
         onApprove={handleApproveProvider}
         onReject={handleRejectProvider}
+      />
+
+      {/* Report Generator Modal */}
+      <ReportGenerator
+        isOpen={isReportGeneratorOpen}
+        onClose={() => setIsReportGeneratorOpen(false)}
+      />
+
+      {/* Analytics Dashboard Modal */}
+      <AnalyticsDashboard
+        isOpen={isAnalyticsDashboardOpen}
+        onClose={() => setIsAnalyticsDashboardOpen(false)}
       />
     </div>
   );

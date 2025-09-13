@@ -243,10 +243,6 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
- Umesha_mid
-  const handleBookNow = () => {
-    // Navigate to messaging page when booking
-    navigate('/messaging');
   const handleBookNow = async () => {
     // Check if user is logged in
     if (!isLoggedIn || !user) {
@@ -376,7 +372,6 @@ const ServiceDetailPage: React.FC = () => {
     } finally {
       setBookingLoading(false);
     }
- yasith_new
   };
 
   const toggleWishlist = () => {
@@ -507,7 +502,7 @@ const ServiceDetailPage: React.FC = () => {
           </div>
 
           {/* Service Video Background Section */}
-          {(service.videoUrl || true) && (
+          {service.videoUrl && (
             <div className="mb-6 relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-lg">
               {/* Video Background */}
               <div className="absolute inset-0 z-0">
