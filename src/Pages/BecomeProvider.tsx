@@ -9,8 +9,7 @@ import {
   Award,
   Briefcase,
   ArrowLeft,
-  IdCard,
-  Upload
+  IdCard
 } from 'lucide-react';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';

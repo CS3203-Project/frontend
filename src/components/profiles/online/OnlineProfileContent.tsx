@@ -9,10 +9,6 @@ interface ProfileContentProps {
   provider: ServiceProviderProfile;
   reviewFilter: string;
   setReviewFilter: (value: string) => void;
-  selectedService: any;
-  setSelectedService: (value: any) => void;
-  selectedPortfolio: any;
-  setSelectedPortfolio: (value: any) => void;
 }
 
 export default function ProfileContent({
@@ -20,11 +16,7 @@ export default function ProfileContent({
   setActiveTab,
   provider,
   reviewFilter,
-  setReviewFilter,
-  selectedService,
-  setSelectedService,
-  selectedPortfolio,
-  setSelectedPortfolio
+  setReviewFilter
 }: ProfileContentProps) {
   const getSkillLevelColor = (level: string) => {
     switch (level) {
@@ -236,7 +228,7 @@ export default function ProfileContent({
             <div 
               key={service.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-1"
-              onClick={() => setSelectedService(service)}
+              onClick={() => console.log('Service clicked:', service)}
             >
               <div className="relative aspect-w-16 aspect-h-9 bg-gray-200">
                 <img 
@@ -279,7 +271,7 @@ export default function ProfileContent({
             <div 
               key={item.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-1"
-              onClick={() => setSelectedPortfolio(item)}
+              onClick={() => console.log('Portfolio clicked:', item)}
             >
               <div className="relative aspect-w-16 aspect-h-9 bg-gray-200">
                 <img 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -19,8 +19,7 @@ import {
   Building,
   Plus,
   X,
-  Save,
-  Upload
+  Save
 } from 'lucide-react';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
@@ -34,16 +33,10 @@ import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 
-const socialMediaLinks = [
-  { platform: 'Twitter', username: '@user123', url: 'https://twitter.com/user123', icon: '🐦' },
-  { platform: 'Facebook', username: 'user123', url: 'https://facebook.com/user123', icon: '📘' },
-  { platform: 'Instagram', username: '@user123', url: 'https://instagram.com/user123', icon: '📸' },
-];
-
 export default function Profile() {
   const navigate = useNavigate();
   const { user: authUser, isLoading: authLoading, updateUser } = useAuth();
-  const [localUser, setLocalUser] = useState<UserProfile | null>(null);
+  const [localUser] = useState<UserProfile | null>(null);
   const [showEditProviderModal, setShowEditProviderModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -58,8 +51,6 @@ export default function Profile() {
   const user = authUser || localUser;
   const loading = authLoading;
 
-  // Use useMemo to prevent unnecessary re-computations
-  const isProvider = useMemo(() => user?.role === 'PROVIDER', [user?.role]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [showUpdateServiceModal, setShowUpdateServiceModal] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -927,7 +918,10 @@ export default function Profile() {
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleEditService(service);
+                                  handleEditService({
+                                    ...service,
+                                    price: typeof service.price === 'string' ? parseFloat(service.price) : service.price
+                                  });
                                 }}
                                 variant="white"
                                 size="sm"

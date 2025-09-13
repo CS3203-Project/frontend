@@ -39,14 +39,15 @@ export interface PendingProvider {
 }
 
 export interface AdminProfile {
-  id: string;
-  email: string;
+  id: number;
+  username: string;
   firstName: string;
   lastName: string;
-  role: string;
+  password?: string; // Optional for updates
+  role?: string;
   imageUrl?: string;
   lastLogin?: string;
-  permissions: string[];
+  permissions?: string[];
 }
 
 export interface User {
@@ -86,8 +87,77 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface AdminLoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface AdminLoginResponse {
+  admin: {
+    id: number;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+  token: string;
+}
+
 // Admin API functions
 export const adminApi = {
+  // Admin login
+  login: async (credentials: AdminLoginRequest): Promise<ApiResponse<AdminLoginResponse>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<AdminLoginResponse>>('/admin/login', credentials);
+      
+      // Store the token in localStorage if login is successful
+      if (response.data.success && response.data.data.token) {
+        localStorage.setItem('adminToken', response.data.data.token);
+        localStorage.setItem('adminUser', JSON.stringify(response.data.data.admin));
+      }
+      
+      return response.data;
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        throw new Error(axiosError.response?.data?.message || 'Login failed');
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Admin logout
+  logout: async (): Promise<void> => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+  },
+
+  // Check if admin is authenticated
+  isAuthenticated: (): boolean => {
+    const token = localStorage.getItem('adminToken');
+    const user = localStorage.getItem('adminUser');
+    return !!(token && user);
+  },
+
+  // Get current admin user
+  getCurrentAdmin: (): AdminLoginResponse['admin'] | null => {
+    const userStr = localStorage.getItem('adminUser');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  },
+
+  // Get admin token
+  getToken: (): string | null => {
+    return localStorage.getItem('adminToken');
+  },
   // Get admin dashboard statistics
   getDashboardStats: async (): Promise<ApiResponse<AdminStats>> => {
     try {

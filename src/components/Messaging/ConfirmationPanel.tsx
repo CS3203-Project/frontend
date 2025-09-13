@@ -5,16 +5,13 @@ import type { ConversationConfirmation } from '../../types/confirmation';
 import { useConfirmationSocket } from '../../hooks/useConfirmationSocket';
 import { useAuth } from '../../contexts/AuthContext';
 
-type Role = 'USER' | 'PROVIDER' | string;
-
 interface Props {
   conversationId: string;
-  currentUserRole: Role;
+  currentUserRole: 'USER' | 'PROVIDER';
   onReviewClick?: () => void;
-  currentUserId?: string;
 }
 
-const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, onReviewClick, currentUserId }) => {
+const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, onReviewClick }) => {
   const { user } = useAuth();
   const [record, setRecord] = useState<ConversationConfirmation | null>(null);
   const [saving, setSaving] = useState(false);

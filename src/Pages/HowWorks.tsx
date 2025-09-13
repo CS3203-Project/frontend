@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FiSearch, FiMessageCircle, FiCreditCard, FiStar, FiUsers, FiShield, FiTrendingUp, FiCheckCircle, FiArrowRight, FiPlay, FiClock, FiAward, FiHeart } from 'react-icons/fi'
+import { FiSearch, FiMessageCircle, FiCreditCard, FiStar, FiUsers, FiShield, FiTrendingUp, FiCheckCircle, FiArrowRight, FiClock, FiAward, FiHeart } from 'react-icons/fi'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 

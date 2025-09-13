@@ -45,17 +45,6 @@ interface DetailedService {
   updatedAt?: string;
 }
 
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  clientName: string;
-  clientAvatar: string;
-  date: string;
-  helpful: number;
-  service?: string;
-}
-
 interface ChatMessage {
   id: string;
   sender: 'user' | 'provider';

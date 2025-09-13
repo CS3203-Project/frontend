@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const RateCustomerPage: React.FC = () => {
-  const { conversationId } = useParams();
   const location = useLocation();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');

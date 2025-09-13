@@ -18,12 +18,13 @@ import {
   MapPin,
   Phone,
   Mail,
-  ExternalLink
+  ExternalLink,
+  LogOut
 } from 'lucide-react';
 import Button from '../components/Button';
 import { adminApi, type AdminStats, type PendingProvider, type AdminProfile } from '../api/adminApi';
 import { showSuccessToast, showErrorToast } from '../utils/toastUtils';
-import { mockAdminStats, mockPendingProviders, mockAdminProfile } from '../data/mockAdminData';
+import { mockAdminStats, mockPendingProviders } from '../data/mockAdminData';
 
 // Statistics Card Component
 interface StatCardProps {
@@ -362,20 +363,56 @@ const ProviderDetailsModal: React.FC<ProviderDetailsModalProps> = ({
 interface AdminProfileSectionProps {
   profile: AdminProfile | null;
   onUpdateProfile: (data: Partial<AdminProfile>) => void;
+  onLogout: () => void;
 }
 
-const AdminProfileSection: React.FC<AdminProfileSectionProps> = ({ profile, onUpdateProfile }) => {
+const AdminProfileSection: React.FC<AdminProfileSectionProps> = ({ profile, onUpdateProfile, onLogout }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || '',
     lastName: profile?.lastName || '',
-    email: profile?.email || '',
+    username: profile?.username || '',
+    password: '',
+    confirmPassword: '',
   });
+
+  // Check if passwords match
+  const passwordsMatch = !formData.password || formData.password === formData.confirmPassword;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateProfile(formData);
+    
+    // Validate password confirmation if password is provided
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      showErrorToast('Passwords do not match');
+      return;
+    }
+    
+    // Remove confirmPassword from the data sent to API
+    const { confirmPassword, ...profileData } = formData;
+    onUpdateProfile(profileData);
     setIsEditing(false);
+    
+    // Reset form data
+    setFormData({
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      username: profile?.username || '',
+      password: '',
+      confirmPassword: '',
+    });
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    // Reset form data
+    setFormData({
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      username: profile?.username || '',
+      password: '',
+      confirmPassword: '',
+    });
   };
 
   if (!profile) {
@@ -393,14 +430,25 @@ const AdminProfileSection: React.FC<AdminProfileSectionProps> = ({ profile, onUp
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900">Admin Profile</h2>
-        <Button
-          onClick={() => setIsEditing(!isEditing)}
-          variant="outline"
-          size="sm"
-        >
-          <Settings className="w-4 h-4 mr-2" />
-          {isEditing ? 'Cancel' : 'Edit'}
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={onLogout}
+            variant="outline"
+            size="sm"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+          <Button
+            onClick={() => setIsEditing(!isEditing)}
+            variant="outline"
+            size="sm"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            {isEditing ? 'Cancel' : 'Edit'}
+          </Button>
+        </div>
       </div>
 
       {isEditing ? (
@@ -431,26 +479,71 @@ const AdminProfileSection: React.FC<AdminProfileSectionProps> = ({ profile, onUp
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                New Password
+              </label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                placeholder="Leave empty to keep current password"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                  formData.confirmPassword && !passwordsMatch 
+                    ? 'border-red-300 bg-red-50' 
+                    : formData.confirmPassword && passwordsMatch
+                    ? 'border-green-300 bg-green-50'
+                    : 'border-gray-300'
+                }`}
+                placeholder="Confirm your new password"
+                disabled={!formData.password}
+              />
+              {formData.confirmPassword && !passwordsMatch && (
+                <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+              )}
+              {formData.confirmPassword && passwordsMatch && formData.password && (
+                <p className="mt-1 text-sm text-green-600">Passwords match</p>
+              )}
+            </div>
           </div>
           <div className="flex space-x-3">
-            <Button type="submit">
+            <Button 
+              type="submit"
+              disabled={!passwordsMatch}
+              className={!passwordsMatch ? 'opacity-50 cursor-not-allowed' : ''}
+            >
               Save Changes
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsEditing(false)}
+              onClick={handleCancel}
             >
               Cancel
             </Button>
@@ -459,18 +552,13 @@ const AdminProfileSection: React.FC<AdminProfileSectionProps> = ({ profile, onUp
       ) : (
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
-            <img
-              src={profile.imageUrl || '/api/placeholder/64/64'}
-              alt={`${profile.firstName} ${profile.lastName}`}
-              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-            />
             <div>
               <h3 className="text-lg font-medium text-gray-900">
                 {profile.firstName} {profile.lastName}
               </h3>
-              <p className="text-gray-600">{profile.email}</p>
+              <p className="text-gray-600">@{profile.username}</p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
-                {profile.role}
+                {profile.role || 'ADMIN'}
               </span>
             </div>
           </div>
@@ -514,6 +602,17 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'providers' | 'profile'>('overview');
 
   useEffect(() => {
+    // Initialize admin profile from localStorage
+    const currentAdmin = adminApi.getCurrentAdmin();
+    if (currentAdmin) {
+      setAdminProfile({
+        ...currentAdmin,
+        role: 'ADMIN',
+        permissions: ['manage_users', 'manage_providers', 'view_stats'],
+        lastLogin: new Date().toISOString(),
+      });
+    }
+    
     fetchDashboardData();
   }, []);
 
@@ -524,10 +623,9 @@ const AdminDashboard: React.FC = () => {
 
       // Try to fetch real data, fall back to mock data if API is not available
       try {
-        const [statsResponse, providersResponse, profileResponse] = await Promise.all([
+        const [statsResponse, providersResponse] = await Promise.all([
           adminApi.getDashboardStats(),
           adminApi.getPendingProviders(),
-          adminApi.getAdminProfile(),
         ]);
 
         if (statsResponse.success) {
@@ -537,16 +635,11 @@ const AdminDashboard: React.FC = () => {
         if (providersResponse.success) {
           setPendingProviders(providersResponse.data);
         }
-
-        if (profileResponse.success) {
-          setAdminProfile(profileResponse.data);
-        }
       } catch (apiError) {
         console.warn('API not available, using mock data:', apiError);
         // Use mock data for demonstration
         setStats(mockAdminStats);
         setPendingProviders(mockPendingProviders);
-        setAdminProfile(mockAdminProfile);
         showSuccessToast('Demo mode: Using mock data');
       }
     } catch (error) {
@@ -588,14 +681,46 @@ const AdminDashboard: React.FC = () => {
 
   const handleUpdateAdminProfile = async (profileData: Partial<AdminProfile>) => {
     try {
-      const response = await adminApi.updateAdminProfile(profileData);
+      // Filter out empty password field if it exists
+      const updateData = { ...profileData };
+      if (updateData.password === '') {
+        delete updateData.password;
+      }
+
+      const response = await adminApi.updateAdminProfile(updateData);
+      
       if (response.success) {
-        setAdminProfile(response.data);
+        const updatedProfile = response.data;
+        setAdminProfile(updatedProfile);
+        
+        // Update localStorage with new admin data
+        localStorage.setItem('adminUser', JSON.stringify({
+          id: updatedProfile.id,
+          username: updatedProfile.username,
+          firstName: updatedProfile.firstName,
+          lastName: updatedProfile.lastName,
+        }));
+        
         showSuccessToast('Profile updated successfully');
+      } else {
+        showErrorToast(response.message || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Failed to update profile:', error);
       showErrorToast(error instanceof Error ? error.message : 'Failed to update profile');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await adminApi.logout();
+      showSuccessToast('Logged out successfully');
+      
+      // Redirect to admin login page
+      window.location.href = '/admin-login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      showErrorToast('Failed to logout');
     }
   };
 
@@ -633,12 +758,23 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-sm text-gray-600">Manage your platform</p>
+              <p className="text-sm text-gray-600">
+                Welcome back, {adminProfile?.firstName || 'Admin'}
+              </p>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="outline" size="sm">
                 <Download className="w-4 h-4 mr-2" />
                 Export Data
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleLogout}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
               </Button>
               <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
@@ -730,10 +866,6 @@ const AdminDashboard: React.FC = () => {
                       {pendingProviders.length}
                     </span>
                   )}
-                </Button>
-                <Button className="justify-start" variant="outline">
-                  <Search className="w-5 h-5 mr-3" />
-                  Search Users
                 </Button>
                 <Button className="justify-start" variant="outline">
                   <Filter className="w-5 h-5 mr-3" />
@@ -835,6 +967,7 @@ const AdminDashboard: React.FC = () => {
             <AdminProfileSection
               profile={adminProfile}
               onUpdateProfile={handleUpdateAdminProfile}
+              onLogout={handleLogout}
             />
           </div>
         )}
