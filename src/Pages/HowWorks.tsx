@@ -174,7 +174,7 @@ export default function HowWorks() {
             <div className="max-w-4xl mx-auto mb-8">
               <div className="relative bg-gray-800 rounded-lg overflow-hidden aspect-video">
                 <iframe
-                  src="https://www.youtube.com/embed/2rgNHyzP6ZQ"
+                  src="https://www.youtube.com/embed/POIjIq1VMfw"
                   title="How Our Platform Works"
                   className="w-full h-full"
                   frameBorder="0"
