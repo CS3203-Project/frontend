@@ -25,6 +25,7 @@ interface DetailedService {
   price: number;
   currency: string;
   images: string[];
+  videoUrl?: string;
   category: {
     name: string;
     slug: string;
@@ -121,6 +122,7 @@ const ServiceDetailPage: React.FC = () => {
       price: Number(apiService.price),
       currency: apiService.currency,
       images: apiService.images && apiService.images.length > 0 ? apiService.images : ['https://picsum.photos/seed/service/800/400'],
+      videoUrl: apiService.videoUrl,
       category: {
         name: apiService.category?.name || 'Service',
         slug: apiService.category?.slug || 'general'
@@ -252,6 +254,10 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
+ Umesha_mid
+  const handleBookNow = () => {
+    // Navigate to messaging page when booking
+    navigate('/messaging');
   const handleBookNow = async () => {
     // Check if user is logged in
     if (!isLoggedIn || !user) {
@@ -318,7 +324,7 @@ const ServiceDetailPage: React.FC = () => {
       if (existingConversation) {
         console.log('Found existing conversation:', existingConversation);
         toast.success('Opening existing conversation...');
-        navigate(`/messaging?conversation=${existingConversation.id}`);
+        navigate(`/conversation/${existingConversation.id}`);
         return;
       }
       
@@ -358,7 +364,7 @@ const ServiceDetailPage: React.FC = () => {
       }
       
       // Navigate to the specific conversation
-      navigate(`/messaging?conversation=${conversation.id}`);
+      navigate(`/conversation/${conversation.id}`);
       
     } catch (error) {
       console.error('Failed to create conversation:', error);
@@ -381,6 +387,7 @@ const ServiceDetailPage: React.FC = () => {
     } finally {
       setBookingLoading(false);
     }
+ yasith_new
   };
 
   const toggleWishlist = () => {
@@ -509,6 +516,58 @@ const ServiceDetailPage: React.FC = () => {
           <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <Breadcrumb items={breadcrumbItems} />
           </div>
+
+          {/* Service Video Background Section */}
+          {(service.videoUrl || true) && (
+            <div className="mb-6 relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+              {/* Video Background */}
+              <div className="absolute inset-0 z-0">
+                {service.videoUrl ? (
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src={service.videoUrl} type="video/mp4" />
+                    <source src={service.videoUrl} type="video/webm" />
+                  </video>
+                ) : (
+                  // Default video (using HeroSection video as fallback)
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src="https://sg.fiverrcdn.com/packages_lp/cover_video.mp4" type="video/mp4" />
+                  </video>
+                )}
+                <div className="absolute inset-0 bg-black/50"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-purple-900/30"></div>
+              </div>
+
+              {/* Service Info Overlay */}
+              <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                  {service.title}
+                </h1>
+                <p className="text-lg md:text-xl text-white mb-6 max-w-2xl mx-auto leading-relaxed">
+                  {service.description || 'Professional service by verified provider'}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 text-white font-semibold">
+                    <span className="text-2xl">{service.currency} {service.price}</span>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 text-white">
+                    <span className="text-sm">by {service.provider.name}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
             {/* Main Content - Takes 3 columns */}

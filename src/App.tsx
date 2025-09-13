@@ -22,6 +22,8 @@ import BecomeProvider from "./Pages/BecomeProvider.tsx";
 import Provider from "./Pages/Provider.tsx";
 import CreateService from "./Pages/CreateService.tsx";
 import MessagingPage from "./Pages/NewMessagingPage.tsx";
+import ConversationHub from "./Pages/ConversationHub.tsx";
+import ConversationView from "./Pages/ConversationView.tsx";
 import AdminDashboard from "./Pages/AdminDashboard.tsx";
 import RateCustomerPage from "./Pages/RateCustomerPage.tsx";
 import RateServicePage from "./Pages/RateServicePage.tsx";
@@ -49,6 +51,8 @@ function App() {
             <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
             <Route path="/create-service" element={<CreateService />} />
             <Route path="/messaging" element={<MessagingPage />} />
+            <Route path="/conversation-hub" element={<ConversationHub />} />
+            <Route path="/conversation/:conversationId" element={<ConversationView />} />
             <Route path="/rate-customer/:conversationId" element={<RateCustomerPage />} />
             <Route path="/rate-service/:serviceId" element={<RateServicePage />} />
             <Route path="/admin" element={<AdminDashboard />} />
