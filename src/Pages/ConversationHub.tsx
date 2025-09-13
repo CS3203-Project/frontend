@@ -22,7 +22,8 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
     loading, 
     error,
     startNewConversation,
-    loadConversations
+    loadConversations,
+    checkUserOnlineStatus
   } = useMessaging();
   
   const navigate = useNavigate();
@@ -246,11 +247,15 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
                     className="p-6 hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center space-x-4">
-                      {/* Avatar */}
-                      <div className="flex-shrink-0">
+                      {/* Avatar with online indicator */}
+                      <div className="flex-shrink-0 relative">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
                           {getContactDisplayName(conversation).charAt(0).toUpperCase()}
                         </div>
+                        {/* Online status indicator */}
+                        {checkUserOnlineStatus(getOtherParticipant(conversation)) && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                        )}
                       </div>
 
                       {/* Content */}

@@ -17,12 +17,14 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
     sendMessage,
     loadMoreMessages,
     currentUserId,
+    checkUserOnlineStatus,
+    onlineUsers, // Add onlineUsers to trigger re-renders when it changes
   } = useMessaging();
   
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [contactProfile, setContactProfile] = useState<UserProfile | null>(null);
-  const [loadingContact, setLoadingContact] = useState(false);
+  const [isContactOnline, setIsContactOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +50,6 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
       }
 
       try {
-        setLoadingContact(true);
         const profile = await userApi.getUserById(otherUserId);
         setContactProfile(profile);
       } catch (error) {
@@ -66,8 +67,6 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
           createdAt: '',
           isEmailVerified: false,
         } as UserProfile);
-      } finally {
-        setLoadingContact(false);
       }
     };
 
@@ -88,6 +87,23 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, [loading, loadMoreMessages]);
+
+    // Track contact online status - updates automatically when onlineUsers changes
+  useEffect(() => {
+    if (!activeConversation || !currentUserId) {
+      setIsContactOnline(false);
+      return;
+    }
+
+    const otherUserId = activeConversation.userIds.find(id => id !== currentUserId);
+    if (!otherUserId) {
+      setIsContactOnline(false);
+      return;
+    }
+
+    // Update status immediately based on current onlineUsers
+    setIsContactOnline(checkUserOnlineStatus(otherUserId));
+  }, [activeConversation, currentUserId, checkUserOnlineStatus, onlineUsers]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,8 +221,10 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
           
           {/* Connection status */}
           <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-xs text-green-400 font-mono">ONLINE</span>
+            <div className={`w-2 h-2 rounded-full ${isContactOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
+            <span className={`text-xs font-mono ${isContactOnline ? 'text-green-400' : 'text-gray-400'}`}>
+              {isContactOnline ? 'ONLINE' : 'OFFLINE'}
+            </span>
           </div>
         </div>
       </div>

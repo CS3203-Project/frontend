@@ -17,6 +17,7 @@ interface MessagingContextType {
   
   // WebSocket status
   isWebSocketConnected: boolean;
+  onlineUsers: string[];
   
   // Actions
   loadConversations: () => Promise<void>;
@@ -26,6 +27,7 @@ interface MessagingContextType {
   markConversationAsRead: (conversationId: string) => Promise<void>;
   deleteConversation: (conversationId: string) => Promise<void>;
   loadMoreMessages: () => Promise<void>;
+  checkUserOnlineStatus: (userId: string) => boolean;
 }
 
 const MessagingContext = createContext<MessagingContextType | undefined>(undefined);
@@ -45,6 +47,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
   const [error, setError] = useState<string | null>(null);
   const [messagesPage, setMessagesPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   // WebSocket integration
   const webSocket = useWebSocket({
@@ -472,6 +475,28 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       }
     };
 
+    // Handle online users list
+    const handleOnlineUsersList = (userIds: string[]) => {
+      console.log('👥 Online users updated:', userIds);
+      setOnlineUsers(userIds);
+    };
+
+    // Handle real-time user online status changes
+    const handleUserOnline = (data: { userId: string; status: 'online' }) => {
+      console.log('🟢 User came online:', data.userId);
+      setOnlineUsers(prev => {
+        if (!prev.includes(data.userId)) {
+          return [...prev, data.userId];
+        }
+        return prev;
+      });
+    };
+
+    const handleUserOffline = (data: { userId: string; status: 'offline' }) => {
+      console.log('🔴 User went offline:', data.userId);
+      setOnlineUsers(prev => prev.filter(id => id !== data.userId));
+    };
+
     // Register event listeners
     webSocket.on('message:received', handleMessageReceived);
     webSocket.on('message:sent', handleMessageSent);
@@ -479,6 +504,9 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     webSocket.on('message:read-receipt', handleMessageReadReceipt);
     webSocket.on('message:auto-read', handleMessageAutoRead);
     webSocket.on('conversation:marked-read', handleConversationMarkedRead);
+    webSocket.on('users:online-list', handleOnlineUsersList);
+    webSocket.on('user:online', handleUserOnline);
+    webSocket.on('user:offline', handleUserOffline);
 
     // Cleanup listeners on unmount or socket change
     return () => {
@@ -488,8 +516,32 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       webSocket.off('message:read-receipt', handleMessageReadReceipt);
       webSocket.off('message:auto-read', handleMessageAutoRead);
       webSocket.off('conversation:marked-read', handleConversationMarkedRead);
+      webSocket.off('users:online-list', handleOnlineUsersList);
+      webSocket.off('user:online', handleUserOnline);
+      webSocket.off('user:offline', handleUserOffline);
     };
   }, [webSocket.socket, activeConversation]);
+
+  // Request online users periodically when connected
+  useEffect(() => {
+    if (!webSocket.isConnected) return;
+
+    const requestOnlineUsers = () => {
+      webSocket.emit('users:online', {});
+    };
+
+    // Request initial online users only once when connected
+    requestOnlineUsers();
+
+    // Optional: Uncomment below for backup polling (currently disabled for pure real-time)
+    // const intervalId = setInterval(requestOnlineUsers, 5000);
+    // return () => clearInterval(intervalId);
+  }, [webSocket.isConnected]);
+
+  // Helper function to check if a user is online
+  const checkUserOnlineStatus = (userId: string): boolean => {
+    return onlineUsers.includes(userId);
+  };
 
   // Ensure user joins and enters conversation on connect or when activeConversation changes
   useEffect(() => {
@@ -517,6 +569,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     error,
     currentUserId: userId,
     isWebSocketConnected: webSocket.isConnected,
+    onlineUsers,
     loadConversations,
     selectConversation,
     sendMessage,
@@ -524,6 +577,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     markConversationAsRead,
     deleteConversation,
     loadMoreMessages,
+    checkUserOnlineStatus,
   };
 
   return (
