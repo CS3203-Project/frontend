@@ -157,18 +157,33 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
 
   if (error) {
     return (
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center text-red-500">
-            <p className="text-lg font-medium">Error loading conversations</p>
-            <p className="text-sm mt-2">{error}</p>
-            <button 
-              onClick={() => loadConversations()} 
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Retry
-            </button>
+        <main className="flex-grow flex items-center justify-center relative z-10 px-4">
+          <div className="text-center bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-2xl max-w-md w-full relative overflow-hidden">
+            {/* Glittering border effect */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/20 via-red-400/10 to-red-500/20 animate-pulse"></div>
+            
+            <div className="relative z-10">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-red-500/20 to-red-600/20 flex items-center justify-center border border-red-500/30">
+                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <p className="text-lg font-medium text-white mb-2">Error loading conversations</p>
+              <p className="text-sm text-gray-400 mb-6">{error}</p>
+              <button 
+                onClick={() => loadConversations()} 
+                className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                <span className="relative z-10">Retry</span>
+              </button>
+            </div>
           </div>
         </main>
         <Footer />
@@ -177,151 +192,203 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse"></div>
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      
+      {/* Floating orbs for visual appeal */}
+      <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
+      
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8 mt-16">
+      <main className="flex-grow container mx-auto px-4 py-8 mt-16 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Conversation Hub</h1>
-            <p className="text-gray-600 mt-2">Manage your conversations and start new ones</p>
+          <div className="mb-8 text-center">
+            <div className="relative inline-block">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent mb-4">
+                Conversation Hub
+              </h1>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+            </div>
+            <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
+              Connect, communicate, and collaborate with your network in a seamless messaging experience
+            </p>
           </div>
 
           {/* Actions */}
-          <div className="mb-6">
+          <div className="mb-8 flex justify-center">
             <button
               onClick={() => setShowNewConversation(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              className="px-8 py-4 bg-gradient-to-r from-blue-600/90 to-purple-600/90 backdrop-blur-xl text-white rounded-2xl hover:from-blue-700/90 hover:to-purple-700/90 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3 border border-white/20 hover:border-white/30 relative overflow-hidden group"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Start New Conversation</span>
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+              <div className="relative z-10 flex items-center space-x-3">
+                <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <span className="font-semibold">Start New Conversation</span>
+              </div>
             </button>
           </div>
 
           {/* New Conversation Modal */}
           {showNewConversation && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Start New Conversation</h3>
-                  <button
-                    onClick={() => setShowNewConversation(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 px-4">
+              <div className="bg-black/95 backdrop-blur-xl rounded-2xl border border-white/10 p-8 w-full max-w-lg shadow-2xl relative overflow-hidden">
+                {/* Glittering border effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-bold text-white">Start New Conversation</h3>
+                    <button
+                      onClick={() => setShowNewConversation(false)}
+                      className="p-2 text-gray-400 hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/10"
+                      aria-label="Close modal"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <UserSearch
+                    onSelectUser={handleStartNewConversation}
+                    placeholder="Search for users to message..."
+                  />
                 </div>
-                <UserSearch
-                  onSelectUser={handleStartNewConversation}
-                  placeholder="Search for users to message..."
-                />
               </div>
             </div>
           )}
 
           {/* Conversations List */}
-          <div className="bg-white rounded-lg shadow-md">
-            {loading && conversations.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                <p>Loading conversations...</p>
-              </div>
-            ) : conversations.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <p className="text-lg">No conversations yet</p>
-                <p className="text-sm mt-2">Start a new conversation to begin messaging</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {conversations.map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    onClick={() => handleSelectConversation(conversation)}
-                    className="p-6 hover:bg-gray-50 cursor-pointer transition-colors"
+          <div className="bg-black/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden">
+            {/* Glittering border effect */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse"></div>
+            
+            <div className="relative z-10">
+              {loading && conversations.length === 0 ? (
+                <div className="p-12 text-center text-gray-400">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/20">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                  </div>
+                  <p className="text-lg font-medium">Loading conversations...</p>
+                  <p className="text-sm text-gray-500 mt-2">Please wait while we fetch your messages</p>
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="p-12 text-center text-gray-400">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-gray-500/20 to-gray-600/20 flex items-center justify-center border border-white/20">
+                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <p className="text-xl font-semibold text-white mb-2">No conversations yet</p>
+                  <p className="text-gray-500">Start your first conversation to begin messaging with others</p>
+                  <button
+                    onClick={() => setShowNewConversation(true)}
+                    className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
                   >
-                    <div className="flex items-center space-x-4">
-                      {/* Avatar with online indicator */}
-                      <div className="flex-shrink-0 relative">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {getContactDisplayName(conversation).charAt(0).toUpperCase()}
+                    Start Messaging
+                  </button>
+                </div>
+              ) : (
+                <div className="divide-y divide-white/10">
+                  {conversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      onClick={() => handleSelectConversation(conversation)}
+                      className="p-6 hover:bg-white/5 cursor-pointer transition-all duration-300 group relative overflow-hidden border-l-4 border-transparent hover:border-blue-500/50"
+                    >
+                      {/* Hover shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                      
+                      <div className="flex items-center space-x-4 relative z-10">
+                        {/* Avatar with enhanced styling */}
+                        <div className="flex-shrink-0 relative">
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-lg group-hover:shadow-xl transition-all duration-300 border-2 border-white/20 group-hover:border-white/40">
+                            {getContactDisplayName(conversation).charAt(0).toUpperCase()}
+                          </div>
+                          {/* Enhanced online status indicator */}
+                          {checkUserOnlineStatus(getOtherParticipant(conversation)) && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-3 border-black rounded-full shadow-lg animate-pulse">
+                              <div className="absolute inset-0 bg-green-400 rounded-full animate-ping"></div>
+                            </div>
+                          )}
                         </div>
-                        {/* Online status indicator */}
-                        {checkUserOnlineStatus(getOtherParticipant(conversation)) && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                        )}
-                      </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1 min-w-0">
-                            {/* Contact Name */}
-                            <div className="flex items-center space-x-2">
-                              <p className="text-lg font-semibold text-gray-900 truncate">
-                                {getContactDisplayName(conversation)}
-                              </p>
-                              {loadingProfiles.has(getOtherParticipant(conversation)) && (
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        {/* Content with enhanced typography */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1 min-w-0">
+                              {/* Contact Name with gradient */}
+                              <div className="flex items-center space-x-2">
+                                <p className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent truncate">
+                                  {getContactDisplayName(conversation)}
+                                </p>
+                                {loadingProfiles.has(getOtherParticipant(conversation)) && (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                                )}
+                              </div>
+                              
+                              {/* Conversation Title */}
+                              {conversation.title && 
+                               !conversation.title.includes('Chat with') && 
+                               conversation.title !== getContactDisplayName(conversation) && (
+                                <p className="text-sm text-blue-400 truncate mt-1 font-medium">
+                                  {conversation.title}
+                                </p>
+                              )}
+                              
+                              {/* Last Message */}
+                              {conversation.lastMessage && (
+                                <p className="text-sm text-gray-400 truncate mt-2 leading-relaxed">
+                                  {conversation.lastMessage.fromId === currentUserId ? (
+                                    <span className="text-blue-400 font-medium">You: </span>
+                                  ) : ''}
+                                  {conversation.lastMessage.content}
+                                </p>
+                              )}
+                              
+                              {!conversation.lastMessage && (
+                                <p className="text-sm text-gray-500 italic mt-2">No messages yet - start the conversation!</p>
                               )}
                             </div>
                             
-                            {/* Conversation Title */}
-                            {conversation.title && 
-                             !conversation.title.includes('Chat with') && 
-                             conversation.title !== getContactDisplayName(conversation) && (
-                              <p className="text-sm text-gray-500 truncate mt-1">
-                                {conversation.title}
-                              </p>
-                            )}
-                            
-                            {/* Last Message */}
-                            {conversation.lastMessage && (
-                              <p className="text-sm text-gray-600 truncate mt-2">
-                                {conversation.lastMessage.fromId === currentUserId ? 'You: ' : ''}
-                                {conversation.lastMessage.content}
-                              </p>
-                            )}
-                            
-                            {!conversation.lastMessage && (
-                              <p className="text-sm text-gray-400 italic mt-2">No messages yet</p>
-                            )}
+                            {/* Time and Unread with enhanced styling */}
+                            <div className="flex flex-col items-end ml-4 space-y-2">
+                              {conversation.lastMessage && (
+                                <p className="text-xs text-gray-500 font-medium">
+                                  {formatTime(conversation.lastMessage.createdAt)}
+                                </p>
+                              )}
+                              
+                              {conversation.unreadCount && conversation.unreadCount > 0 && (
+                                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs rounded-full h-7 w-7 flex items-center justify-center font-bold shadow-lg animate-pulse">
+                                  {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          
-                          {/* Time and Unread */}
-                          <div className="flex flex-col items-end ml-4">
-                            {conversation.lastMessage && (
-                              <p className="text-xs text-gray-500 mb-2">
-                                {formatTime(conversation.lastMessage.createdAt)}
-                              </p>
-                            )}
-                            
-                            {conversation.unreadCount && conversation.unreadCount > 0 && (
-                              <div className="bg-blue-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center">
-                                {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
-                              </div>
-                            )}
+                        </div>
+
+                        {/* Enhanced Arrow */}
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110">
+                            <svg className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                           </div>
                         </div>
                       </div>
-
-                      {/* Arrow */}
-                      <div className="flex-shrink-0">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
@@ -353,12 +420,28 @@ const ConversationHub: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        
+        {/* Floating orbs */}
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
+        
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading conversations...</p>
+        <main className="flex-grow flex items-center justify-center relative z-10 px-4">
+          <div className="text-center bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 p-12 shadow-2xl max-w-md w-full relative overflow-hidden">
+            {/* Glittering border effect */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 via-purple-500/10 to-blue-500/20 animate-pulse"></div>
+            
+            <div className="relative z-10">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/20">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
+              </div>
+              <p className="text-xl font-semibold text-white mb-2">Loading Conversation Hub</p>
+              <p className="text-gray-400">Setting up your messaging environment...</p>
+            </div>
           </div>
         </main>
         <Footer />
@@ -368,18 +451,33 @@ const ConversationHub: React.FC = () => {
 
   if (error || !currentUser) {
     return (
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center text-red-500">
-            <p className="text-lg font-medium">Error loading conversation hub</p>
-            <p className="text-sm mt-2">{error || 'User not found'}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Retry
-            </button>
+        <main className="flex-grow flex items-center justify-center relative z-10 px-4">
+          <div className="text-center bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 p-12 shadow-2xl max-w-md w-full relative overflow-hidden">
+            {/* Glittering border effect */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/20 via-red-400/10 to-red-500/20 animate-pulse"></div>
+            
+            <div className="relative z-10">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-red-500/20 to-red-600/20 flex items-center justify-center border border-red-500/30">
+                <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <p className="text-xl font-semibold text-white mb-2">Unable to Load Conversation Hub</p>
+              <p className="text-gray-400 mb-8">{error || 'User authentication required'}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                <span className="relative z-10">Retry</span>
+              </button>
+            </div>
           </div>
         </main>
         <Footer />
