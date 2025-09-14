@@ -122,14 +122,14 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-          <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
+        <div className="flex items-center justify-between p-6 border-b border-white/20 bg-black/20 backdrop-blur-lg flex-shrink-0">
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Edit Profile</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-white/20 rounded-full transition-colors text-gray-300 hover:text-white backdrop-blur-sm"
             disabled={loading}
           >
             <X className="h-5 w-5" />
@@ -137,37 +137,37 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto" style={{ maxHeight: 'calc(95vh - 200px)' }}>
-          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto backdrop-blur-sm" style={{ maxHeight: 'calc(95vh - 200px)' }}>
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Personal Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2" />
+            <div className="bg-black/20 backdrop-blur-lg rounded-xl p-5 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center drop-shadow-lg">
+                <User className="h-5 w-5 mr-2 text-blue-400" />
                 Personal Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     First Name
                   </label>
                   <input
                     type="text"
                     value={formData.firstName || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="Enter your first name"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Last Name
                   </label>
                   <input
                     type="text"
                     value={formData.lastName || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="Enter your last name"
                   />
                 </div>
@@ -175,21 +175,21 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
             </div>
 
             {/* Contact Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Phone className="h-5 w-5 mr-2" />
+            <div className="bg-black/20 backdrop-blur-lg rounded-xl p-5 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center drop-shadow-lg">
+                <Phone className="h-5 w-5 mr-2 text-green-400" />
                 Contact Information
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={formData.phone || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="Enter your phone number"
                   />
                 </div>
@@ -197,33 +197,33 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
             </div>
 
             {/* Location Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2" />
+            <div className="bg-black/20 backdrop-blur-lg rounded-xl p-5 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center drop-shadow-lg">
+                <MapPin className="h-5 w-5 mr-2 text-purple-400" />
                 Location Information
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Location/City
                   </label>
                   <input
                     type="text"
                     value={formData.location || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="Enter your city or location"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Address
                   </label>
                   <textarea
                     value={formData.address || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none text-white placeholder-gray-400 backdrop-blur-sm"
                     rows={2}
                     placeholder="Enter your full address"
                   />
@@ -232,28 +232,28 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
             </div>
 
             {/* Profile Image */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Image className="h-5 w-5 mr-2" />
+            <div className="bg-black/20 backdrop-blur-lg rounded-xl p-5 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center drop-shadow-lg">
+                <Image className="h-5 w-5 mr-2 text-pink-400" />
                 Profile Image
               </h3>
               
               {/* Current Image Display */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Current Profile Image
                 </label>
                 <div className="flex items-center space-x-4">
                   <img
                     src={previewUrl || formData.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.firstName + ' ' + formData.lastName)}&background=3b82f6&color=fff&size=80`}
                     alt="Profile"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow-lg"
                   />
                   {(previewUrl || selectedFile) && (
                     <button
                       type="button"
                       onClick={handleRemoveFile}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      className="text-red-400 hover:text-red-300 text-sm font-medium bg-red-500/20 hover:bg-red-500/30 px-3 py-1 rounded-lg backdrop-blur-sm border border-red-400/30 transition-colors"
                     >
                       Remove new image
                     </button>
@@ -263,7 +263,7 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
 
               {/* File Upload */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Upload New Image
                 </label>
                 <div className="flex items-center space-x-4">
@@ -277,12 +277,12 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 backdrop-blur-sm transition-colors"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Choose Image
                   </button>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-400">
                     {selectedFile ? selectedFile.name : 'Max size: 5MB'}
                   </span>
                 </div>
@@ -290,7 +290,7 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
 
               {/* URL Input (Alternative) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Or Image URL (Optional)
                 </label>
                 <input
@@ -307,25 +307,25 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                       }
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                   placeholder="https://example.com/your-image.jpg"
                   disabled={!!selectedFile}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   {selectedFile ? 'URL input disabled while file is selected' : 'Enter a direct link to your image or upload a file above'}
                 </p>
               </div>
             </div>
 
             {/* Social Media */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                <Globe className="h-5 w-5 mr-2" />
+            <div className="bg-black/20 backdrop-blur-lg rounded-xl p-5 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center drop-shadow-lg">
+                <Globe className="h-5 w-5 mr-2 text-cyan-400" />
                 Social Media
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Twitter/X
                   </label>
                   <input
@@ -336,13 +336,13 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                       newSocial[0] = e.target.value.trim();
                       setFormData(prev => ({ ...prev, socialmedia: newSocial }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="twitter.com/username or x.com/username"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     LinkedIn
                   </label>
                   <input
@@ -353,13 +353,13 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                       newSocial[1] = e.target.value.trim();
                       setFormData(prev => ({ ...prev, socialmedia: newSocial }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="linkedin.com/in/username"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Instagram
                   </label>
                   <input
@@ -370,13 +370,13 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                       newSocial[2] = e.target.value.trim();
                       setFormData(prev => ({ ...prev, socialmedia: newSocial }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="instagram.com/username"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     GitHub
                   </label>
                   <input
@@ -387,13 +387,13 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                       newSocial[3] = e.target.value.trim();
                       setFormData(prev => ({ ...prev, socialmedia: newSocial }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="github.com/username"
                   />
                 </div>
                 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Website/Portfolio
                   </label>
                   <input
@@ -404,12 +404,12 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
                       newSocial[4] = e.target.value.trim();
                       setFormData(prev => ({ ...prev, socialmedia: newSocial }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                     placeholder="https://yourwebsite.com"
                   />
                 </div>
                 
-                <p className="text-xs text-gray-500 sm:col-span-2">
+                <p className="text-xs text-gray-400 sm:col-span-2 bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
                   Leave fields empty if you don't have accounts on these platforms.
                 </p>
               </div>
@@ -418,18 +418,19 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess, user }: E
         </div>
 
         {/* Footer - Always visible */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-white/20 bg-black/20 backdrop-blur-lg flex-shrink-0">
           <Button
             variant="ghost"
             onClick={onClose}
             disabled={loading}
+            className="bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white border-white/20 hover:border-white/40 backdrop-blur-sm"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border border-blue-400/30 backdrop-blur-sm shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <>

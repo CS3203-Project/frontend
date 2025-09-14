@@ -3,7 +3,7 @@ import Orb from '../components/Orb';
 import Footer from '../components/Footer';
 import useServices from '../hooks/useServices';
 import { useEffect, useState, useRef } from 'react';
-import { Search, MapPin, ChevronDown, Globe, Map, Home, X, Loader2 } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Globe, Map, Home, X, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { semanticSearchApi } from '../api/semanticSearchApi';
 import Button from '../components/Button';
@@ -586,6 +586,88 @@ export default function Homepage() {
           </div>
         </div>
       )}
+
+      {/* Call to Action Section for Service Providers */}
+      <section className="relative py-20 bg-gradient-to-br from-purple-900 via-black to-gray-900 overflow-hidden">
+        {/* Background Orb */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-20">
+          <div className="w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="mb-8">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 text-purple-300 text-sm font-medium mb-6">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Join Our Provider Network
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Ready to Turn Your Skills Into
+              <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                Income?
+              </span>
+            </h2>
+            
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+              Join thousands of professionals already earning on our platform. Set your own rates, 
+              work flexible hours, and build your reputation.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="p-3 bg-green-600/20 rounded-xl w-fit mx-auto mb-4">
+                <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Earn More</h3>
+              <p className="text-gray-400 text-sm">Set competitive rates and increase your income potential</p>
+            </div>
+            
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="p-3 bg-blue-600/20 rounded-xl w-fit mx-auto mb-4">
+                <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Stay Protected</h3>
+              <p className="text-gray-400 text-sm">Secure payments and verified customer base</p>
+            </div>
+            
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="p-3 bg-purple-600/20 rounded-xl w-fit mx-auto mb-4">
+                <svg className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Grow Fast</h3>
+              <p className="text-gray-400 text-sm">Build your reputation and expand your client base</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+              onClick={() => navigate('/become-provider')}
+            >
+              <span className="flex items-center">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Become a Provider
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg"
+              onClick={() => navigate('/services')}
+            >
+              Browse Services
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <Footer />

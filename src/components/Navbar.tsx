@@ -300,11 +300,13 @@ const Navbar = () => {
                   <div className="text-center relative z-10">
                     <h4 className="font-semibold text-white text-sm">Start earning today!</h4>
                     <p className="text-xs text-gray-300 mt-1">Join thousands of service providers</p>
-                    <Button size="sm" className="mt-2 w-full bg-gradient-to-r from-white/20 to-white/10 text-white border border-white/30 hover:from-white/30 hover:to-white/20 hover:border-white/40 transition-all duration-300 relative overflow-hidden group">
-                      {/* Button glitter effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-                      <span className="relative z-10">Start Selling</span>
-                    </Button>
+                    <Link to="/become-provider">
+                      <Button size="sm" className="mt-2 w-full bg-gradient-to-r from-white/20 to-white/10 text-white border border-white/30 hover:from-white/30 hover:to-white/20 hover:border-white/40 transition-all duration-300 relative overflow-hidden group">
+                        {/* Button glitter effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                        <span className="relative z-10">Become a Provider</span>
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -385,6 +387,16 @@ const Navbar = () => {
               </div>
             ) : (
               <>
+                <Link to="/become-provider">
+                  <Button variant="outline" className="font-medium text-purple-400 border-purple-400/50 hover:text-purple-300 hover:border-purple-300 hover:bg-purple-500/10 transition-all duration-300 relative overflow-hidden group mr-3">
+                    {/* Button glitter effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                    <span className="relative z-10 flex items-center">
+                      <Sparkles className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
+                      Become a Provider
+                    </span>
+                  </Button>
+                </Link>
                 <a href="/signin">
                   <Button variant="ghost" className="font-medium text-white/90 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20 transition-all duration-300 relative overflow-hidden group">
                     {/* Button glitter effect */}
