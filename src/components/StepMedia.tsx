@@ -109,24 +109,34 @@ export default function StepMedia({
                   type="button"
                   onClick={onNext}
                   disabled={!canProceed || isLoading}
-                  className={`flex items-center text-sm px-5 py-3 rounded-xl font-semibold transition-all duration-200
+                  className={`group relative overflow-hidden flex items-center text-sm px-6 py-3 rounded-xl font-semibold transition-all duration-200
                     ${!canProceed || isLoading
                       ? 'bg-white/20 text-white/60 cursor-not-allowed'
-                      : 'bg-white text-black hover:scale-[1.02] shadow-lg'
+                      : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-[1.02] shadow-lg hover:shadow-purple-500/25'
                     }`}
                 >
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  {!canProceed || isLoading ? (
+                    <>
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </>
+                  ) : (
+                    <>
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                    </>
+                  )}
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={onSubmit}
                   disabled={!canProceed || isLoading}
-                  className={`flex items-center text-sm px-5 py-3 rounded-xl font-semibold transition-all duration-200
+                  className={`group relative overflow-hidden flex items-center text-sm px-6 py-3 rounded-xl font-semibold transition-all duration-200
                     ${!canProceed || isLoading
                       ? 'bg-white/20 text-white/60 cursor-not-allowed'
-                      : 'bg-white text-black hover:scale-[1.02] shadow-lg'
+                      : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-[1.02] shadow-lg hover:shadow-purple-500/25'
                     }`}
                 >
                   {isLoading ? (
@@ -134,10 +144,16 @@ export default function StepMedia({
                       <Loader className="h-4 w-4 mr-2 animate-spin" />
                       Creating...
                     </>
-                  ) : (
+                  ) : !canProceed ? (
                     <>
                       Create Account
                       <Check className="h-4 w-4 ml-1" />
+                    </>
+                  ) : (
+                    <>
+                      Create Account
+                      <Check className="h-4 w-4 ml-1 group-hover:scale-110 transition-transform" />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
                     </>
                   )}
                 </button>

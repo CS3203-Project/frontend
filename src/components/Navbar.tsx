@@ -4,8 +4,7 @@ import Button from './Button';
 import { cn } from '../utils/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { clearMessages } from '../utils/messageDB';
-import { Link } from 'react-router-dom';
-import SpecificSearchCard from './services/SpecificSearchCard';
+import { Link, useLocation } from 'react-router-dom';
 import { categoriesData } from '../data/servicesData';
 
 const Navbar = () => {
@@ -17,8 +16,22 @@ const Navbar = () => {
   const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // Use AuthContext instead of managing local state
+  // Use AuthContext and location hook
   const { user, isLoggedIn, logout } = useAuth();
+  const location = useLocation();
+
+  // Helper function to check if a route is active
+  const isActiveRoute = (href: string) => {
+    if (href === '/' && location.pathname === '/') return true;
+    if (href !== '/' && location.pathname.startsWith(href)) return true;
+    return false;
+  };
+
+  // Helper function to check if provider-related routes are active
+  const isProviderRouteActive = () => {
+    const providerRoutes = ['/easy-setup', '/secure-payments', '/customer-management', '/analytics-dashboard'];
+    return providerRoutes.some(route => location.pathname.startsWith(route));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -123,10 +136,18 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center space-x-3 group cursor-pointer">
+            <Link to="/" className={cn(
+              "flex items-center space-x-3 group cursor-pointer py-2 px-3 rounded-xl transition-all duration-300",
+              isActiveRoute("/") ? "bg-white/10 shadow-lg border border-white/20" : ""
+            )}>
               <div className="relative w-10 h-10 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
                 {/* Glittering background effect */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/10 to-white/5 group-hover:from-white/20 group-hover:to-white/10 transition-all duration-300"></div>
+                <div className={cn(
+                  "absolute inset-0 rounded-xl transition-all duration-300",
+                  isActiveRoute("/") 
+                    ? "bg-gradient-to-r from-white/20 to-white/15" 
+                    : "bg-gradient-to-r from-white/10 to-white/5 group-hover:from-white/20 group-hover:to-white/10"
+                )}></div>
                 <div className="absolute inset-0 rounded-xl animate-pulse bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
                 
                 <img 
@@ -159,18 +180,26 @@ const Navbar = () => {
             <div className="relative">
                <Link
                 to="/services"
-                className="flex items-center space-x-1 text-white/90 hover:text-white font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-white/5 group"
+                className={cn(
+                  "flex items-center space-x-1 font-medium transition-all duration-300 py-2 px-3 rounded-lg group",
+                  isActiveRoute("/services") 
+                    ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                    : "text-white/90 hover:text-white hover:bg-white/5"
+                )}
                 onMouseEnter={handleServicesEnter}
                 onMouseLeave={handleServicesLeave}
               >
                 <span className="relative">
                   Browse Services
-                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
+                  <div className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
+                    isActiveRoute("/services") ? "w-full" : "w-0 group-hover:w-full"
+                  )}></div>
                 </span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   servicesOpen && "rotate-180 text-white",
-                  "group-hover:text-white"
+                  isActiveRoute("/services") ? "text-white" : "group-hover:text-white"
                 )} />
               </Link>
               
@@ -223,25 +252,32 @@ const Navbar = () => {
                     );
                   })}
                 </div>
-                <SpecificSearchCard />
               </div>
             </div>
 
             {/* For Providers Dropdown */}
             <div className="relative">
               <button 
-                className="flex items-center space-x-1 text-white/90 hover:text-white font-medium transition-all duration-300 py-2 px-3 rounded-lg hover:bg-white/5 group"
+                className={cn(
+                  "flex items-center space-x-1 font-medium transition-all duration-300 py-2 px-3 rounded-lg group",
+                  isProviderRouteActive() 
+                    ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                    : "text-white/90 hover:text-white hover:bg-white/5"
+                )}
                 onMouseEnter={handleProvidersEnter}
                 onMouseLeave={handleProvidersLeave}
               >
                 <span className="relative">
                   For Providers
-                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
+                  <div className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
+                    isProviderRouteActive() ? "w-full" : "w-0 group-hover:w-full"
+                  )}></div>
                 </span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   forProvidersOpen && "rotate-180 text-white",
-                  "group-hover:text-white"
+                  isProviderRouteActive() ? "text-white" : "group-hover:text-white"
                 )} />
               </button>
               
@@ -297,37 +333,32 @@ const Navbar = () => {
                     );
                   })}
                 </div>
-                <div className="mt-4 p-3 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 relative overflow-hidden">
-                  {/* Glittering background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse"></div>
-                  
-                  <div className="text-center relative z-10">
-                    <h4 className="font-semibold text-white text-sm">Start earning today!</h4>
-                    <p className="text-xs text-gray-300 mt-1">Join thousands of service providers</p>
-                    <Link to="/become-provider">
-                      <Button size="sm" className="mt-2 w-full bg-gradient-to-r from-white/20 to-white/10 text-white border border-white/30 hover:from-white/30 hover:to-white/20 hover:border-white/40 transition-all duration-300 relative overflow-hidden group">
-                        {/* Button glitter effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-                        <span className="relative z-10">Become a Provider</span>
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
               </div>
             </div>
 
-            {navLinks.map((link, index) => (
-              <Link
-                key={index}
-                to={link.href}
-                className="text-white/90 hover:text-white font-medium transition-all duration-300 relative group py-2 px-3 rounded-lg hover:bg-white/5 whitespace-nowrap"
-              >
-                <span className="relative">
-                  {link.name}
-                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
-                </span>
-              </Link>
-            ))}
+            {navLinks.map((link, index) => {
+              const isActive = isActiveRoute(link.href);
+              return (
+                <Link
+                  key={index}
+                  to={link.href}
+                  className={cn(
+                    "font-medium transition-all duration-300 relative group py-2 px-3 rounded-lg whitespace-nowrap",
+                    isActive 
+                      ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                      : "text-white/90 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <span className="relative">
+                    {link.name}
+                    <div className={cn(
+                      "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
+                      isActive ? "w-full" : "w-0 group-hover:w-full"
+                    )}></div>
+                  </span>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Desktop Actions */}
@@ -391,16 +422,6 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-                <Link to="/become-provider">
-                  <Button variant="outline" className="font-medium text-purple-400 border-purple-400/50 hover:text-purple-300 hover:border-purple-300 hover:bg-purple-500/10 transition-all duration-300 relative overflow-hidden group mr-3">
-                    {/* Button glitter effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-                    <span className="relative z-10 flex items-center">
-                      <Sparkles className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
-                      Become a Provider
-                    </span>
-                  </Button>
-                </Link>
                 <a href="/signin">
                   <Button variant="ghost" className="font-medium text-white/90 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20 transition-all duration-300 relative overflow-hidden group">
                     {/* Button glitter effect */}
@@ -550,19 +571,30 @@ const Navbar = () => {
 
             {/* Mobile Navigation Links */}
             <div className="space-y-2">
-              {navLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  to={link.href}
-                  className="block py-3 px-3 text-lg font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 relative group"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="relative">
-                    {link.name}
-                    <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
-                  </span>
-                </Link>
-              ))}
+              {navLinks.map((link, index) => {
+                const isActive = isActiveRoute(link.href);
+                return (
+                  <Link
+                    key={index}
+                    to={link.href}
+                    className={cn(
+                      "block py-3 px-3 text-lg font-medium rounded-lg transition-all duration-300 relative group",
+                      isActive 
+                        ? "text-white bg-white/20 border border-white/30 shadow-lg" 
+                        : "text-white/90 hover:text-white hover:bg-white/10"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="relative">
+                      {link.name}
+                      <div className={cn(
+                        "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
+                        isActive ? "w-full" : "w-0 group-hover:w-full"
+                      )}></div>
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Mobile CTA */}
