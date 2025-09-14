@@ -934,7 +934,7 @@ const ServiceDetailPage: React.FC = () => {
                       <div className="space-y-4">
                         {reviewsLoading ? (
                           <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                             <span className="ml-2 text-gray-600">Loading reviews...</span>
                           </div>
                         ) : filteredReviews.length === 0 ? (
@@ -1119,7 +1119,7 @@ const ServiceDetailPage: React.FC = () => {
               
               {providerLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                 </div>
               ) : (
                 <>

@@ -109,7 +109,7 @@ export const UserSearch: React.FC<UserSearchProps> = ({
         {/* Loading Spinner */}
         {loading && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
           </div>
         )}
       </div>

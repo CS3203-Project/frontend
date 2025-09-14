@@ -292,6 +292,7 @@ export default function SuccessStories() {
                 <button
                   onClick={() => setSelectedStory(null)}
                   className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-300 border border-white/20"
+                  aria-label="Close modal"
                 >
                   <span className="text-white text-xl">×</span>
                 </button>
@@ -373,7 +374,7 @@ export default function SuccessStories() {
                     <div className="flex items-center">
                       <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center mr-4">
                         <span className="text-white font-bold text-lg">
-                          {selectedStory.freelancerName.split(' ').map((n: any[]) => n[0]).join('')}
+                          {selectedStory.freelancerName.split(' ').map((n: string) => n[0]).join('')}
                         </span>
                       </div>
                       <div>

@@ -30,6 +30,11 @@ import AdminDashboard from "./Pages/AdminDashboard.tsx";
 import RateCustomerPage from "./Pages/RateCustomerPage.tsx";
 import RateServicePage from "./Pages/RateServicePage.tsx";
 import AdminLogin from "./Pages/AdminLogin.tsx";
+import Pricing from "./Pages/Pricing.tsx";
+import EasySetup from "./Pages/EasySetup.tsx";
+import SecurePayments from "./Pages/SecurePayments.tsx";
+import CustomerManagement from "./Pages/CustomerManagement.tsx";
+import AnalyticsDashboard from "./Pages/AnalyticsDashboard.tsx";
 
 function App() {
   return (
@@ -42,6 +47,11 @@ function App() {
             <Route path="/articles" element={<Articles />} />
             <Route path="/stories" element={<SucessStories />} />
             <Route path="/howWorks" element={<HowWorks />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/easy-setup" element={<EasySetup />} />
+            <Route path="/secure-payments" element={<SecurePayments />} />
+            <Route path="/customer-management" element={<CustomerManagement />} />
+            <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/services" element={<BrowseServices />} />

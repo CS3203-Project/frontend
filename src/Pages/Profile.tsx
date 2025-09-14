@@ -328,11 +328,13 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+      <div className="min-h-screen bg-black flex flex-col">
         <div className="flex-1 flex items-center justify-center mt-16">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading profile...</p>
+            <div className="bg-black/50 backdrop-blur-lg rounded-2xl p-8 border border-gray-800">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+              <p className="mt-4 text-gray-300">Loading profile...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -917,7 +919,7 @@ export default function Profile() {
                       </div>
                     </div>
                     <div className="text-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-3"></div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-3"></div>
                       <p className="text-gray-400">Loading services...</p>
                     </div>
                   </div>
@@ -1285,9 +1287,9 @@ export default function Profile() {
               )
             ) : user.role === 'PROVIDER' && !providerProfile ? (
               /* Loading provider data */
-              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading provider profile...</p>
+              <div className="bg-black/50 backdrop-blur-lg rounded-xl border border-gray-800 p-8 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-gray-300">Loading provider profile...</p>
               </div>
             ) : (
               /* USER role content */
@@ -1446,7 +1448,7 @@ export default function Profile() {
                   />
                   {uploadingImages && (
                     <div className="flex items-center space-x-2 text-blue-400">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                       <span className="text-sm">Uploading images...</span>
                     </div>
                   )}

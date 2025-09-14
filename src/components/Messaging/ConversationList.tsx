@@ -200,7 +200,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({ className = 
       <div className="flex-1 overflow-y-auto">
         {loading && conversations.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             Loading conversations...
           </div>
         ) : conversations.length === 0 ? (
@@ -254,7 +254,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({ className = 
                           {getContactDisplayName(conversation)}
                         </p>
                         {loadingProfiles.has(getOtherParticipant(conversation)) && (
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
                         )}
                       </div>
                       

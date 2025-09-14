@@ -241,20 +241,12 @@ const ServiceCategoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        {/* Background Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 opacity-20">
-          <Orb hue={280} hoverIntensity={0.3} rotateOnHover={true} />
-        </div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-15">
-          <Orb hue={200} hoverIntensity={0.3} rotateOnHover={true} />
-        </div>
-        
+      <div className="min-h-screen bg-black relative overflow-hidden">
         <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
-                <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-400" />
+              <div className="bg-black/50 backdrop-blur-lg rounded-2xl p-8 border border-gray-800">
+                <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-white" />
                 <p className="text-white text-lg">Loading category...</p>
               </div>
             </div>
@@ -397,7 +389,7 @@ const ServiceCategoryPage: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   {servicesLoading ? (
                     <div className="flex items-center space-x-2">
-                      <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
                       <span className="text-gray-300">
                         {selectedSubCategory ? 'Loading services...' : 'Loading all services...'}
                       </span>

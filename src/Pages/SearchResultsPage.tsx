@@ -50,32 +50,32 @@ const SearchResultsPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 mt-20">
           <div className="flex items-center mb-4">
             <button
               onClick={() => navigate(-1)}
-              className="mr-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="mr-4 p-2 hover:bg-white/10 rounded-full transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="w-5 h-5 text-gray-300" />
             </button>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
+              <Sparkles className="w-6 h-6 text-white" />
+              <h1 className="text-2xl font-bold text-white">
                 Smart Search Results
               </h1>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-gray-600">
-                  Searched for: <span className="font-semibold text-gray-900">"{query}"</span>
+                <p className="text-gray-300">
+                  Searched for: <span className="font-semibold text-white">"{query}"</span>
                 </p>
-                <p className="text-sm text-blue-600">
+                <p className="text-sm text-blue-400">
                   Found {results.length} semantically matching services
                 </p>
               </div>
@@ -86,21 +86,21 @@ const SearchResultsPage: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'relevance' | 'price' | 'rating')}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="relevance">Most Relevant</option>
-                  <option value="price">Lowest Price</option>
-                  <option value="rating">Best Match</option>
+                  <option value="relevance" className="bg-gray-800 text-white">Most Relevant</option>
+                  <option value="price" className="bg-gray-800 text-white">Lowest Price</option>
+                  <option value="rating" className="bg-gray-800 text-white">Best Match</option>
                 </select>
                 
                 {/* View Mode */}
-                <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-md transition-colors ${
                       viewMode === 'grid' 
-                        ? 'bg-white text-blue-600 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white/20 text-white shadow-sm' 
+                        : 'text-gray-400 hover:text-gray-300'
                     }`}
                   >
                     <Grid3X3 className="w-4 h-4" />
@@ -109,8 +109,8 @@ const SearchResultsPage: React.FC = () => {
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-md transition-colors ${
                       viewMode === 'list' 
-                        ? 'bg-white text-blue-600 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white/20 text-white shadow-sm' 
+                        : 'text-gray-400 hover:text-gray-300'
                     }`}
                   >
                     <List className="w-4 h-4" />
@@ -124,14 +124,14 @@ const SearchResultsPage: React.FC = () => {
         {/* Results */}
         {sortedResults.length === 0 ? (
           <div className="text-center py-12">
-            <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-            <p className="text-gray-600 mb-4">
+            <Sparkles className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+            <p className="text-gray-400 mb-4">
               Try adjusting your search terms or browse our categories
             </p>
             <Link
               to="/services"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 hover:border-white/30 transition-all duration-200"
             >
               Browse All Services
             </Link>
@@ -145,7 +145,7 @@ const SearchResultsPage: React.FC = () => {
               <Link
                 key={service.id}
                 to={`/services/detail/${service.id}`}
-                className={`group block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:-translate-y-1 ${
+                className={`group block bg-black/30 backdrop-blur-lg rounded-xl shadow-lg border border-white/10 hover:border-white/20 hover:bg-black/40 transition-all duration-200 hover:-translate-y-1 ${
                   viewMode === 'list' ? 'p-4' : 'p-6'
                 }`}
               >
@@ -159,8 +159,8 @@ const SearchResultsPage: React.FC = () => {
                         className="w-full h-full object-cover rounded-lg"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg flex items-center justify-center">
-                        <Star className="w-8 h-8 text-white" />
+                      <div className="w-full h-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg flex items-center justify-center border border-white/10">
+                        <Star className="w-8 h-8 text-white/60" />
                       </div>
                     )}
                   </div>
@@ -168,20 +168,20 @@ const SearchResultsPage: React.FC = () => {
                   {/* Content */}
                   <div className={`${viewMode === 'list' ? 'flex-1' : 'mt-4'}`}>
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
                         {service.title}
                       </h3>
-                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                      <span className="ml-2 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full border border-blue-500/30">
                         {Math.round(service.similarity * 100)}% match
                       </span>
                     </div>
                     
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                    <p className="text-gray-400 text-sm mb-3 line-clamp-2">
                       {service.description}
                     </p>
                     
                     <div className="flex items-center text-sm text-gray-500 mb-2">
-                      <span className="font-medium text-gray-700">{service.category.name}</span>
+                      <span className="font-medium text-gray-300">{service.category.name}</span>
                       <span className="mx-2">•</span>
                       <span>{service.provider.user.firstName} {service.provider.user.lastName}</span>
                     </div>
@@ -189,10 +189,10 @@ const SearchResultsPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">4.8</span>
+                        <span className="text-sm font-medium text-white">4.8</span>
                         <span className="text-xs text-gray-500">(24 reviews)</span>
                       </div>
-                      <div className="text-lg font-semibold text-green-600">
+                      <div className="text-lg font-semibold text-green-400">
                         {service.currency} {service.price}
                       </div>
                     </div>
@@ -202,7 +202,7 @@ const SearchResultsPage: React.FC = () => {
                         {service.tags.slice(0, 3).map((tag, index) => (
                           <span
                             key={index}
-                            className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md"
+                            className="inline-block px-2 py-1 bg-white/10 text-gray-300 text-xs rounded-md border border-white/20"
                           >
                             {tag}
                           </span>

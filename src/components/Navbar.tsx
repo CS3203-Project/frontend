@@ -74,28 +74,28 @@ const Navbar = () => {
     {
       title: "Easy Setup",
       description: "Get your service online in minutes",
-      href: "#",
+      href: "/easy-setup",
       icon: Sparkles,
       gradient: "from-green-400 to-blue-500"
     },
     {
       title: "Secure Payments",
       description: "Get paid safely and on time",
-      href: "#",
+      href: "/secure-payments",
       icon: Shield,
       gradient: "from-blue-400 to-indigo-500"
     },
     {
       title: "Customer Management",
       description: "Track bookings and communications",
-      href: "#",
+      href: "/customer-management",
       icon: Users,
       gradient: "from-purple-400 to-pink-500"
     },
     {
       title: "Analytics Dashboard",
       description: "Monitor your business performance",
-      href: "#",
+      href: "/analytics-dashboard",
       icon: BarChart3,
       gradient: "from-orange-400 to-red-500"
     },
@@ -103,7 +103,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "How It Works", href: "/howWorks" },
-    { name: "Pricing", href: "#" },
+    { name: "Pricing", href: "/pricing" },
     { name: "Success Stories", href: "/stories" },
     { name: "Support", href: "/support" },
     { name: "Messages", href: "/conversation-hub" }
@@ -263,10 +263,14 @@ const Navbar = () => {
                   {providerFeatures.map((feature, index) => {
                     const IconComponent = feature.icon;
                     return (
-                      <a
+                      <Link
                         key={index}
-                        href={feature.href}
+                        to={feature.href}
                         className="group p-3 rounded-xl hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20 relative overflow-hidden"
+                        onClick={() => {
+                          setForProvidersOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
                       >
                         {/* Shimmer effect on hover */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
@@ -289,7 +293,7 @@ const Navbar = () => {
                             </p>
                           </div>
                         </div>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
@@ -313,16 +317,16 @@ const Navbar = () => {
             </div>
 
             {navLinks.map((link, index) => (
-              <a
+              <Link
                 key={index}
-                href={link.href}
+                to={link.href}
                 className="text-white/90 hover:text-white font-medium transition-all duration-300 relative group py-2 px-3 rounded-lg hover:bg-white/5 whitespace-nowrap"
               >
                 <span className="relative">
                   {link.name}
                   <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -516,9 +520,9 @@ const Navbar = () => {
                   {providerFeatures.map((feature, index) => {
                     const IconComponent = feature.icon;
                     return (
-                      <a
+                      <Link
                         key={index}
-                        href={feature.href}
+                        to={feature.href}
                         className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20 relative overflow-hidden group"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -537,7 +541,7 @@ const Navbar = () => {
                           <div className="font-medium text-white group-hover:text-gray-100 transition-colors duration-300">{feature.title}</div>
                           <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">{feature.description}</div>
                         </div>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
@@ -547,9 +551,9 @@ const Navbar = () => {
             {/* Mobile Navigation Links */}
             <div className="space-y-2">
               {navLinks.map((link, index) => (
-                <a
+                <Link
                   key={index}
-                  href={link.href}
+                  to={link.href}
                   className="block py-3 px-3 text-lg font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 relative group"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -557,7 +561,7 @@ const Navbar = () => {
                     {link.name}
                     <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
                   </span>
-                </a>
+                </Link>
               ))}
             </div>
 

@@ -266,7 +266,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
         <div className="p-6 overflow-y-auto max-h-[calc(95vh-100px)]">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
             </div>
           ) : analytics ? (
             <div className="space-y-6">

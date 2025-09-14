@@ -10,6 +10,7 @@ import type { CreateServiceRequest } from '../api/serviceApi';
 import type { Category } from '../api/categoryApi';
 import type { ProviderProfile } from '../api/userApi';
 import { FiUpload, FiX, FiClock, FiEye, FiChevronDown, FiPlus } from 'react-icons/fi';
+import Orb from '../components/Orb';
 
 interface FormData {
   categoryId: string;
@@ -538,34 +539,63 @@ export default function CreateService() {
   };
 
   return (
-    <div className="min-h-screen bg-white py-12">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-black">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 opacity-20">
+          <Orb hue={280} hoverIntensity={0.3} rotateOnHover={true} />
+        </div>
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 opacity-15">
+          <Orb hue={240} hoverIntensity={0.2} rotateOnHover={true} />
+        </div>
+        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 opacity-25">
+          <Orb hue={320} hoverIntensity={0.4} rotateOnHover={true} />
+        </div>
+        <div className="absolute top-2/3 left-1/6 w-72 h-72 opacity-15">
+          <Orb hue={200} hoverIntensity={0.25} rotateOnHover={true} />
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 hover:border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden group">
+          {/* Glowing border effect */}
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-white/5 to-blue-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
           {/* Enhanced Header */}
-          <div className="bg-black px-8 py-8">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-white rounded-xl">
-                <FiPlus className="h-8 w-8 text-black" />
+          <div className="relative bg-gradient-to-r from-black/80 to-black/60 backdrop-blur-lg px-8 py-8 border-b border-white/10">
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 animate-pulse"></div>
+            
+            <div className="relative flex items-center space-x-4">
+              <div className="p-3 bg-gradient-to-r from-white/20 to-white/10 rounded-xl border border-white/20 hover:border-white/30 transition-all duration-300 relative overflow-hidden group/icon">
+                {/* Glitter effect */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+                <FiPlus className="h-8 w-8 text-white relative z-10" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white">Create New Service</h1>
-                <p className="text-gray-300 mt-2">Showcase your expertise and reach new customers</p>
+                <p className="text-white/80 mt-2">Share your expertise with the world. Create a service that showcases your skills.</p>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <form onSubmit={handleSubmit} className="relative p-8 space-y-8">
             {/* Category Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
-                Category Selection
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-blue-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full mr-4 shadow-lg shadow-purple-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Category Selection</span>
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 {/* Main Category */}
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-black mb-2">
-                    Category *
+                  <label htmlFor="categoryId" className="block text-sm font-semibold text-white/90 mb-3">
+                    Category <span className="text-red-400">*</span>
                   </label>
                   <div className="relative">
                     <select
@@ -573,147 +603,172 @@ export default function CreateService() {
                       name="categoryId"
                       value={formData.categoryId}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white transition-all duration-200 appearance-none ${
-                        errors.categoryId ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
+                      className={`w-full px-4 py-4 bg-black/30 backdrop-blur-sm border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 appearance-none text-white placeholder-white/50 ${
+                        errors.categoryId ? 'border-red-400/50 ring-red-400/20' : 'border-white/20'
                       }`}
                     >
-                      <option value="">Select a category</option>
+                      <option value="" className="bg-gray-900 text-white">Select a category</option>
                       {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
+                        <option key={category.id} value={category.id} className="bg-gray-900 text-white">
                           {category.name || category.slug}
                         </option>
                       ))}
                     </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none flex space-x-1">
-                      <FiChevronDown className="text-black" />
-                      <FiChevronDown className="text-black" />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse"></div>
+                        <FiChevronDown className="text-white/60 w-5 h-5" />
+                      </div>
                     </div>
                   </div>
-                  {errors.categoryId && <p className="mt-2 text-sm text-red-600 flex items-center">
+                  {errors.categoryId && <p className="mt-2 text-sm text-red-400 flex items-center">
                     <FiX className="w-4 h-4 mr-1" />
                     {errors.categoryId}
                   </p>}
                 </div>
 
                 {/* Subcategory */}
-                <div>
-                  <label htmlFor="subcategoryId" className="block text-sm font-medium text-black mb-2">
-                    Subcategory
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="subcategoryId"
-                      name="subcategoryId"
-                      value={formData.subcategoryId}
-                      onChange={handleInputChange}
-                      disabled={!formData.categoryId || subcategories.length === 0}
-                      className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white transition-all duration-200 appearance-none ${
-                        !formData.categoryId || subcategories.length === 0 
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300' 
-                          : 'border-black hover:border-gray-700'
-                      }`}
-                    >
-                      <option value="">
-                        {!formData.categoryId 
-                          ? 'Select a category first' 
-                          : subcategories.length === 0 
-                            ? 'No subcategories available' 
-                            : 'Select a subcategory (optional)'
-                        }
-                      </option>
-                      {subcategories.map((subcategory) => (
-                        <option key={subcategory.id} value={subcategory.id}>
-                          {subcategory.name || subcategory.slug}
+                {subcategories.length > 0 && (
+                  <div>
+                    <label htmlFor="subcategoryId" className="block text-sm font-semibold text-white/90 mb-3">
+                      Subcategory
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="subcategoryId"
+                        name="subcategoryId"
+                        value={formData.subcategoryId}
+                        onChange={handleInputChange}
+                        disabled={!formData.categoryId || subcategories.length === 0}
+                        className={`w-full px-4 py-4 bg-black/30 backdrop-blur-sm border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 appearance-none text-white placeholder-white/50 ${
+                          !formData.categoryId || subcategories.length === 0 
+                            ? 'bg-black/20 text-white/40 cursor-not-allowed border-white/10' 
+                            : 'border-white/20'
+                        }`}
+                      >
+                        <option value="" className="bg-gray-900 text-white">
+                          {!formData.categoryId 
+                            ? 'Select a category first' 
+                            : subcategories.length === 0 
+                              ? 'No subcategories available' 
+                              : 'Select a subcategory (optional)'
+                          }
                         </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none flex space-x-1">
-                      <FiChevronDown className={!formData.categoryId || subcategories.length === 0 ? 'text-gray-400' : 'text-black'} />
-                      <FiChevronDown className={!formData.categoryId || subcategories.length === 0 ? 'text-gray-400' : 'text-black'} />
+                        {subcategories.map((subcategory) => (
+                          <option key={subcategory.id} value={subcategory.id} className="bg-gray-900 text-white">
+                            {subcategory.name || subcategory.slug}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <div className="flex items-center space-x-1">
+                          <div className={`w-1 h-1 rounded-full ${!formData.categoryId || subcategories.length === 0 ? 'bg-white/20' : 'bg-blue-400 animate-pulse'}`}></div>
+                          <FiChevronDown className={!formData.categoryId || subcategories.length === 0 ? 'text-white/40 w-5 h-5' : 'text-white/60 w-5 h-5'} />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
             {/* Service Details Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
-                Service Details
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mr-4 shadow-lg shadow-blue-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Service Details</span>
               </h2>
-              <div className="space-y-6">
+              <div className="space-y-8 relative z-10">
                 {/* Title */}
-                <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-black mb-2">
-                    Service Title *
+                <div className="relative">
+                  <label htmlFor="title" className="block text-sm font-semibold text-white/90 mb-3">
+                    Service Title <span className="text-red-400">*</span>
                   </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="Enter a descriptive title for your service"
-                    className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
-                      errors.title ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
-                    }`}
-                  />
-                  {errors.title && <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      placeholder="Enter a descriptive title for your service"
+                      className={`w-full px-4 py-4 bg-black/30 backdrop-blur-sm border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 text-white placeholder-white/50 ${
+                        errors.title ? 'border-red-400/50 ring-red-400/20' : 'border-white/20'
+                      }`}
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
+                  {errors.title && <p className="mt-2 text-sm text-red-400 flex items-center">
                     <FiX className="w-4 h-4 mr-1" />
                     {errors.title}
                   </p>}
                 </div>
 
                 {/* Description */}
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-black mb-2">
-                    Description *
+                <div className="relative">
+                  <label htmlFor="description" className="block text-sm font-semibold text-white/90 mb-3">
+                    Description <span className="text-red-400">*</span>
                   </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={5}
-                    placeholder="Describe your service in detail. Include what's included, your experience, and what makes your service unique."
-                    className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 resize-none ${
-                      errors.description ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
-                    }`}
-                  />
-                  {errors.description && <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <div className="relative">
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      rows={6}
+                      placeholder="Describe your service in detail. Include what's included, your experience, and what makes your service unique."
+                      className={`w-full px-4 py-4 bg-black/30 backdrop-blur-sm border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 resize-none text-white placeholder-white/50 ${
+                        errors.description ? 'border-red-400/50 ring-red-400/20' : 'border-white/20'
+                      }`}
+                    />
+                    <div className="absolute bottom-4 right-4 pointer-events-none">
+                      <div className="w-1 h-1 bg-orange-400 rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
+                  {errors.description && <p className="mt-2 text-sm text-red-400 flex items-center">
                     <FiX className="w-4 h-4 mr-1" />
                     {errors.description}
                   </p>}
                 </div>
 
                 {/* Price and Currency */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-black mb-2">
-                      Price *
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="relative">
+                    <label htmlFor="price" className="block text-sm font-semibold text-white/90 mb-3">
+                      Price <span className="text-red-400">*</span>
                     </label>
-                    <input
-                      type="number"
-                      id="price"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      className={`w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
-                        errors.price ? 'border-red-500 ring-red-200' : 'border-black hover:border-gray-700'
-                      }`}
-                    />
-                    {errors.price && <p className="mt-2 text-sm text-red-600 flex items-center">
+                    <div className="relative">
+                      <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleInputChange}
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        className={`w-full px-4 py-4 bg-black/30 backdrop-blur-sm border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 text-white placeholder-white/50 ${
+                          errors.price ? 'border-red-400/50 ring-red-400/20' : 'border-white/20'
+                        }`}
+                      />
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse"></div>
+                      </div>
+                    </div>
+                    {errors.price && <p className="mt-2 text-sm text-red-400 flex items-center">
                       <FiX className="w-4 h-4 mr-1" />
                       {errors.price}
                     </p>}
                   </div>
 
-                  <div>
-                    <label htmlFor="currency" className="block text-sm font-medium text-black mb-2">
+                  <div className="relative">
+                    <label htmlFor="currency" className="block text-sm font-semibold text-white/90 mb-3">
                       Currency
                     </label>
                     <div className="relative">
@@ -722,16 +777,18 @@ export default function CreateService() {
                         name="currency"
                         value={formData.currency}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border-2 border-black rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black bg-white transition-all duration-200 hover:border-gray-700 appearance-none"
+                        className="w-full px-4 py-4 bg-black/30 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 appearance-none text-white"
                       >
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                        <option value="LKR">LKR (₨)</option>
+                        <option value="USD" className="bg-gray-900 text-white">USD ($)</option>
+                        <option value="EUR" className="bg-gray-900 text-white">EUR (€)</option>
+                        <option value="GBP" className="bg-gray-900 text-white">GBP (£)</option>
+                        <option value="LKR" className="bg-gray-900 text-white">LKR (₨)</option>
                       </select>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none flex space-x-1">
-                        <FiChevronDown className="text-black" />
-                        <FiChevronDown className="text-black" />
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <div className="flex items-center space-x-1">
+                          <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"></div>
+                          <FiChevronDown className="text-white/60 w-5 h-5" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -740,39 +797,47 @@ export default function CreateService() {
             </div>
 
             {/* Images Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
-                Service Images *
-                <span className="ml-2 text-sm font-normal text-gray-500">(Max 5 images, 5MB each)</span>
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-600/5 via-transparent to-blue-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-blue-400 rounded-full mr-4 shadow-lg shadow-green-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Service Images</span>
+                <span className="text-red-400 ml-2">*</span>
+                <span className="ml-4 text-sm font-normal text-white/50">(Max 5 images, 5MB each)</span>
               </h2>
               
               {/* Upload Area */}
-              <div className="mb-6">
+              <div className="mb-6 relative z-10">
                 {uploading ? (
-                  <div className="border-2 border-dashed border-blue-300 rounded-xl p-8 text-center bg-blue-50">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-lg font-medium text-blue-600">
+                  <div className="border-2 border-dashed border-white/40 rounded-xl p-8 text-center bg-white/10 backdrop-blur-sm">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                    <p className="mt-4 text-lg font-medium text-white">
                       Uploading images to Amazon S3...
                     </p>
-                    <p className="mt-2 text-sm text-blue-500">
+                    <p className="mt-2 text-sm text-white/80">
                       {formData.images.length > 0 ? `Processing ${formData.images.length} image(s)` : 'Please wait...'}
                     </p>
                   </div>
                 ) : (
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-black rounded-xl p-8 text-center hover:border-gray-700 hover:bg-gray-50 transition-all duration-200 cursor-pointer group"
+                    className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-white/40 hover:bg-white/5 transition-all duration-300 cursor-pointer group relative overflow-hidden"
                   >
-                    <FiUpload className="mx-auto h-12 w-12 text-black group-hover:text-gray-700 transition-colors duration-200" />
-                    <p className="mt-4 text-lg font-medium text-black group-hover:text-gray-700">
+                    {/* Glowing effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-blue-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <FiUpload className="mx-auto h-12 w-12 text-white/80 group-hover:text-white transition-colors duration-200 relative z-10" />
+                    <p className="mt-4 text-lg font-medium text-white group-hover:text-white/90 relative z-10">
                       Click to upload images
                     </p>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-white/60 relative z-10">
                       PNG, JPG, WEBP up to 5MB each
                     </p>
                     {formData.images.length + formData.uploadedImageUrls.length > 0 && (
-                      <p className="mt-2 text-sm text-black font-medium">
+                      <p className="mt-2 text-sm text-white/70 font-medium relative z-10">
                         {formData.images.length + formData.uploadedImageUrls.length}/5 images selected
                       </p>
                     )}
@@ -787,7 +852,7 @@ export default function CreateService() {
                     className="hidden"
                     aria-label="Upload service images"
                   />
-                {errors.images && <p className="mt-2 text-sm text-red-600 flex items-center">
+                {errors.images && <p className="mt-2 text-sm text-red-400 flex items-center">
                   <FiX className="w-4 h-4 mr-1" />
                   At least one image is required
                 </p>}
@@ -824,24 +889,37 @@ export default function CreateService() {
             </div>
 
             {/* Video Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
-                Service Video
-                <span className="ml-2 text-sm font-normal text-gray-500">(Optional, Max 100MB)</span>
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-transparent to-blue-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full mr-4 shadow-lg shadow-indigo-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Service Video</span>
+                <span className="ml-4 text-sm font-normal text-white/50">(Optional, Max 100MB)</span>
               </h2>
               
               {/* Video Upload Area */}
-              <div className="mb-6">
+              <div className="mb-6 relative z-10">
                 {uploading ? (
-                  <div className="border-2 border-dashed border-blue-300 rounded-xl p-8 text-center bg-blue-50">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-lg font-medium text-blue-600">
+                  <div className="border-2 border-dashed border-white/40 rounded-xl p-8 text-center bg-white/10 backdrop-blur-sm">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                    <p className="mt-4 text-lg font-medium text-white">
                       Uploading video to Amazon S3...
+                    </p>
+                    <p className="mt-2 text-sm text-white/80">
+                      Please wait while your video is being uploaded...
                     </p>
                   </div>
                 ) : !formData.video && !formData.uploadedVideoUrl ? (
-                  <div className="border-2 border-dashed border-black rounded-xl p-8 text-center hover:border-gray-700 hover:bg-gray-50 transition-all duration-200 cursor-pointer group">
+                  <div 
+                    onClick={() => document.getElementById('video-upload')?.click()}
+                    className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-white/40 hover:bg-white/5 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+                  >
+                    {/* Glowing effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 to-blue-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
                     <input
                       type="file"
                       accept="video/*"
@@ -850,31 +928,30 @@ export default function CreateService() {
                       id="video-upload"
                       aria-label="Upload service video"
                     />
-                    <label htmlFor="video-upload" className="cursor-pointer block">
-                      <FiUpload className="mx-auto h-12 w-12 text-black group-hover:text-gray-700 transition-colors duration-200" />
-                      <p className="mt-4 text-lg font-medium text-black group-hover:text-gray-700">
-                        Click to upload a service video
-                      </p>
-                      <p className="mt-2 text-sm text-gray-500">
-                        MP4, WebM, MOV up to 100MB
-                      </p>
-                      <p className="mt-1 text-xs text-gray-400">
-                        A short video showcasing your service (optional)
-                      </p>
-                    </label>
+                    
+                    <FiUpload className="mx-auto h-12 w-12 text-white/80 group-hover:text-white transition-colors duration-200 relative z-10" />
+                    <p className="mt-4 text-lg font-medium text-white group-hover:text-white/90 relative z-10">
+                      Click to upload a service video
+                    </p>
+                    <p className="mt-2 text-sm text-white/60 relative z-10">
+                      MP4, WebM, MOV up to 100MB
+                    </p>
+                    <p className="mt-1 text-xs text-white/50 relative z-10">
+                      A short video showcasing your service (optional)
+                    </p>
                   </div>
                 ) : (
-                  <div className="border-2 border-black rounded-xl p-6">
+                  <div className="border-2 border-white/20 rounded-xl p-6 bg-black/20 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-black text-white rounded-lg flex items-center justify-center">
+                        <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg">
                           <FiEye className="w-6 h-6" />
                         </div>
                         <div>
-                          <p className="font-medium text-black">
+                          <p className="font-medium text-white">
                             {formData.video ? formData.video.name : 'Uploaded Video'}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-white/70">
                             {formData.video 
                               ? `${(formData.video.size / (1024 * 1024)).toFixed(1)} MB`
                               : 'Video ready'
@@ -885,7 +962,7 @@ export default function CreateService() {
                       <button
                         type="button"
                         onClick={handleRemoveVideo}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors duration-200"
+                        className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/20 rounded-full transition-all duration-200"
                         aria-label="Remove video"
                         title="Remove video"
                       >
@@ -896,7 +973,7 @@ export default function CreateService() {
                       <div className="mt-4">
                         <video 
                           controls 
-                          className="w-full max-w-md h-48 bg-black rounded-lg"
+                          className="w-full max-w-md h-48 bg-black/40 rounded-lg border border-white/20"
                           src={URL.createObjectURL(formData.video)}
                         >
                           Your browser does not support the video tag.
@@ -909,44 +986,54 @@ export default function CreateService() {
             </div>
 
             {/* Tags Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
-                Tags
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-600/5 via-transparent to-orange-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full mr-4 shadow-lg shadow-yellow-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Tags</span>
               </h2>
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={currentTag}
-                    onChange={(e) => setCurrentTag(e.target.value)}
-                    placeholder="e.g., photography, wedding, portrait"
-                    maxLength={30}
-                    className="flex-1 px-4 py-3 border-2 border-black rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 hover:border-gray-700"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                  />
+              <div className="space-y-6 relative z-10">
+                <div className="flex gap-4">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={currentTag}
+                      onChange={(e) => setCurrentTag(e.target.value)}
+                      placeholder="e.g., photography, wedding, portrait"
+                      maxLength={30}
+                      className="w-full px-4 py-4 bg-black/30 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 text-white placeholder-white/50"
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
                   <Button 
                     type="button" 
                     onClick={handleAddTag} 
                     size="sm"
-                    className="px-6 whitespace-nowrap bg-black hover:bg-gray-800 text-white border-2 border-black"
+                    className="px-6 py-4 bg-gradient-to-r from-yellow-600 to-orange-600 text-white shadow-lg transition-all duration-300 rounded-xl font-semibold border border-yellow-500/30"
                   >
                     <FiPlus className="w-4 h-4 mr-2" />
                     Add Tag
                   </Button>
                 </div>
                 {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-3">
                     {formData.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-gray-100 text-black border-2 border-black hover:bg-gray-200 transition-colors duration-200"
+                        className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-black/30 backdrop-blur-sm text-white border border-white/20 transition-all duration-300 group"
                       >
+                        <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></div>
                         {tag}
                         <button
                           type="button"
                           onClick={() => handleRemoveTag(tag)}
-                          className="ml-2 text-black hover:text-gray-700 hover:bg-gray-300 rounded-full p-1 transition-all duration-200"
+                          className="ml-2 text-white/70 hover:text-red-400 hover:bg-red-500/20 rounded-full p-1 transition-all duration-200"
                           aria-label={`Remove tag ${tag}`}
                           title={`Remove tag ${tag}`}
                         >
@@ -960,82 +1047,83 @@ export default function CreateService() {
             </div>
 
             {/* Working Hours Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
-                Working Hours
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-transparent to-purple-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mr-4 shadow-lg shadow-indigo-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Working Hours</span>
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4 relative z-10">
                 {daysOfWeek.map(({ key, label }) => (
-                  <div key={key} className="flex items-center space-x-4 p-4 bg-white rounded-lg border-2 border-black hover:border-gray-700 transition-colors duration-200">
-                    <div className="flex items-center min-w-[120px]">
-                      <input
-                        type="checkbox"
-                        id={`working-${key}`}
-                        checked={formData.workingTime[key as keyof WorkingHours].enabled}
-                        onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'enabled', e.target.checked)}
-                        className="h-4 w-4 text-black border-2 border-black rounded focus:ring-black accent-black"
-                      />
-                      <label htmlFor={`working-${key}`} className="ml-3 text-sm font-medium text-black">
+                  <div key={key} className="flex items-center space-x-4 p-4 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 transition-all duration-300">
+                    <div className="flex items-center min-w-[140px]">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          id={`working-${key}`}
+                          checked={formData.workingTime[key as keyof WorkingHours].enabled}
+                          onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'enabled', e.target.checked)}
+                          className="h-5 w-5 rounded-md bg-black/30 border border-white/20 focus:ring-2 focus:ring-white/50 focus:border-white/50 text-white transition-all duration-200"
+                        />
+                        {formData.workingTime[key as keyof WorkingHours].enabled && (
+                          <div className="absolute top-1 left-1 w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                        )}
+                      </div>
+                      <label htmlFor={`working-${key}`} className="ml-3 text-sm font-semibold text-white/90">
                         {label}
                       </label>
                     </div>
                     
                     <div className="flex items-center space-x-3 flex-1">
-                      <div className="flex items-center space-x-2">
-                        <FiClock className="w-4 h-4 text-black" />
-                        <input
-                          type="time"
-                          value={formData.workingTime[key as keyof WorkingHours].startTime}
-                          onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'startTime', e.target.value)}
-                          disabled={!formData.workingTime[key as keyof WorkingHours].enabled}
-                          className={`px-3 py-2 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
-                            formData.workingTime[key as keyof WorkingHours].enabled 
-                              ? 'border-black hover:border-gray-700' 
-                              : 'border-gray-200 bg-gray-100 text-gray-400'
-                          }`}
-                          aria-label={`Start time for ${label}`}
-                        />
-                        <span className="text-black">to</span>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                          <FiClock className="w-4 h-4 text-white/60" />
+                          <input
+                            type="time"
+                            value={formData.workingTime[key as keyof WorkingHours].startTime}
+                            onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'startTime', e.target.value)}
+                            disabled={!formData.workingTime[key as keyof WorkingHours].enabled}
+                            className={`px-3 py-2 bg-black/30 backdrop-blur-sm border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 text-white ${
+                              formData.workingTime[key as keyof WorkingHours].enabled 
+                                ? 'border-white/20' 
+                                : 'border-white/10 bg-black/10 text-white/40 cursor-not-allowed'
+                            }`}
+                            aria-label={`Start time for ${label}`}
+                          />
+                        </div>
+                        <span className="text-white/60 font-medium">to</span>
                         <input
                           type="time"
                           value={formData.workingTime[key as keyof WorkingHours].endTime}
                           onChange={(e) => handleWorkingHoursChange(key as keyof WorkingHours, 'endTime', e.target.value)}
                           disabled={!formData.workingTime[key as keyof WorkingHours].enabled}
-                          className={`px-3 py-2 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all duration-200 ${
+                          className={`px-3 py-2 bg-black/30 backdrop-blur-sm border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 text-white ${
                             formData.workingTime[key as keyof WorkingHours].enabled 
-                              ? 'border-black hover:border-gray-700' 
-                              : 'border-gray-200 bg-gray-100 text-gray-400'
+                              ? 'border-white/20' 
+                              : 'border-white/10 bg-black/10 text-white/40 cursor-not-allowed'
                           }`}
                           aria-label={`End time for ${label}`}
                         />
                       </div>
-                      {formData.workingTime[key as keyof WorkingHours].enabled && (
-                        <div className="text-xs text-gray-500 ml-4">
-                          {(() => {
-                            const convertTo12Hour = (time24: string): string => {
-                              const [hours, minutes] = time24.split(':');
-                              const hour24 = parseInt(hours, 10);
-                              const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-                              const ampm = hour24 >= 12 ? 'PM' : 'AM';
-                              return `${hour12}:${minutes} ${ampm}`;
-                            };
-                            const startTime12 = convertTo12Hour(formData.workingTime[key as keyof WorkingHours].startTime);
-                            const endTime12 = convertTo12Hour(formData.workingTime[key as keyof WorkingHours].endTime);
-                            return `${startTime12} - ${endTime12}`;
-                          })()}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
               </div>
               {formatWorkingHoursForAPI(formData.workingTime).length > 0 && (
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Preview (as saved):</p>
-                  <div className="text-sm text-gray-600">
+                <div className="mt-6 p-4 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10">
+                  <p className="text-sm font-semibold text-white/90 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                    Preview (as saved):
+                  </p>
+                  <div className="text-sm text-white/70 space-y-1">
                     {formatWorkingHoursForAPI(formData.workingTime).map((time, index) => (
-                      <div key={index}>{time}</div>
+                      <div key={index} className="flex items-center">
+                        <div className="w-1 h-1 bg-purple-400 rounded-full mr-2"></div>
+                        {time}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1043,21 +1131,24 @@ export default function CreateService() {
             </div>
 
             {/* Service Status Section */}
-            <div className="bg-white p-6 rounded-xl border-2 border-black">
-              <h2 className="text-lg font-semibold text-black mb-4 flex items-center">
-                <div className="w-2 h-2 bg-black rounded-full mr-3"></div>
+            <div className="relative bg-white/5 backdrop-blur-lg p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300 group/section">
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 opacity-0 group-hover/section:animate-pulse group-hover/section:opacity-100 transition-opacity duration-300"></div>
+              
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center relative z-10">
+                <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full mr-3"></div>
                 Service Status
               </h2>
-              <div className="flex items-center justify-between p-4 bg-white rounded-lg border-2 border-black">
+              <div className="flex items-center justify-between p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 relative z-10">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg border-2 ${formData.isActive ? 'bg-green-100 border-green-500' : 'bg-gray-100 border-gray-300'}`}>
-                    <FiEye className={`w-5 h-5 ${formData.isActive ? 'text-green-600' : 'text-gray-400'}`} />
+                  <div className={`p-2 rounded-lg border ${formData.isActive ? 'bg-green-500/20 border-green-400/50' : 'bg-white/5 border-white/20'}`}>
+                    <FiEye className={`w-5 h-5 ${formData.isActive ? 'text-green-400' : 'text-white/40'}`} />
                   </div>
                   <div>
-                    <p className={`font-medium ${formData.isActive ? 'text-green-700' : 'text-gray-500'}`}>
+                    <p className={`font-medium ${formData.isActive ? 'text-green-300' : 'text-white/60'}`}>
                       {formData.isActive ? 'Service Active' : 'Service Inactive'}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-white/50">
                       {formData.isActive 
                         ? 'Your service will be visible to customers and available for booking'
                         : 'Your service will be hidden from customers and unavailable for booking'
@@ -1087,38 +1178,63 @@ export default function CreateService() {
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex justify-end space-x-4 pt-8 border-t-2 border-black">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/profile')}
-                disabled={loading || uploading}
-                className="px-8 py-3 border-2 border-black hover:border-gray-700 text-black hover:text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading || uploading}
-                className="px-8 py-3 min-w-[160px] bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl border-2 border-black"
-              >
-                {uploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Uploading...
-                  </>
-                ) : loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <FiPlus className="w-4 h-4 mr-2" />
-                    Create Service
-                  </>
-                )}
-              </Button>
+            <div className="relative pt-12">
+              {/* Decorative separator */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+              <div className="absolute top-2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/20 to-transparent"></div>
+              
+              <div className="flex justify-end space-x-6 pt-8">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate('/profile')}
+                  disabled={loading || uploading}
+                  className="px-10 py-4 bg-black/40 backdrop-blur-sm border border-white/20 text-white/90 transition-all duration-300 relative overflow-hidden group rounded-xl shadow-lg"
+                >
+                  {/* Subtle glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative z-10 font-semibold">Cancel</span>
+                </Button>
+                
+                <Button
+                  type="submit"
+                  disabled={loading || uploading}
+                  className="px-10 py-4 min-w-[200px] bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 text-white shadow-2xl border border-purple-500/30 transition-all duration-300 relative overflow-hidden group rounded-xl"
+                >
+                  {/* Animated background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-blue-400/20 to-purple-400/20 animate-pulse"></div>
+                  
+                  {/* Glowing border */}
+                  <div className="absolute inset-0 rounded-xl border border-purple-400/50 shadow-lg shadow-purple-500/25"></div>
+                  
+                  <span className="relative z-10 flex items-center justify-center font-bold">
+                    {uploading ? (
+                      <>
+                        <div className="w-5 h-5 mr-3 relative">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30"></div>
+                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white absolute top-0 left-0"></div>
+                        </div>
+                        Uploading...
+                      </>
+                    ) : loading ? (
+                      <>
+                        <div className="w-5 h-5 mr-3 relative">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30"></div>
+                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white absolute top-0 left-0"></div>
+                        </div>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-5 h-5 mr-3 bg-gradient-to-br from-white to-gray-300 rounded-md flex items-center justify-center">
+                          <FiPlus className="w-3 h-3 text-purple-600" />
+                        </div>
+                        Create Service
+                      </>
+                    )}
+                  </span>
+                </Button>
+              </div>
             </div>
           </form>
         </div>

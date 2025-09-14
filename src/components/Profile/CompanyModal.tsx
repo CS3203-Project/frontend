@@ -244,7 +244,7 @@ export default function CompanyModal({ isOpen, onClose, onSuccess, company }: Co
                   <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                   {uploadingLogo && (
                     <div className="flex items-center justify-center space-x-2 text-blue-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                       <span className="text-sm">Uploading...</span>
                     </div>
                   )}

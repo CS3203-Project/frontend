@@ -187,7 +187,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
             <h3 className="text-lg font-semibold text-white">{getStatusText()}</h3>
             {saving && (
               <div className="flex items-center space-x-1 text-blue-400">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-400"></div>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
                 <span className="text-xs">Saving...</span>
               </div>
             )}

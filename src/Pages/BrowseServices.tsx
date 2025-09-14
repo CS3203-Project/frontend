@@ -207,11 +207,11 @@ const BrowseServices: React.FC = () => {
 
   if (state.loading) {
     return (
-      <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen">
+      <div className="bg-black min-h-screen">
         <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center mb-12 pt-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-lg rounded-full mb-4 border border-white/20">
-              <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-black/50 backdrop-blur-lg rounded-full mb-4 border border-gray-800">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
             <h1 className="text-4xl font-extrabold text-white mb-4">
               Loading Services
@@ -225,12 +225,12 @@ const BrowseServices: React.FC = () => {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="animate-pulse">
-                <div className="rounded-xl bg-white/10 backdrop-blur-lg border border-white/20 p-6 shadow-lg">
+                <div className="rounded-xl bg-gray-800/50 backdrop-blur-lg border border-gray-700 p-6 shadow-lg">
                   <div className="flex items-start">
-                    <div className="w-14 h-14 bg-white/20 rounded-lg"></div>
+                    <div className="w-14 h-14 bg-gray-700 rounded-lg"></div>
                     <div className="ml-4 flex-1">
-                      <div className="h-6 bg-white/20 rounded mb-2"></div>
-                      <div className="h-4 bg-white/20 rounded w-3/4"></div>
+                      <div className="h-6 bg-gray-700 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-700 rounded w-3/4"></div>
                     </div>
                   </div>
                   <div className="mt-4 h-4 bg-white/20 rounded w-1/2"></div>
@@ -318,7 +318,7 @@ const BrowseServices: React.FC = () => {
               />
               {state.isSemanticSearching && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />
                 </div>
               )}
             </div>

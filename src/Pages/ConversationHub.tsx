@@ -227,7 +227,7 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
           <div className="bg-white rounded-lg shadow-md">
             {loading && conversations.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
                 <p>Loading conversations...</p>
               </div>
             ) : conversations.length === 0 ? (
@@ -268,7 +268,7 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
                                 {getContactDisplayName(conversation)}
                               </p>
                               {loadingProfiles.has(getOtherParticipant(conversation)) && (
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                               )}
                             </div>
                             
@@ -357,7 +357,7 @@ const ConversationHub: React.FC = () => {
         <Navbar />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p className="text-gray-600">Loading conversations...</p>
           </div>
         </main>
