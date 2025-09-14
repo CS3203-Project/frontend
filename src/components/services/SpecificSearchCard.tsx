@@ -45,13 +45,13 @@ const SpecificSearchCard: React.FC = () => {
   };
 
   return (
-    <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200 shadow-sm">
+    <div className="mt-6 p-6 bg-white/5 rounded-xl border border-white/20 shadow-sm">
       <div className="text-center mb-4">
         <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-3">
           <Sparkles className="w-6 h-6 text-white" />
         </div>
-        <h4 className="font-semibold text-gray-900 mb-2">Smart Service Discovery</h4>
-        <p className="text-sm text-gray-600">
+        <h4 className="font-semibold text-white mb-2">Smart Service Discovery</h4>
+        <p className="text-sm text-gray-400">
           Use AI-powered search to find exactly what you need
         </p>
       </div>
@@ -64,7 +64,7 @@ const SpecificSearchCard: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-white placeholder-gray-400"
           />
         </div>
         <Button 
@@ -92,7 +92,7 @@ const SpecificSearchCard: React.FC = () => {
           <button
             key={index}
             onClick={() => setSearchQuery(suggestion)}
-            className="px-3 py-1 bg-white/80 hover:bg-white text-gray-600 hover:text-gray-800 text-xs rounded-full border border-gray-200 hover:border-gray-300 transition-colors"
+            className="px-3 py-1 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white text-xs rounded-full border border-white/20 hover:border-white/30 transition-colors"
           >
             {suggestion}
           </button>

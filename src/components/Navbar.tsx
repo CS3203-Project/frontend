@@ -116,7 +116,7 @@ const Navbar = () => {
         ? "bg-black/95 backdrop-blur-xl shadow-2xl border-b border-white/10" 
         : "bg-black/90 backdrop-blur-lg"
     )}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-2 sm:px-4 lg:px-6">
         {/* Subtle gradient line at top */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
         
@@ -146,16 +146,15 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-white group-hover:text-gray-100 transition-colors duration-300">
-                  Zia
+                <h1 className="text-xl font-bold text-white group-hover:text-gray-100 transition-colors duration-300 whitespace-nowrap">
+                  Zia <span className="text-xs font-normal text-gray-400 group-hover:text-gray-300">Service Marketplace</span>
                 </h1>
-                <p className="text-xs text-gray-400 -mt-1 group-hover:text-gray-300 transition-colors duration-300">Service Marketplace</p>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8 flex-nowrap">
             {/* Services Dropdown */}
             <div className="relative">
                <Link
@@ -315,7 +314,7 @@ const Navbar = () => {
               <a
                 key={index}
                 href={link.href}
-                className="text-white/90 hover:text-white font-medium transition-all duration-300 relative group py-2 px-3 rounded-lg hover:bg-white/5"
+                className="text-white/90 hover:text-white font-medium transition-all duration-300 relative group py-2 px-3 rounded-lg hover:bg-white/5 whitespace-nowrap"
               >
                 <span className="relative">
                   {link.name}
