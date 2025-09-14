@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, Grid3X3, List, ChevronRight, Loader2, Home, Briefcase, Monitor, GraduationCap, Car, Calendar, Building2 } from 'lucide-react';
 import { categoryApi, type Category } from '../api/categoryApi';
+import Orb from '../components/Orb';
 
 // Icon mapping for categories
 const getCategoryIcon = (categoryName: string) => {
@@ -39,46 +40,75 @@ const CategoryCard: React.FC<{
     return (
       <Link
         to={`/services/${category.slug}`}
-        className="group block bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 p-4"
+        className="group block bg-black/40 backdrop-blur-xl rounded-2xl border border-white/20 hover:border-white/40 hover:shadow-2xl transition-all duration-500 p-6 relative overflow-hidden"
       >
-        <div className="flex items-center justify-between">
+        {/* Enhanced multi-layer glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/15 to-blue-600/15 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 opacity-0 group-hover:animate-pulse group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        <div className="relative flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white group-hover:scale-110 transition-transform duration-300">
-              {getCategoryIcon(category.name || category.slug)}
+            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 text-white group-hover:scale-110 transition-transform duration-500 shadow-lg group-hover:shadow-purple-500/25 relative overflow-hidden">
+              {/* Icon glitter effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+              <div className="relative z-10">
+                {getCategoryIcon(category.name || category.slug)}
+              </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors duration-500 relative">
                 {category.name}
+                {/* Text underline effect */}
+                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 group-hover:w-full transition-all duration-500"></div>
               </h3>
               {category.description && (
-                <p className="text-sm text-gray-600 mt-1 line-clamp-1">
+                <p className="text-sm text-gray-300 group-hover:text-gray-200 mt-1 line-clamp-1 transition-colors duration-300">
                   {category.description}
                 </p>
               )}
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                <span>{subcategoryCount} subcategories</span>
-                <span>{serviceCount} services</span>
+              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                <span className="flex items-center space-x-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-60"></div>
+                  <span>{subcategoryCount} subcategories</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 opacity-60"></div>
+                  <span>{serviceCount} services</span>
+                </span>
               </div>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" />
+          <div className="flex items-center space-x-2">
+            <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-500" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110">
+              <ChevronRight className="h-3 w-3 text-white" />
+            </div>
+          </div>
         </div>
         
         {/* Subcategories Preview for List View */}
         {category.children && category.children.length > 0 && (
-          <div className="mt-3 pl-16">
-            <div className="flex flex-wrap gap-1">
-              {category.children.slice(0, 5).map((sub) => (
+          <div className="mt-4 pl-16 relative">
+            {/* Glowing line connector */}
+            <div className="absolute left-8 top-0 w-px h-full bg-gradient-to-b from-purple-500/30 to-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="flex flex-wrap gap-2">
+              {category.children.slice(0, 5).map((sub, index) => (
                 <span
                   key={sub.id}
-                  className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md"
+                  className={`inline-block px-3 py-1 bg-black/30 backdrop-blur-sm text-gray-300 group-hover:text-gray-200 text-xs rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300 relative overflow-hidden opacity-0 group-hover:opacity-100 animate-in slide-in-from-bottom-${index + 1}`}
                 >
-                  {sub.name}
+                  {/* Subtle shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 opacity-0 group-hover:animate-pulse"></div>
+                  <span className="relative z-10">{sub.name}</span>
                 </span>
               ))}
               {category.children.length > 5 && (
-                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-md">
-                  +{category.children.length - 5} more
+                <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm text-blue-300 group-hover:text-blue-200 text-xs rounded-full border border-blue-400/30 group-hover:border-blue-400/50 transition-all duration-300 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent animate-pulse"></div>
+                  <span className="relative z-10">+{category.children.length - 5} more</span>
                 </span>
               )}
             </div>
@@ -91,47 +121,74 @@ const CategoryCard: React.FC<{
   return (
     <Link
       to={`/services/${category.slug}`}
-      className="group block bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 p-6 h-full"
+      className="group block bg-black/40 backdrop-blur-xl rounded-2xl border border-white/20 hover:border-white/40 hover:shadow-2xl transition-all duration-500 p-6 h-full relative overflow-hidden"
     >
-      <div className="flex items-start justify-between mb-4">
+      {/* Enhanced multi-layer glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/15 to-blue-600/15 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 opacity-0 group-hover:animate-pulse group-hover:opacity-100 transition-opacity duration-300"></div>
+      
+      <div className="relative flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white group-hover:scale-110 transition-transform duration-300">
-            {getCategoryIcon(category.name || category.slug)}
+          <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 text-white group-hover:scale-110 transition-transform duration-500 shadow-lg group-hover:shadow-purple-500/25 relative overflow-hidden">
+            {/* Icon glitter effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+            <div className="relative z-10">
+              {getCategoryIcon(category.name || category.slug)}
+            </div>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors duration-500 relative">
               {category.name}
+              {/* Text underline effect */}
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 group-hover:w-full transition-all duration-500"></div>
             </h3>
             {category.description && (
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+              <p className="text-sm text-gray-300 group-hover:text-gray-200 mt-1 line-clamp-2 transition-colors duration-300">
                 {category.description}
               </p>
             )}
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" />
+        <div className="flex items-center space-x-2">
+          <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-500" />
+          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110">
+            <ChevronRight className="h-3 w-3 text-white" />
+          </div>
+        </div>
       </div>
       
-      <div className="flex items-center justify-between text-sm text-gray-500">
-        <span>{subcategoryCount} subcategories</span>
-        <span>{serviceCount} services</span>
+      <div className="relative flex items-center justify-between text-sm text-gray-400 group-hover:text-gray-300 mb-3 transition-colors duration-300">
+        <span className="flex items-center space-x-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <span>{subcategoryCount} subcategories</span>
+        </span>
+        <span className="flex items-center space-x-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <span>{serviceCount} services</span>
+        </span>
       </div>
       
       {/* Subcategories Preview for Grid View */}
       {category.children && category.children.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-gray-100">
+        <div className="relative mt-3 pt-3 border-t border-white/20 group-hover:border-white/30 transition-colors duration-300">
           <div className="flex flex-wrap gap-1">
-            {category.children.slice(0, 3).map((sub) => (
+            {category.children.slice(0, 3).map((sub, index) => (
               <span
                 key={sub.id}
-                className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md"
+                className={`inline-block px-2 py-1 bg-black/30 backdrop-blur-sm text-gray-300 group-hover:text-gray-200 text-xs rounded-full border border-white/20 group-hover:border-white/30 transition-all duration-300 relative overflow-hidden opacity-0 group-hover:opacity-100 animate-in slide-in-from-bottom-${index + 1}`}
               >
-                {sub.name}
+                {/* Subtle shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 opacity-0 group-hover:animate-pulse"></div>
+                <span className="relative z-10">{sub.name}</span>
               </span>
             ))}
             {category.children.length > 3 && (
-              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-md">
-                +{category.children.length - 3} more
+              <span className="inline-block px-2 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm text-blue-300 group-hover:text-blue-200 text-xs rounded-full border border-blue-400/30 group-hover:border-blue-400/50 transition-all duration-300 relative overflow-hidden opacity-0 group-hover:opacity-100">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent animate-pulse"></div>
+                <span className="relative z-10">+{category.children.length - 3} more</span>
               </span>
             )}
           </div>
@@ -204,12 +261,20 @@ const CategoriesPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Background Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 opacity-30">
+          <Orb hue={240} hoverIntensity={0.3} rotateOnHover={true} />
+        </div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 opacity-20">
+          <Orb hue={280} hoverIntensity={0.4} rotateOnHover={true} />
+        </div>
+        
+        <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-              <p className="text-gray-600">Loading categories...</p>
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-purple-500" />
+              <p className="text-gray-300">Loading categories...</p>
             </div>
           </div>
         </div>
@@ -219,20 +284,30 @@ const CategoriesPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-gray-50 min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Background Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 opacity-30">
+          <Orb hue={240} hoverIntensity={0.3} rotateOnHover={true} />
+        </div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 opacity-20">
+          <Orb hue={280} hoverIntensity={0.4} rotateOnHover={true} />
+        </div>
+        
+        <div className="relative z-10 container mx-auto px-4 py-8">
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Unable to Load Categories
-              </h2>
-              <p className="text-gray-600 mb-6">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
+              <div className="bg-red-500/10 backdrop-blur-lg border border-red-500/30 rounded-2xl p-8">
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  Unable to Load Categories
+                </h2>
+                <p className="text-gray-300 mb-6">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 font-semibold"
+                >
+                  Try Again
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -241,49 +316,65 @@ const CategoriesPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-1/4 left-0 w-96 h-96 opacity-20">
+        <Orb hue={240} hoverIntensity={0.3} rotateOnHover={true} />
+      </div>
+      <div className="absolute top-1/2 right-0 w-80 h-80 opacity-25">
+        <Orb hue={280} hoverIntensity={0.4} rotateOnHover={true} />
+      </div>
+      <div className="absolute bottom-1/4 left-1/3 w-64 h-64 opacity-15">
+        <Orb hue={320} hoverIntensity={0.3} rotateOnHover={true} />
+      </div>
+      
+      <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Grid3X3 className="h-8 w-8 text-blue-600 mr-3" />
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Service Categories
-            </h1>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300">
+            <div className="flex items-center mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white mr-4">
+                <Grid3X3 className="h-8 w-8" />
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">
+                Service Categories
+              </h1>
+            </div>
+            <p className="text-lg text-gray-300 max-w-2xl">
+              Browse through our comprehensive list of service categories to find exactly what you need.
+            </p>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl">
-            Browse through our comprehensive list of service categories to find exactly what you need.
-          </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg p-6 mb-8 border border-white/20 hover:border-white/30 transition-all duration-300">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search Bar */}
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-gray-300" />
               </div>
               <input
                 type="text"
                 placeholder="Search categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-gray-400 transition-all duration-300"
               />
             </div>
 
             {/* Sort Dropdown */}
             <div className="flex items-center space-x-3">
-              <Filter className="h-5 w-5 text-gray-400" />
+              <Filter className="h-5 w-5 text-gray-300" />
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'services' | 'subcategories')}
-                className="border border-gray-200 rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white"
+                aria-label="Sort categories"
               >
-                <option value="name">Sort by Name</option>
-                <option value="services">Sort by Services Count</option>
-                <option value="subcategories">Sort by Subcategories</option>
+                <option value="name" className="bg-gray-800 text-white">Sort by Name</option>
+                <option value="services" className="bg-gray-800 text-white">Sort by Services Count</option>
+                <option value="subcategories" className="bg-gray-800 text-white">Sort by Subcategories</option>
               </select>
             </div>
 
@@ -291,21 +382,23 @@ const CategoriesPage: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-3 rounded-lg transition-colors ${
+                className={`p-3 rounded-xl transition-all duration-300 ${
                   viewMode === 'grid' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg' 
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20 border border-white/20'
                 }`}
+                aria-label="Grid view"
               >
                 <Grid3X3 className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-3 rounded-lg transition-colors ${
+                className={`p-3 rounded-xl transition-all duration-300 ${
                   viewMode === 'list' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg' 
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20 border border-white/20'
                 }`}
+                aria-label="List view"
               >
                 <List className="h-5 w-5" />
               </button>
@@ -313,8 +406,8 @@ const CategoriesPage: React.FC = () => {
           </div>
 
           {/* Results Count */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-600">
+          <div className="mt-4 pt-4 border-t border-white/20">
+            <p className="text-sm text-gray-300">
               Showing {filteredCategories.length} of {categories.length} categories
               {searchQuery && (
                 <span> matching "{searchQuery}"</span>
@@ -339,12 +432,12 @@ const CategoriesPage: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-12 text-center">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20">
             <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <h3 className="text-xl font-semibold text-white mb-2">
               No categories found
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-300 mb-6">
               {searchQuery 
                 ? `No categories match your search for "${searchQuery}"`
                 : 'No categories are available at the moment'
@@ -353,7 +446,7 @@ const CategoriesPage: React.FC = () => {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 font-semibold"
               >
                 Clear Search
               </button>
@@ -362,34 +455,39 @@ const CategoriesPage: React.FC = () => {
         )}
 
         {/* Statistics */}
-        <div className="mt-16 bg-white rounded-xl p-8 border border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-            Platform Statistics
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {categories.length}
+        <div className="mt-16 bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 relative overflow-hidden group">
+          {/* Background glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+          
+          <div className="relative">
+            <h3 className="text-xl font-semibold text-white mb-6 text-center">
+              Platform Statistics
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div className="group/stat p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 hover:bg-white/10 transition-all duration-300">
+                <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2 group-hover/stat:scale-110 transition-transform duration-300">
+                  {categories.length}
+                </div>
+                <div className="text-gray-300 text-sm">Main Categories</div>
               </div>
-              <div className="text-gray-600">Main Categories</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {categories.reduce((sum, cat) => sum + (cat.children?.length || 0), 0)}
+              <div className="group/stat p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-green-400/30 hover:bg-white/10 transition-all duration-300">
+                <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-2 group-hover/stat:scale-110 transition-transform duration-300">
+                  {categories.reduce((sum, cat) => sum + (cat.children?.length || 0), 0)}
+                </div>
+                <div className="text-gray-300 text-sm">Subcategories</div>
               </div>
-              <div className="text-gray-600">Subcategories</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">
-                {categories.reduce((sum, cat) => sum + (cat._count?.services || 0), 0)}
+              <div className="group/stat p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-cyan-400/30 hover:bg-white/10 transition-all duration-300">
+                <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2 group-hover/stat:scale-110 transition-transform duration-300">
+                  {categories.reduce((sum, cat) => sum + (cat._count?.services || 0), 0)}
+                </div>
+                <div className="text-gray-300 text-sm">Total Services</div>
               </div>
-              <div className="text-gray-600">Total Services</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">
-                24/7
+              <div className="group/stat p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-orange-400/30 hover:bg-white/10 transition-all duration-300">
+                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2 group-hover/stat:scale-110 transition-transform duration-300">
+                  24/7
+                </div>
+                <div className="text-gray-300 text-sm">Support Available</div>
               </div>
-              <div className="text-gray-600">Support Available</div>
             </div>
           </div>
         </div>

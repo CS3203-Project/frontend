@@ -17,6 +17,9 @@ export interface Category {
     name?: string;
     slug: string;
     description?: string;
+    _count?: {
+      services: number;
+    };
   }>;
   _count?: {
     services: number;
