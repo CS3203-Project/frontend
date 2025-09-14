@@ -29,37 +29,41 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   const renderDummyService = (service: Service) => (
     <div 
       onClick={handleCardClick}
-      className="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-200/80 cursor-pointer"
+      className="group relative bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 ease-in-out hover:shadow-2xl border border-white/20 hover:border-white/30 cursor-pointer"
     >
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+      
       <div className="relative">
-        <img className="w-full h-48 object-cover" src={service.image} alt={service.title} />
+        <img className="w-full h-48 object-cover rounded-t-2xl" src={service.image} alt={service.title} />
         <button 
           onClick={handleHeartClick}
-          className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200"
+          className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-2 rounded-full text-white hover:text-red-400 hover:bg-black/50 transition-all duration-200 border border-white/20"
+          aria-label="Add to favorites"
         >
           <Heart className="w-5 h-5" />
         </button>
       </div>
-      <div className="p-4">
-        <p className="text-sm text-gray-500">
+      <div className="p-6 relative">
+        <p className="text-sm text-gray-300">
           {typeof service.category === 'string' ? service.category : 'Category'} &gt; {service.subcategory || ''}
         </p>
-        <h3 className="text-lg font-semibold text-gray-900 mt-1 truncate">{service.title}</h3>
+        <h3 className="text-lg font-semibold text-white mt-1 truncate">{service.title}</h3>
         
-        <div className="flex items-center mt-2">
-          <img src={service.provider.avatar} alt={service.provider.name} className="w-8 h-8 rounded-full mr-2" />
-          <span className="text-sm text-gray-700">{service.provider.name}</span>
+        <div className="flex items-center mt-3">
+          <img src={service.provider.avatar} alt={service.provider.name} className="w-8 h-8 rounded-full mr-2 border border-white/20" />
+          <span className="text-sm text-gray-300">{service.provider.name}</span>
         </div>
 
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center">
             <Star className="w-5 h-5 text-yellow-400 fill-current" />
-            <span className="text-gray-800 font-bold ml-1">{service.provider.rating}</span>
-            <span className="text-gray-600 text-sm ml-1">({service.provider.reviews} reviews)</span>
+            <span className="text-white font-bold ml-1">{service.provider.rating}</span>
+            <span className="text-gray-400 text-sm ml-1">({service.provider.reviews} reviews)</span>
           </div>
-          <div className="text-lg font-bold text-gray-900">
+          <div className="text-lg font-bold text-white">
             {service.price.currency} {service.price.amount}
-            <span className="text-sm text-gray-500 ml-1">
+            <span className="text-sm text-gray-400 ml-1">
               {service.price.type === 'hourly' ? '/hr' : ''}
             </span>
           </div>
@@ -71,12 +75,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   const renderApiService = (service: ServiceResponse) => (
     <div 
       onClick={handleCardClick}
-      className="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-200/80 cursor-pointer"
+      className="group relative bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 ease-in-out hover:shadow-2xl border border-white/20 hover:border-white/30 cursor-pointer"
     >
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+      
       <div className="relative">
         {service.images && service.images.length > 0 ? (
           <img 
-            className="w-full h-48 object-cover" 
+            className="w-full h-48 object-cover rounded-t-2xl" 
             src={service.images[0]} 
             alt={service.title || 'Service image'}
             onError={(e) => {
@@ -85,8 +92,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
             }}
           />
         ) : (
-          <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-            <div className="text-gray-500 text-center">
+          <div className="w-full h-48 bg-gradient-to-br from-gray-800/50 to-gray-700/50 flex items-center justify-center rounded-t-2xl">
+            <div className="text-gray-400 text-center">
               <User className="w-12 h-12 mx-auto mb-2" />
               <p className="text-sm">No image available</p>
             </div>
@@ -94,29 +101,30 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         )}
         <button 
           onClick={handleHeartClick}
-          className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-200"
+          className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm p-2 rounded-full text-white hover:text-red-400 hover:bg-black/50 transition-all duration-200 border border-white/20"
+          aria-label="Add to favorites"
         >
           <Heart className="w-5 h-5" />
         </button>
         {!service.isActive && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-md text-xs">
+          <div className="absolute top-3 left-3 bg-red-500/80 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs border border-red-400/30">
             Inactive
           </div>
         )}
       </div>
-      <div className="p-4">
-        <p className="text-sm text-gray-500">
+      <div className="p-6 relative">
+        <p className="text-sm text-gray-300">
           {service.category?.name || 'Category'}
         </p>
-        <h3 className="text-lg font-semibold text-gray-900 mt-1 truncate">
+        <h3 className="text-lg font-semibold text-white mt-1 truncate">
           {service.title || 'Untitled Service'}
         </h3>
         
-        <div className="flex items-center mt-2">
-          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
-            <User className="w-4 h-4 text-gray-600" />
+        <div className="flex items-center mt-3">
+          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mr-2 border border-white/20">
+            <User className="w-4 h-4 text-gray-300" />
           </div>
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-gray-300">
             {service.provider?.user ? 
               `${service.provider.user.firstName || ''} ${service.provider.user.lastName || ''}`.trim() || 
               service.provider.user.email : 
@@ -128,10 +136,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center">
             <Star className="w-5 h-5 text-yellow-400 fill-current" />
-            <span className="text-gray-800 font-bold ml-1">--</span>
-            <span className="text-gray-600 text-sm ml-1">(No reviews yet)</span>
+            <span className="text-white font-bold ml-1">--</span>
+            <span className="text-gray-400 text-sm ml-1">(No reviews yet)</span>
           </div>
-          <div className="text-lg font-bold text-gray-900">
+          <div className="text-lg font-bold text-white">
             {service.currency} {service.price}
           </div>
         </div>
@@ -140,12 +148,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         {service.tags && service.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-3">
             {service.tags.slice(0, 3).map((tag, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+              <span key={index} className="px-2 py-1 bg-blue-500/20 backdrop-blur-sm text-blue-300 text-xs rounded-full border border-blue-400/30">
                 {tag}
               </span>
             ))}
             {service.tags.length > 3 && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+              <span className="px-2 py-1 bg-white/10 backdrop-blur-sm text-gray-300 text-xs rounded-full border border-white/20">
                 +{service.tags.length - 3} more
               </span>
             )}
@@ -154,7 +162,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
 
         {/* Description */}
         {service.description && (
-          <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+          <p className="text-sm text-gray-400 mt-2 line-clamp-2">
             {service.description}
           </p>
         )}

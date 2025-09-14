@@ -182,7 +182,7 @@ export default function Homepage() {
         </div>
 
         {/* Content Overlay */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 pt-20">
           <div className="text-center max-w-4xl mx-auto">
             {/* Badge */}
             {/* <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 text-purple-300 text-sm font-medium mb-8">
@@ -209,7 +209,7 @@ export default function Homepage() {
 
             {/* Enhanced Search Bar */}
             <div className="max-w-3xl mx-auto mb-6">
-              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20">
+              <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-2 shadow-2xl border border-white/10">
                 <div className="flex flex-col sm:flex-row gap-2">
                   {/* Service Search Input */}
                   <div className="flex-1 relative">
@@ -227,7 +227,7 @@ export default function Homepage() {
                           doSearch();
                         }
                       }}
-                      className="w-full pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 bg-transparent border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-base font-medium"
+                      className="w-full pl-12 pr-4 py-4 text-white placeholder-gray-400 bg-transparent border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-base font-medium"
                     />
                   </div>
 
@@ -235,13 +235,13 @@ export default function Homepage() {
                   <div className="relative">
                     <button
                       onClick={openLocationModal}
-                      className="flex items-center justify-between w-full sm:w-56 px-4 py-4 text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-200 hover:border-gray-300 font-medium"
+                      className="flex items-center justify-between w-full sm:w-56 px-4 py-4 text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20 font-medium"
                     >
                       <div className="flex items-center">
-                        <MapPin className="h-5 w-5 text-gray-500 mr-2" />
+                        <MapPin className="h-5 w-5 text-gray-400 mr-2" />
                         <span className="truncate">{getLocationDisplayText()}</span>
                       </div>
-                      <ChevronDown className="h-4 w-4 text-gray-500 ml-2" />
+                      <ChevronDown className="h-4 w-4 text-gray-400 ml-2" />
                     </button>
                   </div>
 
@@ -249,7 +249,7 @@ export default function Homepage() {
                   <Button 
                     onClick={handleSearch}
                     disabled={isSearching}
-                    className="px-8 h-14 py-4 text-base font-semibold bg-black hover:bg-neutral-900 text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl border border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-8 h-14 py-4 text-base font-semibold bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl border border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSearching ? (
                       <>
@@ -328,15 +328,135 @@ export default function Homepage() {
           </div>
         </div>
       </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        {/* Background Orbs */}
+        <div className="absolute top-1/4 left-0 w-72 h-72 opacity-20">
+          <Orb hue={240} hoverIntensity={0.3} rotateOnHover={true} />
+        </div>
+        <div className="absolute bottom-1/4 right-0 w-96 h-96 opacity-15">
+          <Orb hue={300} hoverIntensity={0.4} rotateOnHover={true} />
+        </div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Why Choose <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Zia</span>?
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Experience the future of service marketplace with cutting-edge features designed for both customers and professionals.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 - Verified Professionals */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Verified Professionals</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  All service providers undergo thorough verification processes including background checks, skill assessments, and identity verification.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2 - Smart Matching */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Smart Matching</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Our AI-powered semantic search connects you with the perfect service provider based on your specific needs and location preferences.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 3 - Secure Payments */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-green-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-green-500 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Secure Payments</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  End-to-end encrypted payment processing with escrow protection ensures safe transactions for both parties every time.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 4 - Real-time Communication */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Real-time Chat</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Instant messaging system allows seamless communication between customers and service providers throughout the entire project lifecycle.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 5 - Quality Assurance */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Quality Assurance</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Comprehensive review system with ratings, feedback, and quality monitoring ensures consistently high service standards across the platform.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 6 - 24/7 Support */}
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 bg-gradient-to-r from-teal-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 109.75 9.75A9.75 9.75 0 0012 2.25z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">24/7 Support</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Round-the-clock customer support with dedicated teams ready to assist with any questions, disputes, or technical issues you may encounter.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Services Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-black to-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Featured Services
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
               Discover professional services from our verified providers. 
               Quality guaranteed, satisfaction assured.
             </p>

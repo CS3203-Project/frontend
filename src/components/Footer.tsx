@@ -57,7 +57,7 @@ const Footer = ({
   legalLinks = defaultLegalLinks,
 }) => {
   return (
-    <footer className="relative bg-black/95 backdrop-blur-xl border-t border-white/10 mt-20 overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-gray-900 via-black to-gray-900 backdrop-blur-xl border-t border-white/10 overflow-hidden">
       {/* Glittering top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
       

@@ -14,8 +14,8 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ services, loading, error })
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Loading services...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+        <span className="ml-3 text-gray-300">Loading services...</span>
       </div>
     );
   }
@@ -23,9 +23,9 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ services, loading, error })
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Services</h3>
-          <p className="text-red-600">{error}</p>
+        <div className="bg-red-500/10 backdrop-blur-lg border border-red-500/30 rounded-2xl p-6 max-w-md mx-auto">
+          <h3 className="text-lg font-semibold text-red-400 mb-2">Error Loading Services</h3>
+          <p className="text-red-300">{error}</p>
         </div>
       </div>
     );
@@ -34,9 +34,9 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({ services, loading, error })
   if (!services || services.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">No Services Found</h3>
-          <p className="text-gray-600">There are currently no services available.</p>
+        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 max-w-md mx-auto">
+          <h3 className="text-lg font-semibold text-white mb-2">No Services Found</h3>
+          <p className="text-gray-300">There are currently no services available.</p>
         </div>
       </div>
     );
