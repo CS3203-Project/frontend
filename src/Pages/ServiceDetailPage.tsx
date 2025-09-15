@@ -516,29 +516,36 @@ const ServiceDetailPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100/30 to-blue-50/20 dark:from-black dark:via-gray-900/50 dark:to-blue-950/30 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 dark:from-black dark:via-gray-900/70 dark:to-blue-950/40 flex flex-col relative overflow-hidden">
+      {/* Ambient Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-300/20 to-purple-300/20 dark:from-blue-800/30 dark:to-purple-800/30 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-300/20 to-blue-300/20 dark:from-cyan-800/30 dark:to-blue-800/30 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-purple-300/10 to-pink-300/10 dark:from-purple-800/20 dark:to-pink-800/20 rounded-full blur-2xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+      </div>
+      
       <Navbar />
       
-      <main className="flex-1 mt-16">
+      <main className="flex-1 mt-16 relative z-10">
         <div className="container mx-auto px-4 py-8">
-          {/* Enhanced Back Button */}
+          {/* Enhanced Back Button with Glass Morphism */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400 mb-4 transition-all duration-300 group bg-white dark:bg-black/80 rounded-xl px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600"
+            className="flex items-center text-gray-600 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400 mb-6 transition-all duration-300 group bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-lg border border-white/30 dark:border-gray-700/50 hover:shadow-xl hover:border-blue-300/50 dark:hover:border-blue-600/50 hover:scale-105"
           >
             <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back</span>
+            <span className="font-semibold">Back</span>
           </button>
 
-          {/* Enhanced Breadcrumb */}
-          <div className="mb-6 bg-white dark:bg-black/80 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          {/* Enhanced Glass Morphism Breadcrumb */}
+          <div className="mb-8 bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
-          {/* Service Video Background Section */}
+          {/* Enhanced Responsive Full Width Video Section */}
           {service.videoUrl && (
-            <div className="mb-6 relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-lg">
-              {/* Video Background */}
+            <div className="mb-6 relative h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] w-full rounded-2xl sm:rounded-3xl overflow-hidden mx-auto max-w-7xl">
+              {/* Full Width Video Background */}
               <div className="absolute inset-0 z-0">
                 {service.videoUrl ? (
                   <video
@@ -563,68 +570,88 @@ const ServiceDetailPage: React.FC = () => {
                     <source src="https://sg.fiverrcdn.com/packages_lp/cover_video.mp4" type="video/mp4" />
                   </video>
                 )}
-                <div className="absolute inset-0 bg-black/50"></div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-purple-900/30"></div>
+                {/* Dark overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-pink-900/30"></div>
               </div>
 
-              {/* Service Info Overlay */}
-              <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-                  {service.title}
-                </h1>
-                <p className="text-lg md:text-xl text-white mb-6 max-w-2xl mx-auto leading-relaxed">
-                  {service.description || 'Professional service by verified provider'}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 text-white font-semibold">
-                    <span className="text-2xl">{service.currency} {service.price}</span>
+              {/* Responsive Title Overlay */}
+              <div className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+                <div className="text-center max-w-xs sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl font-bold text-white mb-2 sm:mb-4 leading-tight drop-shadow-2xl">
+                    {service.title}
+                  </h1>
+                  {/* Optional subtle service indicator */}
+                  <div className="inline-flex items-center bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 sm:px-6 sm:py-2 border border-white/20">
+                    <span className="text-white/90 text-xs sm:text-sm font-medium">Premium Service</span>
                   </div>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 text-white">
-                    <span className="text-sm">by {service.provider.name}</span>
-                  </div>
+                </div>
+              </div>
+
+              {/* Responsive floating indicators */}
+              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 lg:top-6 lg:left-6 bg-black/20 backdrop-blur-md rounded-full px-2 py-1 sm:px-3 sm:py-1 border border-white/10">
+                <div className="flex items-center text-white text-xs sm:text-sm">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full mr-1 sm:mr-2 animate-pulse"></div>
+                  Live
+                </div>
+              </div>
+              
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 bg-black/20 backdrop-blur-md rounded-full px-2 py-1 sm:px-3 sm:py-1 border border-white/10">
+                <div className="flex items-center text-white text-xs sm:text-sm">
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                  HD
                 </div>
               </div>
             </div>
           )}
 
-          {/* Main Content - Full Width */}
-          <div>
+          {/* Main Content Layout - Grid System */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Images and Service Info */}
+            <div className="lg:col-span-2 space-y-6">
               {/* Enhanced Compact Image Gallery */}
-              <div className="bg-white dark:bg-black/90 rounded-2xl shadow-lg overflow-hidden mb-6 group border border-gray-100 dark:border-gray-700">
-                <div className="aspect-[16/10] relative bg-gradient-to-br from-gray-50 to-blue-50 dark:from-black/70 dark:to-blue-950/30">
+              <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 dark:border-gray-700/50 group">
+                <div className="aspect-[16/9] relative bg-gradient-to-br from-gray-50/50 to-blue-50/50 dark:from-black/40 dark:to-blue-950/40">
                   <img
                     src={service.images[selectedImage]}
                     alt={service.title}
-                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.02]"
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.03]"
                   />
                   
-                  {/* Refined overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-black/5" />
+                  {/* Enhanced Glass Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
                   
-                  {/* Enhanced Action Buttons */}
+                  {/* Floating Action Buttons with Glass Morphism */}
                   <div className="absolute top-4 right-4 flex space-x-2">
                     <button
                       onClick={toggleWishlist}
                       className={cn(
-                        "p-2.5 rounded-xl backdrop-blur-md border transition-all duration-300 hover:scale-110 shadow-lg",
+                        "p-3 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-110 shadow-xl",
                         isWishlisted 
-                          ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-400 shadow-red-200' 
-                          : 'bg-white/95 dark:bg-black/80 text-gray-700 dark:text-gray-300 border-white/70 dark:border-gray-600/70 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 hover:border-red-200 dark:hover:border-red-600'
+                          ? 'bg-gradient-to-r from-red-500/90 to-pink-500/90 text-white border-red-400/50 shadow-red-200/50' 
+                          : 'bg-white/20 dark:bg-black/30 text-gray-700 dark:text-gray-300 border-white/30 dark:border-gray-600/30 hover:bg-red-50/30 dark:hover:bg-red-900/30 hover:text-red-500 hover:border-red-200/50 dark:hover:border-red-600/50'
                       )}
+                      title="Add to wishlist"
                     >
                       <Heart className={cn("w-4 h-4", isWishlisted && "fill-current")} />
                     </button>
-                    <button className="p-2.5 rounded-xl bg-white/95 dark:bg-black/80 backdrop-blur-md border border-white/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-600 transition-all duration-300 hover:scale-110 shadow-lg">
+                    <button 
+                      className="p-3 rounded-2xl bg-white/20 dark:bg-black/30 backdrop-blur-xl border border-white/30 dark:border-gray-600/30 text-gray-700 dark:text-gray-300 hover:bg-blue-50/30 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200/50 dark:hover:border-blue-600/50 transition-all duration-300 hover:scale-110 shadow-xl"
+                      title="Share service"
+                    >
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button className="p-2.5 rounded-xl bg-white/95 dark:bg-black/80 backdrop-blur-md border border-white/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 dark:hover:text-yellow-400 hover:border-yellow-200 dark:hover:border-yellow-600 transition-all duration-300 hover:scale-110 shadow-lg">
+                    <button 
+                      className="p-3 rounded-2xl bg-white/20 dark:bg-black/30 backdrop-blur-xl border border-white/30 dark:border-gray-600/30 text-gray-700 dark:text-gray-300 hover:bg-yellow-50/30 dark:hover:bg-yellow-900/30 hover:text-yellow-600 dark:hover:text-yellow-400 hover:border-yellow-200/50 dark:hover:border-yellow-600/50 transition-all duration-300 hover:scale-110 shadow-xl"
+                      title="Bookmark service"
+                    >
                       <Bookmark className="w-4 h-4" />
                     </button>
                   </div>
 
-                  {/* Refined slide indicator */}
+                  {/* Glass Morphism Slide Indicator */}
                   <div className="absolute top-4 left-4">
-                    <div className="flex items-center space-x-2 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-xl px-3 py-2 border border-white/50 dark:border-gray-600/50 shadow-lg">
+                    <div className="flex items-center space-x-2 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl px-4 py-2 border border-white/30 dark:border-gray-600/30 shadow-xl">
                       <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{selectedImage + 1}/{service.images.length}</span>
                       {autoSlide && (
@@ -633,25 +660,27 @@ const ServiceDetailPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* Sleek Navigation Arrows */}
+                  {/* Modern Glass Navigation Arrows */}
                   {service.images.length > 1 && (
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-black/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-lg border border-white/50 dark:border-gray-600/50"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-black/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-xl border border-white/30 dark:border-gray-600/30"
+                        title="Previous image"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-black/90 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-lg border border-white/50 dark:border-gray-600/50"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-black/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-xl border border-white/30 dark:border-gray-600/30"
+                        title="Next image"
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
                     </>
                   )}
 
-                  {/* Modern Progress Indicators */}
+                  {/* Modern Glass Progress Indicators */}
                   {service.images.length > 1 && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
                       {service.images.map((_, index) => (
@@ -674,9 +703,9 @@ const ServiceDetailPage: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Compact Image Thumbnails */}
+                {/* Compact Glass Thumbnails */}
                 {service.images.length > 1 && (
-                  <div className="flex space-x-2 p-3 overflow-x-auto scrollbar-hide bg-gradient-to-r from-gray-50 to-blue-50 dark:from-black/60 dark:to-blue-950/30">
+                  <div className="flex space-x-2 p-4 overflow-x-auto scrollbar-hide bg-gradient-to-r from-gray-50/80 to-blue-50/80 dark:from-black/40 dark:to-blue-950/40 backdrop-blur-sm">
                     {service.images.map((image, index) => (
                       <button
                         key={index}
@@ -686,10 +715,10 @@ const ServiceDetailPage: React.FC = () => {
                           setTimeout(() => setAutoSlide(true), 10000);
                         }}
                         className={cn(
-                          "flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110",
+                          "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110",
                           selectedImage === index 
-                            ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-600/50 shadow-lg transform scale-105' 
-                            : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 shadow-sm'
+                            ? 'border-blue-500/80 dark:border-blue-400/80 ring-2 ring-blue-200/50 dark:ring-blue-600/30 shadow-lg transform scale-105' 
+                            : 'border-gray-200/50 dark:border-gray-600/50 hover:border-blue-300/70 dark:hover:border-blue-500/70 shadow-sm'
                         )}
                       >
                         <img src={image} alt={`${service.title} ${index + 1}`} className="w-full h-full object-cover" />
@@ -699,23 +728,23 @@ const ServiceDetailPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Enhanced Service Header */}
-              <div className="bg-gradient-to-br from-white to-gray-50/30 dark:from-black/90 dark:to-gray-900/30 rounded-2xl shadow-lg p-6 mb-6 border border-gray-100 dark:border-gray-700">
+              {/* Enhanced Service Header with Glass Morphism */}
+              <div className="bg-gradient-to-br from-white/90 to-gray-50/50 dark:from-black/70 dark:to-gray-900/50 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20 dark:border-gray-700/50">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-100 bg-clip-text text-transparent mb-3">
+                    <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-100 bg-clip-text text-transparent mb-3">
                       {service.title}
                     </h1>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      <span className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full font-medium shadow-sm border border-blue-200 dark:border-blue-700">
+                    <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400 mb-4 flex-wrap gap-2">
+                      <span className="bg-gradient-to-r from-blue-100/80 to-cyan-100/80 dark:from-blue-900/60 dark:to-cyan-900/60 backdrop-blur-sm text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full font-medium shadow-lg border border-blue-200/50 dark:border-blue-700/50">
                         {service.category?.name}
                       </span>
-                      <div className="flex items-center bg-white dark:bg-black/70 rounded-full px-3 py-1.5 shadow-sm border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                         <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                         <span className="font-medium text-gray-800 dark:text-gray-200">{averageRating.toFixed(1)}</span>
                         <span className="text-gray-500 dark:text-gray-400 ml-1">({reviewStats.totalReviews} reviews)</span>
                       </div>
-                      <div className="flex items-center bg-white dark:bg-black/70 rounded-full px-3 py-1.5 shadow-sm border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                         <Eye className="w-4 h-4 mr-1 text-blue-500 dark:text-blue-400" />
                         <span className="text-gray-700 dark:text-gray-300">1.2k views</span>
                       </div>
@@ -725,7 +754,7 @@ const ServiceDetailPage: React.FC = () => {
                         {service.tags.map((tag, index) => (
                           <span 
                             key={index} 
-                            className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-black/50 dark:to-gray-900/80 text-gray-700 dark:text-gray-300 text-xs px-3 py-1.5 rounded-full hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-950/50 dark:hover:to-cyan-950/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 cursor-default border border-gray-200 dark:border-gray-600 shadow-sm"
+                            className="bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-black/40 dark:to-gray-900/60 backdrop-blur-sm text-gray-700 dark:text-gray-300 text-xs px-3 py-1.5 rounded-full hover:from-blue-50/80 hover:to-cyan-50/80 dark:hover:from-blue-950/40 dark:hover:to-cyan-950/40 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 cursor-default border border-gray-200/50 dark:border-gray-600/50 shadow-sm"
                           >
                             {tag}
                           </span>
@@ -733,510 +762,589 @@ const ServiceDetailPage: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <div className="text-right ml-6 bg-white dark:bg-black/80 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
-                      {service.currency} {service.price.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Provider Details and Actions */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Glass Morphism Price Card */}
+              <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 dark:border-gray-700/50 sticky top-24">
+                <div className="text-center mb-6">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                    {service.currency} {service.price.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Starting price</div>
+                  <div className="flex items-center justify-center text-green-600 dark:text-green-400 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm rounded-2xl px-4 py-2 border border-green-200/50 dark:border-green-700/50 shadow-lg">
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    <span className="text-sm font-medium">Available now</span>
+                  </div>
+                </div>
+
+                {/* Enhanced Action Buttons */}
+                <div className="space-y-3">
+                  <button
+                    onClick={handleBookNow}
+                    disabled={bookingLoading}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none backdrop-blur-sm"
+                  >
+                    {bookingLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Creating conversation...
+                      </div>
+                    ) : (
+                      'Book Now'
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={handleContactProvider}
+                    className="w-full border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-semibold hover:bg-blue-50/50 dark:hover:bg-blue-900/30 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/30 dark:bg-black/30"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Contact Provider
+                  </button>
+                </div>
+
+                {/* Quick Provider Info */}
+                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-700/50">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="relative">
+                      <img
+                        src={provider?.logoUrl || provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider') + '&background=6366f1&color=fff&size=48'}
+                        alt="Provider"
+                        className="w-12 h-12 rounded-2xl object-cover border-2 border-white/50 dark:border-gray-600/50 shadow-lg"
+                      />
+                      {provider?.isVerified && (
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Starting price</div>
-                    <div className="flex items-center justify-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-1.5 border border-green-200 dark:border-green-700">
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      <span className="text-sm font-medium">Available now</span>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100">
+                        {provider?.user ? 
+                          `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' :
+                          'Provider'
+                        }
+                      </h4>
+                      <div className="flex items-center">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                          {provider?.averageRating ? provider.averageRating.toFixed(1) : 'New'}
+                        </span>
+                        <span className="text-gray-500 dark:text-gray-400 ml-1 text-sm">
+                          ({provider?.totalReviews || 0})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {provider?.isVerified && (
+                    <div className="flex items-center text-green-600 dark:text-green-400 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm rounded-xl px-3 py-2 text-sm font-medium border border-green-200/50 dark:border-green-700/50 shadow-sm">
+                      <Shield className="w-4 h-4 mr-1" />
+                      Verified Provider
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Modern Glass Morphism Tabs Navigation */}
+          <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden mb-6 border border-white/20 dark:border-gray-700/50">
+            <div className="border-b border-gray-100/50 dark:border-gray-700/50 bg-gradient-to-r from-gray-50/60 to-blue-50/40 dark:from-black/40 dark:to-blue-950/40 backdrop-blur-sm">
+              <nav className="flex space-x-1 px-6">
+                {[
+                  { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' },
+                  { id: 'reviews', label: `Reviews (${reviewStats.totalReviews})`, icon: Star, color: 'yellow' },
+                  { id: 'chat', label: 'Chat with Provider', icon: MessageCircle, color: 'green' }
+                ].map((tab) => {
+                  const IconComponent = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as TabType)}
+                      className={cn(
+                        "flex items-center py-4 px-4 border-b-3 font-medium text-sm transition-all duration-300 relative group",
+                        isActive
+                          ? "border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-t-2xl shadow-lg"
+                          : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/30 dark:hover:bg-gray-700/30 backdrop-blur-sm rounded-t-lg"
+                      )}
+                    >
+                      <div className={cn(
+                        "p-1.5 rounded-lg mr-2 transition-all duration-300",
+                        isActive 
+                          ? "bg-blue-100/80 dark:bg-blue-900/60 backdrop-blur-sm text-blue-600 dark:text-blue-400" 
+                          : "bg-gray-100/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-500 dark:text-gray-400 group-hover:bg-blue-50/60 dark:group-hover:bg-blue-900/40 group-hover:text-blue-500 dark:group-hover:text-blue-400"
+                      )}>
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                      {tab.label}
+                      {isActive && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 bg-gradient-to-br from-white/60 to-blue-50/30 dark:from-black/50 dark:to-blue-950/30 backdrop-blur-sm">
+              {/* Overview Tab */}
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  {/* Description */}
+                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                      <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full mr-3"></div>
+                      About this service
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+                      {service.description || 'No description available for this service.'}
+                    </p>
+                  </div>
+
+                  {/* Working Hours */}
+                  {service.workingTime && service.workingTime.length > 0 && (
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <div className="p-2 bg-gradient-to-r from-green-100/80 to-emerald-100/80 dark:from-green-900/40 dark:to-emerald-900/40 backdrop-blur-sm rounded-lg mr-3">
+                          <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        Working Hours
+                      </h3>
+                      <div className="bg-gradient-to-r from-gray-50/60 to-blue-50/40 dark:from-black/30 dark:to-blue-950/40 backdrop-blur-sm rounded-2xl p-4 border border-gray-100/50 dark:border-gray-600/50">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {service.workingTime.map((time, index) => (
+                            <div key={index} className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-100/50 dark:border-gray-600/50 hover:shadow-lg transition-all duration-300">
+                              <div className="p-2 bg-gradient-to-r from-blue-100/80 to-purple-100/80 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm rounded-lg mr-3">
+                                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <span className="text-gray-700 dark:text-gray-300 font-medium">{time}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Service Features */}
+                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                      <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full mr-3"></div>
+                      What's included
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {[
+                        { icon: Shield, label: "Verified Provider", desc: "Background checked and verified", gradient: "from-blue-500 to-cyan-500" },
+                        { icon: Award, label: "Quality Guaranteed", desc: "100% satisfaction guarantee", gradient: "from-yellow-500 to-orange-500" },
+                        { icon: MessageCircle, label: "24/7 Support", desc: "Round the clock customer support", gradient: "from-green-500 to-emerald-500" },
+                        { icon: Users, label: "Experienced Team", desc: "years of industry experience", gradient: "from-purple-500 to-pink-500" }
+                      ].map((feature, index) => {
+                        const IconComponent = feature.icon;
+                        return (
+                          <div key={index} className="group">
+                            <div className="flex items-start bg-gradient-to-br from-gray-50/60 to-blue-50/40 dark:from-black/30 dark:to-blue-950/40 backdrop-blur-sm rounded-2xl p-4 hover:from-blue-50/60 hover:to-purple-50/40 dark:hover:from-blue-950/50 dark:hover:to-purple-950/50 transition-all duration-300 border border-gray-100/50 dark:border-gray-600/50 hover:border-blue-200/60 dark:hover:border-blue-700/60 hover:shadow-lg">
+                              <div className={cn(
+                                "w-12 h-12 bg-gradient-to-r rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg backdrop-blur-sm",
+                                feature.gradient
+                              )}>
+                                <IconComponent className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <span className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-900 dark:group-hover:text-blue-300 transition-colors duration-300">{feature.label}</span>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">{feature.desc}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Modern Tabs Navigation */}
-              <div className="bg-white dark:bg-black/90 rounded-2xl shadow-lg overflow-hidden mb-6 border border-gray-100 dark:border-gray-700">
-                <div className="border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-black/50 dark:to-blue-950/30">
-                  <nav className="flex space-x-1 px-6">
-                    {[
-                      { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' },
-                      { id: 'reviews', label: `Reviews (${reviewStats.totalReviews})`, icon: Star, color: 'yellow' },
-                      { id: 'chat', label: 'Chat with Provider', icon: MessageCircle, color: 'green' }
-                    ].map((tab) => {
-                      const IconComponent = tab.icon;
-                      const isActive = activeTab === tab.id;
-                      return (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id as TabType)}
-                          className={cn(
-                            "flex items-center py-4 px-4 border-b-3 font-medium text-sm transition-all duration-300 relative group",
-                            isActive
-                              ? "border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 bg-white dark:bg-black/80 rounded-t-xl shadow-sm"
-                              : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-t-lg"
-                          )}
-                        >
-                          <div className={cn(
-                            "p-1.5 rounded-lg mr-2 transition-all duration-300",
-                            isActive 
-                              ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400" 
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-500 dark:group-hover:text-blue-400"
-                          )}>
-                            <IconComponent className="w-4 h-4" />
+              {/* Reviews Tab */}
+              {activeTab === 'reviews' && (
+                <div className="space-y-6">
+                  {/* Review Summary */}
+                  <div className="bg-gradient-to-br from-blue-50/80 to-purple-50/80 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm rounded-3xl p-6 border border-blue-100/50 dark:border-blue-800/50 shadow-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="text-center">
+                        <div className="relative inline-block">
+                          <div className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                            {averageRating.toFixed(1)}
                           </div>
-                          {tab.label}
-                          {isActive && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </nav>
-                </div>
-
-                {/* Tab Content */}
-                <div className="p-6 bg-gradient-to-br from-white to-blue-50/20 dark:from-black/80 dark:to-blue-950/20">
-                  {/* Overview Tab */}
-                  {activeTab === 'overview' && (
-                    <div className="space-y-6">
-                      {/* Description */}
-                      <div className="bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                          <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full mr-3"></div>
-                          About this service
-                        </h3>
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-                          {service.description || 'No description available for this service.'}
-                        </p>
-                      </div>
-
-                      {/* Working Hours */}
-                      {service.workingTime && service.workingTime.length > 0 && (
-                        <div className="bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                            <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg mr-3">
-                              <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
-                            </div>
-                            Working Hours
-                          </h3>
-                          <div className="bg-gradient-to-r from-gray-50 to-blue-50/50 dark:from-black/40 dark:to-blue-950/30 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              {service.workingTime.map((time, index) => (
-                                <div key={index} className="flex items-center bg-white dark:bg-black/70 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-300">
-                                  <div className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-lg mr-3">
-                                    <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                  </div>
-                                  <span className="text-gray-700 dark:text-gray-300 font-medium">{time}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                          <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse"></div>
                         </div>
-                      )}
-
-                      {/* Service Features */}
-                      <div className="bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                          <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full mr-3"></div>
-                          What's included
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {[
-                            { icon: Shield, label: "Verified Provider", desc: "Background checked and verified", gradient: "from-blue-500 to-cyan-500" },
-                            { icon: Award, label: "Quality Guaranteed", desc: "100% satisfaction guarantee", gradient: "from-yellow-500 to-orange-500" },
-                            { icon: MessageCircle, label: "24/7 Support", desc: "Round the clock customer support", gradient: "from-green-500 to-emerald-500" },
-                            { icon: Users, label: "Experienced Team", desc: "years of industry experience", gradient: "from-purple-500 to-pink-500" }
-                          ].map((feature, index) => {
-                            const IconComponent = feature.icon;
-                            return (
-                              <div key={index} className="group">
-                                <div className="flex items-start bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-black/40 dark:to-blue-950/30 rounded-xl p-4 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950/40 dark:hover:to-purple-950/40 transition-all duration-300 border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md">
-                                  <div className={cn(
-                                    "w-12 h-12 bg-gradient-to-r rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg",
-                                    feature.gradient
-                                  )}>
-                                    <IconComponent className="w-5 h-5 text-white" />
-                                  </div>
-                                  <div>
-                                    <span className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-900 dark:group-hover:text-blue-300 transition-colors duration-300">{feature.label}</span>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">{feature.desc}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
+                        <div className="flex items-center justify-center mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={cn(
+                                "w-5 h-5 transition-all duration-300",
+                                i < Math.floor(averageRating) ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"
+                              )}
+                            />
+                          ))}
                         </div>
+                        <p className="text-gray-600 dark:text-gray-400 font-medium">Based on {reviewStats.totalReviews} reviews</p>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Reviews Tab */}
-                  {activeTab === 'reviews' && (
-                    <div className="space-y-6">
-                      {/* Review Summary */}
-                      <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-2xl p-6 border border-blue-100 dark:border-blue-800 shadow-sm">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="text-center">
-                            <div className="relative inline-block">
-                              <div className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                                {averageRating.toFixed(1)}
-                              </div>
-                              <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse"></div>
+                      <div className="space-y-3">
+                        {ratingDistribution.map((dist) => (
+                          <div key={dist.rating} className="flex items-center space-x-3">
+                            <span className="text-sm font-medium w-10 flex items-center text-gray-700 dark:text-gray-300">
+                              {dist.rating}
+                              <Star className="w-3 h-3 text-yellow-400 fill-current ml-0.5" />
+                            </span>
+                            <div className="flex-1 bg-gray-200/60 dark:bg-gray-700/60 backdrop-blur-sm rounded-full h-2.5 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2.5 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${dist.percentage}%` }}
+                              />
                             </div>
-                            <div className="flex items-center justify-center mb-2">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={cn(
-                                    "w-5 h-5 transition-all duration-300",
-                                    i < Math.floor(averageRating) ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"
-                                  )}
-                                />
-                              ))}
-                            </div>
-                            <p className="text-gray-600 dark:text-gray-400 font-medium">Based on {reviewStats.totalReviews} reviews</p>
+                            <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">{dist.count}</span>
                           </div>
-                          <div className="space-y-3">
-                            {ratingDistribution.map((dist) => (
-                              <div key={dist.rating} className="flex items-center space-x-3">
-                                <span className="text-sm font-medium w-10 flex items-center text-gray-700 dark:text-gray-300">
-                                  {dist.rating}
-                                  <Star className="w-3 h-3 text-yellow-400 fill-current ml-0.5" />
-                                </span>
-                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                                  <div 
-                                    className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2.5 rounded-full transition-all duration-500 ease-out"
-                                    style={{ width: `${dist.percentage}%` }}
-                                  />
-                                </div>
-                                <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">{dist.count}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Review Filters */}
-                      <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-black/80 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                          Filter by rating:
-                        </span>
-                        {['all', '5', '4', '3', '2', '1'].map((filter) => (
-                          <button
-                            key={filter}
-                            onClick={() => setReviewFilter(filter)}
-                            className={cn(
-                              "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border",
-                              reviewFilter === filter
-                                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600 shadow-lg transform scale-105"
-                                : "bg-white dark:bg-black/70 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-400 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 shadow-sm"
-                            )}
-                          >
-                            {filter === 'all' ? 'All' : `${filter} Stars`}
-                          </button>
                         ))}
                       </div>
-
-                      {/* Reviews List */}
-                      <div className="space-y-4">
-                        {reviewsLoading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                            <span className="ml-2 text-gray-600">Loading reviews...</span>
-                          </div>
-                        ) : filteredReviews.length === 0 ? (
-                          <div className="text-center py-8 bg-gray-50 rounded-xl">
-                            <div className="text-gray-500 mb-2">No reviews found</div>
-                            <div className="text-sm text-gray-400">
-                              {reviewFilter === 'all' 
-                                ? 'Be the first to review this service!' 
-                                : `No ${reviewFilter}-star reviews yet.`
-                              }
-                            </div>
-                          </div>
-                        ) : (
-                          filteredReviews.map((review) => (
-                          <div key={review.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-200 group">
-                            <div className="flex items-start space-x-4">
-                              <div className="relative">
-                                <img
-                                  src={review.clientAvatar}
-                                  alt={review.clientName}
-                                  className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-blue-200 transition-all duration-300"
-                                />
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div>
-                                    <h4 className="font-semibold text-gray-900 group-hover:text-blue-900 transition-colors duration-300">{review.clientName}</h4>
-                                    <div className="flex items-center space-x-2">
-                                      <div className="flex">
-                                        {[...Array(5)].map((_, i) => (
-                                          <Star
-                                            key={i}
-                                            className={cn(
-                                              "w-4 h-4 transition-all duration-300",
-                                              i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                                            )}
-                                          />
-                                        ))}
-                                      </div>
-                                      <span className="text-sm text-gray-500">• {review.date}</span>
-                                      {review.service && (
-                                        <span className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs px-3 py-1 rounded-full border border-blue-200">
-                                          {typeof review.service === 'string' ? review.service : review.service.title}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                                <p className="text-gray-700 leading-relaxed mb-4 group-hover:text-gray-800 transition-colors duration-300">{review.comment}</p>
-                                <div className="flex items-center space-x-4 text-sm">
-                                  <button className="flex items-center text-gray-500 hover:text-blue-600 transition-all duration-300 group-hover:scale-105">
-                                    <ThumbsUp className="w-4 h-4 mr-1" />
-                                    Helpful ({review.helpful})
-                                  </button>
-                                  <button className="text-gray-500 hover:text-blue-600 transition-all duration-300">
-                                    Reply
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                        )}
-                      </div>
                     </div>
-                  )}
+                  </div>
 
-                  {/* Chat Tab */}
-                  {activeTab === 'chat' && (
-                    <div className="space-y-4">
-                      {/* Enhanced Chat Header */}
-                      <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 -m-6 p-6 rounded-t-2xl">
-                        <div className="flex items-center space-x-3">
+                  {/* Review Filters */}
+                  <div className="flex flex-wrap items-center gap-3 bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/30 dark:border-gray-700/50">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                      Filter by rating:
+                    </span>
+                    {['all', '5', '4', '3', '2', '1'].map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setReviewFilter(filter)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 border backdrop-blur-sm",
+                          reviewFilter === filter
+                            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600 shadow-lg transform scale-105"
+                            : "bg-white/40 dark:bg-black/40 text-gray-700 dark:text-gray-300 hover:bg-blue-50/40 dark:hover:bg-gray-600/40 hover:text-blue-600 dark:hover:text-blue-400 border-gray-200/50 dark:border-gray-600/50 hover:border-blue-300/50 dark:hover:border-blue-500/50 shadow-sm"
+                        )}
+                      >
+                        {filter === 'all' ? 'All' : `${filter} Stars`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Reviews List */}
+                  <div className="space-y-4">
+                    {reviewsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        <span className="ml-2 text-gray-600">Loading reviews...</span>
+                      </div>
+                    ) : filteredReviews.length === 0 ? (
+                      <div className="text-center py-8 bg-gray-50/60 backdrop-blur-sm rounded-2xl border border-gray-100/50">
+                        <div className="text-gray-500 mb-2">No reviews found</div>
+                        <div className="text-sm text-gray-400">
+                          {reviewFilter === 'all' 
+                            ? 'Be the first to review this service!' 
+                            : `No ${reviewFilter}-star reviews yet.`
+                          }
+                        </div>
+                      </div>
+                    ) : (
+                      filteredReviews.map((review) => (
+                      <div key={review.id} className="bg-white/60 dark:bg-black/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-3xl p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-200/60 dark:hover:border-blue-700/60 group">
+                        <div className="flex items-start space-x-4">
                           <div className="relative">
                             <img
-                              src={provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' : 'Provider') + '&background=6366f1&color=fff&size=40'}
-                              alt="Provider"
-                              className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-600 shadow-lg"
+                              src={review.clientAvatar}
+                              alt={review.clientName}
+                              className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100/50 dark:ring-gray-700/50 group-hover:ring-blue-200/60 dark:group-hover:ring-blue-700/60 transition-all duration-300"
                             />
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></div>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white dark:border-black"></div>
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                              {provider?.user ? 
-                                `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email :
-                                service?.provider?.name || 'Provider'
-                              }
-                            </h3>
-                            <p className="text-sm text-green-600 dark:text-green-400 flex items-center">
-                              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                              Online now
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-black/80 rounded-lg px-3 py-2 shadow-sm border border-gray-200 dark:border-gray-600">
-                          Usually responds within 1 hour
-                        </div>
-                      </div>
-
-                      {/* Enhanced Chat Messages */}
-                      <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-transparent dark:from-black/30 dark:to-transparent rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-                        {chatMessages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={cn(
-                              "flex animate-in slide-in-from-bottom-2 duration-300",
-                              message.sender === 'user' ? "justify-end" : "justify-start"
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                "max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-md",
-                                message.sender === 'user'
-                                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600"
-                                  : "bg-white dark:bg-black/70 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                              )}
-                            >
-                              <p className="text-sm leading-relaxed">{message.message}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <p className={cn(
-                                  "text-xs",
-                                  message.sender === 'user' ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
-                                )}>
-                                  {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                                {message.sender === 'user' && (
-                                  <div className="flex space-x-1">
-                                    <div className="w-1 h-1 bg-blue-200 rounded-full"></div>
-                                    <div className="w-1 h-1 bg-blue-200 rounded-full"></div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-900 dark:group-hover:text-blue-300 transition-colors duration-300">{review.clientName}</h4>
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={cn(
+                                          "w-4 h-4 transition-all duration-300",
+                                          i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300 dark:text-gray-600"
+                                        )}
+                                      />
+                                    ))}
                                   </div>
-                                )}
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">• {review.date}</span>
+                                  {review.service && (
+                                    <span className="bg-gradient-to-r from-blue-100/80 to-purple-100/80 dark:from-blue-900/50 dark:to-purple-900/50 backdrop-blur-sm text-blue-800 dark:text-blue-200 text-xs px-3 py-1 rounded-full border border-blue-200/50 dark:border-blue-700/50">
+                                      {typeof review.service === 'string' ? review.service : review.service.title}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Enhanced Chat Input */}
-                      <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-black/30 dark:to-blue-950/30 -m-6 p-6 rounded-b-2xl">
-                        <div className="flex-1 relative">
-                          <input
-                            type="text"
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            placeholder="Type your message..."
-                            className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-black/80 dark:text-gray-100 dark:placeholder-gray-400 shadow-sm transition-all duration-300 hover:shadow-md"
-                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                          />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
-                            
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{review.comment}</p>
+                            <div className="flex items-center space-x-4 text-sm">
+                              <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 group-hover:scale-105">
+                                <ThumbsUp className="w-4 h-4 mr-1" />
+                                Helpful ({review.helpful})
+                              </button>
+                              <button className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300">
+                                Reply
+                              </button>
+                            </div>
                           </div>
                         </div>
-                        <button
-                          onClick={handleSendMessage}
-                          disabled={!newMessage.trim()}
-                          className={cn(
-                            "px-6 py-3 rounded-2xl font-medium transition-all duration-300 flex items-center shadow-sm border",
-                            newMessage.trim()
-                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 border-blue-600 hover:shadow-lg transform hover:scale-105"
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-200 dark:border-gray-600"
-                          )}
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Send
-                        </button>
+                      </div>
+                    ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Chat Tab */}
+              {activeTab === 'chat' && (
+                <div className="space-y-4">
+                  {/* Enhanced Chat Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50/60 to-purple-50/60 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm -m-6 p-6 rounded-t-3xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <img
+                          src={provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' : 'Provider') + '&background=6366f1&color=fff&size=40'}
+                          alt="Provider"
+                          className="w-12 h-12 rounded-full object-cover ring-2 ring-white/50 dark:ring-gray-600/50 shadow-lg"
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"></div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                          {provider?.user ? 
+                            `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email :
+                            service?.provider?.name || 'Provider'
+                          }
+                        </h3>
+                        <p className="text-sm text-green-600 dark:text-green-400 flex items-center">
+                          <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                          Online now
+                        </p>
                       </div>
                     </div>
-                  )}
+                    <div className="text-sm text-gray-600 dark:text-gray-400 bg-white/40 dark:bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm border border-gray-200/50 dark:border-gray-600/50">
+                      Usually responds within 1 hour
+                    </div>
+                  </div>
+
+                  {/* Enhanced Chat Messages */}
+                  <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-to-b from-gray-50/40 to-transparent dark:from-black/20 dark:to-transparent backdrop-blur-sm rounded-2xl p-4 border border-gray-100/50 dark:border-gray-700/50">
+                    {chatMessages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={cn(
+                          "flex animate-in slide-in-from-bottom-2 duration-300",
+                          message.sender === 'user' ? "justify-end" : "justify-start"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl backdrop-blur-sm",
+                            message.sender === 'user'
+                              ? "bg-gradient-to-r from-blue-600/90 to-purple-600/90 text-white border-blue-600/50"
+                              : "bg-white/60 dark:bg-black/50 text-gray-900 dark:text-gray-100 border-gray-200/50 dark:border-gray-600/50 hover:border-gray-300/60 dark:hover:border-gray-500/60"
+                          )}
+                        >
+                          <p className="text-sm leading-relaxed">{message.message}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className={cn(
+                              "text-xs",
+                              message.sender === 'user' ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
+                            )}>
+                              {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                            {message.sender === 'user' && (
+                              <div className="flex space-x-1">
+                                <div className="w-1 h-1 bg-blue-200 rounded-full"></div>
+                                <div className="w-1 h-1 bg-blue-200 rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Enhanced Chat Input */}
+                  <div className="flex space-x-3 pt-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-gray-50/40 to-blue-50/40 dark:from-black/20 dark:to-blue-950/40 backdrop-blur-sm -m-6 p-6 rounded-b-3xl">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        className="w-full px-4 py-3 pr-12 border border-gray-300/50 dark:border-gray-600/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent bg-white/60 dark:bg-black/50 backdrop-blur-sm dark:text-gray-100 dark:placeholder-gray-400 shadow-lg transition-all duration-300 hover:shadow-xl"
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                        
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                      className={cn(
+                        "px-6 py-3 rounded-2xl font-medium transition-all duration-300 flex items-center shadow-lg border backdrop-blur-sm",
+                        newMessage.trim()
+                          ? "bg-gradient-to-r from-blue-600/90 to-purple-600/90 text-white hover:from-blue-700/90 hover:to-purple-700/90 border-blue-600/50 hover:shadow-xl transform hover:scale-105"
+                          : "bg-gray-100/60 dark:bg-gray-700/60 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-200/50 dark:border-gray-600/50"
+                      )}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Send
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
+            </div>
           </div>
 
-          {/* Provider Section - Now at Bottom */}
+          {/* Enhanced Provider Section with Glass Morphism */}
           <div className="mt-8">
-            {/* Enhanced Provider Card */}
-            <div className="bg-gradient-to-br from-white to-gray-50/30 dark:from-black/90 dark:to-gray-900/30 rounded-2xl shadow-lg p-6 mb-6 border border-gray-100 dark:border-gray-700 max-w-4xl mx-auto">
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                <div className="w-2 h-6 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-3"></div>
+            <div className="bg-gradient-to-br from-white/90 to-gray-50/60 dark:from-black/80 dark:to-gray-900/60 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/50 max-w-6xl mx-auto">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8 flex items-center">
+                <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
                 Service Provider
               </h3>
               
               {providerLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <span className="ml-3 text-gray-600 dark:text-gray-400">Loading provider details...</span>
                 </div>
               ) : (
                 <>
                   {console.log('🎨 Rendering provider in UI. Current provider state:', provider)}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {/* Provider Info */}
-                    <div className="flex items-center">
-                      <div className="relative">
-                        <img
-                          src={provider?.logoUrl || provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider') + '&background=6366f1&color=fff&size=100'}
-                          alt="Provider"
-                          className="w-24 h-24 rounded-2xl mr-4 object-cover border-3 border-white shadow-lg ring-2 ring-gray-100"
-                        />
-                        {provider?.isVerified && (
-                          <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                            <CheckCircle className="w-5 h-5 text-white" />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Provider Info Card */}
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                      <div className="flex items-center mb-6">
+                        <div className="relative">
+                          <img
+                            src={provider?.logoUrl || provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider') + '&background=6366f1&color=fff&size=120'}
+                            alt="Provider"
+                            className="w-20 h-20 rounded-3xl object-cover border-3 border-white/50 dark:border-gray-600/50 shadow-xl ring-4 ring-gray-100/50 dark:ring-gray-700/50"
+                          />
+                          {provider?.isVerified && (
+                            <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                              <CheckCircle className="w-6 h-6 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-6">
+                          <h4 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                            {provider?.user ? 
+                              `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' :
+                              'Provider'
+                            }
+                          </h4>
+                          {provider?.isVerified && (
+                            <div className="flex items-center text-green-600 dark:text-green-400 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm rounded-xl px-4 py-2 text-sm font-medium mb-3 border border-green-200/50 dark:border-green-700/50 shadow-sm">
+                              <Shield className="w-5 h-5 mr-2" />
+                              Verified Provider
+                            </div>
+                          )}
+                          <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+                            <Star className="w-5 h-5 text-yellow-400 fill-current mr-2" />
+                            <span className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                              {provider?.averageRating ? provider.averageRating.toFixed(1) : 'New'}
+                            </span>
+                            <span className="text-gray-500 dark:text-gray-400 ml-2">
+                              ({provider?.totalReviews || 0} reviews)
+                            </span>
                           </div>
-                        )}
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                          {provider?.user ? 
-                            `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' :
-                            'Provider'
-                          }
-                        </h4>
-                        {provider?.isVerified && (
-                          <div className="flex items-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-1.5 text-sm font-medium mb-2">
-                            <Shield className="w-4 h-4 mr-1" />
-                            Verified Provider
+
+                      {/* Provider Stats */}
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="text-center bg-gradient-to-br from-blue-50/60 to-cyan-50/60 dark:from-blue-900/30 dark:to-cyan-900/30 backdrop-blur-sm rounded-2xl p-4 border border-blue-100/50 dark:border-blue-800/50 shadow-sm">
+                          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            {provider?.services?.length || 0}
                           </div>
-                        )}
-                        <div className="flex items-center">
-                          <Star className="w-5 h-5 text-yellow-400 fill-current mr-1" />
-                          <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                            {provider?.averageRating ? provider.averageRating.toFixed(1) : 'New'}
-                          </span>
-                          <span className="text-gray-500 dark:text-gray-400 ml-2">
-                            ({provider?.totalReviews || 0} reviews)
-                          </span>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Services</div>
+                        </div>
+                        <div className="text-center bg-gradient-to-br from-purple-50/60 to-pink-50/60 dark:from-purple-900/30 dark:to-pink-900/30 backdrop-blur-sm rounded-2xl p-4 border border-purple-100/50 dark:border-purple-800/50 shadow-sm">
+                          <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            {provider?.totalReviews || 0}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Reviews</div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col space-y-3 justify-center">
-                      <button
-                        onClick={handleBookNow}
-                        disabled={bookingLoading}
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {bookingLoading ? (
-                          <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            Creating conversation...
+                    {/* Contact Information Card */}
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+                        <Phone className="w-6 h-6 mr-3 text-blue-500 dark:text-blue-400" />
+                        Contact Information
+                      </h4>
+                      <div className="space-y-4">
+                        {provider?.user?.email && (
+                          <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100/50 dark:border-gray-700/50">
+                            <div className="p-3 bg-blue-100/80 dark:bg-blue-900/60 backdrop-blur-sm rounded-xl mr-4">
+                              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Email</div>
+                              <div className="font-medium text-gray-800 dark:text-gray-200">{provider.user.email}</div>
+                            </div>
                           </div>
-                        ) : (
-                          'Book Now'
                         )}
-                      </button>
-                      
-                      <button
-                        onClick={handleContactProvider}
-                        className="w-full border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-md"
-                      >
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Contact Provider
-                      </button>
+                        {provider?.user?.phone && (
+                          <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100/50 dark:border-gray-700/50">
+                            <div className="p-3 bg-green-100/80 dark:bg-green-900/60 backdrop-blur-sm rounded-xl mr-4">
+                              <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Phone</div>
+                              <div className="font-medium text-gray-800 dark:text-gray-200">{provider.user.phone}</div>
+                            </div>
+                          </div>
+                        )}
+                        {provider?.user?.location && (
+                          <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100/50 dark:border-gray-700/50">
+                            <div className="p-3 bg-red-100/80 dark:bg-red-900/60 backdrop-blur-sm rounded-xl mr-4">
+                              <MapPin className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">Location</div>
+                              <div className="font-medium text-gray-800 dark:text-gray-200">{provider.user.location}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Provider Details Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Contact Information */}
-                    <div className="space-y-4">
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                        <Phone className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
-                        Contact Info
-                      </h4>
-                      {provider?.user?.email && (
-                        <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white dark:bg-black/70 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                          <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg mr-3">
-                            <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <span className="text-sm font-medium">{provider.user.email}</span>
-                        </div>
-                      )}
-                      {provider?.user?.phone && (
-                        <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white dark:bg-black/70 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                          <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg mr-3">
-                            <Phone className="w-4 h-4 text-green-600 dark:text-green-400" />
-                          </div>
-                          <span className="text-sm font-medium">{provider.user.phone}</span>
-                        </div>
-                      )}
-                      {provider?.user?.location && (
-                        <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white dark:bg-black/70 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                          <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg mr-3">
-                            <MapPin className="w-4 h-4 text-red-600 dark:text-red-400" />
-                          </div>
-                          <span className="text-sm font-medium">{provider.user.location}</span>
-                        </div>
-                      )}
-                    </div>
-
+                  {/* Skills and About Section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Skills */}
                     {provider?.skills && provider.skills.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                          <Award className="w-4 h-4 mr-2 text-orange-500 dark:text-orange-400" />
-                          Skills
+                      <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+                          <Award className="w-6 h-6 mr-3 text-orange-500 dark:text-orange-400" />
+                          Skills & Expertise
                         </h4>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-3">
                           {provider.skills.map((skill: string, index: number) => (
                             <span 
                               key={index}
-                              className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/50 dark:to-cyan-900/50 text-blue-800 dark:text-blue-200 text-xs px-3 py-1.5 rounded-full font-medium border border-blue-200 dark:border-blue-700"
+                              className="bg-gradient-to-r from-blue-100/80 to-cyan-100/80 dark:from-blue-900/60 dark:to-cyan-900/60 backdrop-blur-sm text-blue-800 dark:text-blue-200 text-sm px-4 py-2 rounded-full font-medium border border-blue-200/50 dark:border-blue-700/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
                             >
                               {skill}
                             </span>
@@ -1245,37 +1353,50 @@ const ServiceDetailPage: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Quick Stats */}
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                        <Users className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
-                        Statistics
+                    {/* Quick Actions */}
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+                        <Users className="w-6 h-6 mr-3 text-purple-500 dark:text-purple-400" />
+                        Quick Actions
                       </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
-                          <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                            {provider?.services?.length || 0}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Services</div>
-                        </div>
-                        {/* <div className="text-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 border border-green-100 dark:border-green-800">
-                          <div className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                            {provider?.totalReviews || 0}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Reviews</div>
-                        </div> */}
+                      <div className="space-y-4">
+                        <button
+                          onClick={handleBookNow}
+                          disabled={bookingLoading}
+                          className="w-full bg-gradient-to-r from-green-600/90 to-emerald-600/90 text-white py-4 px-6 rounded-2xl font-bold hover:from-green-700/90 hover:to-emerald-700/90 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border border-green-600/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none backdrop-blur-sm"
+                        >
+                          {bookingLoading ? (
+                            <div className="flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                              Creating conversation...
+                            </div>
+                          ) : (
+                            <>
+                              <Calendar className="w-5 h-5 mr-2 inline" />
+                              Book Now
+                            </>
+                          )}
+                        </button>
+                        
+                        <button
+                          onClick={handleContactProvider}
+                          className="w-full border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-bold hover:bg-blue-50/50 dark:hover:bg-blue-900/30 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/30 dark:bg-black/30"
+                        >
+                          <MessageCircle className="w-5 h-5 mr-2" />
+                          Contact Provider
+                        </button>
                       </div>
                     </div>
                   </div>
 
                   {/* About Section */}
                   {provider?.bio && (
-                    <div className="mt-6 bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                        <User className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50 mb-8">
+                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <User className="w-6 h-6 mr-3 text-purple-500 dark:text-purple-400" />
                         About the Provider
                       </h4>
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-line">
                         {provider.bio}
                       </p>
                     </div>
@@ -1283,19 +1404,19 @@ const ServiceDetailPage: React.FC = () => {
 
                   {/* Qualifications */}
                   {provider?.qualifications && provider.qualifications.length > 0 && (
-                    <div className="mt-6 bg-white dark:bg-black/80 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                        <GraduationCap className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+                        <GraduationCap className="w-6 h-6 mr-3 text-indigo-500 dark:text-indigo-400" />
                         Qualifications & Certifications
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {provider.qualifications.map((qualification: string, index: number) => (
                           <div 
                             key={index}
-                            className="flex items-center bg-gradient-to-r from-gray-50 to-blue-50 dark:from-black/40 dark:to-blue-950/40 rounded-lg p-3 border border-gray-200 dark:border-gray-600"
+                            className="flex items-center bg-gradient-to-r from-gray-50/60 to-blue-50/60 dark:from-black/30 dark:to-blue-950/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:shadow-lg transition-all duration-300 hover:scale-105"
                           >
-                            <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400 mr-3 flex-shrink-0" />
-                            <span className="text-gray-700 dark:text-gray-300">{qualification}</span>
+                            <CheckCircle className="w-6 h-6 text-green-500 dark:text-green-400 mr-4 flex-shrink-0" />
+                            <span className="text-gray-700 dark:text-gray-300 font-medium">{qualification}</span>
                           </div>
                         ))}
                       </div>
@@ -1305,8 +1426,6 @@ const ServiceDetailPage: React.FC = () => {
               )}
             </div>
           </div>
-
-            {/* Remove the sidebar structure - it will be replaced by the above */}
         </div>
       </main>
 
