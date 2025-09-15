@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Mail, Phone, MessageCircle, Book, Users, Shield, DollarSign, ChevronDown, ChevronUp, Headphones, Clock, Star, Zap, Send, X } from 'lucide-react'
+import { Mail, Phone, MessageCircle, Book, Users, Shield, DollarSign, ChevronDown, ChevronUp, Headphones, Clock, Star, Zap, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { showSuccessToast } from '../utils/toastUtils'
@@ -7,14 +7,7 @@ import Button from '../components/Button'
 
 export default function Support() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
-  const [showEmailModal, setShowEmailModal] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
-  const [emailForm, setEmailForm] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  })
   const navigate = useNavigate()
 
   const helpCategories = [
@@ -112,24 +105,6 @@ export default function Support() {
 
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index)
-  }
-
-  const handleEmailFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEmailForm({
-      ...emailForm,
-      [e.target.name]: e.target.value
-    })
-  }
-
-  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // Here you would typically send the email to your backend
-    console.log('Email form submitted:', emailForm)
-    setShowEmailModal(false)
-    setEmailForm({ name: '', email: '', subject: '', message: '' })
-    
-    // Show success toast
-    showSuccessToast("Message sent successfully! We'll get back to you within 4 hours.")
   }
 
   return (
@@ -295,13 +270,13 @@ export default function Support() {
               Send us an email and we'll get back to you within 4 hours
             </p>
             <Button 
-              onClick={() => setShowEmailModal(true)}
+              onClick={() => window.location.href = 'mailto:zia.contact.team@gmail.com?subject=Support Request&body=Hello Zia Support Team,%0D%0A%0D%0APlease describe your issue or question here...'}
               className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold py-3 hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 mb-4"
             >
               Send Email
             </Button>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 inline-block border border-white/20">
-              <span className="text-sm text-gray-300">support@marketplace.com</span>
+              <span className="text-sm text-gray-300">zia.contact.team@gmail.com</span>
             </div>
           </div>
 
@@ -351,109 +326,6 @@ export default function Support() {
           </div>
         </div>
       </div>
-
-      {/* Email Modal */}
-      {showEmailModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-black/90 backdrop-blur-xl rounded-2xl border border-white/20 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-bold text-white">Send us an Email</h3>
-                <button
-                  onClick={() => setShowEmailModal(false)}
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-300 border border-white/20"
-                  aria-label="Close modal"
-                >
-                  <X className="w-5 h-5 text-white" />
-                </button>
-              </div>
-
-              <form onSubmit={handleEmailSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={emailForm.name}
-                    onChange={handleEmailFormChange}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={emailForm.email}
-                    onChange={handleEmailFormChange}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
-                    placeholder="Enter your email address"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2">
-                    Subject *
-                  </label>
-                  <input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    required
-                    value={emailForm.subject}
-                    onChange={handleEmailFormChange}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
-                    placeholder="What is this regarding?"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
-                    Message *
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    required
-                    rows={4}
-                    value={emailForm.message}
-                    onChange={handleEmailFormChange}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm resize-none"
-                    placeholder="Please describe your issue or question in detail..."
-                  ></textarea>
-                </div>
-
-                <div className="flex space-x-4 pt-4">
-                  <Button
-                    type="button"
-                    onClick={() => setShowEmailModal(false)}
-                    className="flex-1 bg-white/10 text-white border border-white/20 py-3 hover:bg-white/20 hover:border-white/30 transition-all duration-300"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-600 text-white py-3 hover:from-blue-600 hover:to-cyan-700 transition-all duration-300"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Phone Support Modal */}
       {showPhoneModal && (
