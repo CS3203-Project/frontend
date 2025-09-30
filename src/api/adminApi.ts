@@ -108,19 +108,58 @@ export interface User {
 
 export interface Service {
   id: string;
+  providerId: string;
+  categoryId: string;
   title: string;
-  description?: string;
-  price: number;
+  description: string;
+  price: string;
   currency: string;
+  tags: string[];
+  images: string[];
+  videoUrl?: string;
   isActive: boolean;
+  workingTime: string[];
   createdAt: string;
+  updatedAt: string;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    parentId?: string;
+    parent?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  };
   provider: {
     id: string;
+    userId: string;
+    bio: string;
+    skills: string[];
+    qualifications: string[];
+    logoUrl?: string;
+    averageRating?: number;
+    totalReviews?: number;
+    createdAt: string;
+    updatedAt: string;
+    IDCardUrl: string;
+    isVerified: boolean;
     user: {
+      id: string;
+      email: string;
       firstName: string;
       lastName: string;
-      email: string;
+      phone?: string;
+      location?: string;
+      isActive: boolean;
     };
+  };
+  _count: {
+    schedules: number;
+    payments: number;
+    serviceReviews: number;
   };
 }
 
@@ -332,6 +371,80 @@ export const adminApi = {
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response?: { data?: { message?: string } } };
         throw new Error(axiosError.response?.data?.message || 'Failed to fetch service providers');
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Get total customer count
+  getCustomerCount: async (): Promise<ApiResponse<{ count: number }>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<{ count: number }>>('/admin/customers/count');
+      return response.data;
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        throw new Error(axiosError.response?.data?.message || 'Failed to fetch customer count');
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Get all services with analytics data
+  getAllServices: async (): Promise<ApiResponse<Service[]> & { count?: number }> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Service[]> & { count?: number }>('/admin/services');
+      return response.data;
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        throw new Error(axiosError.response?.data?.message || 'Failed to fetch services');
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Get analytics data (combined endpoint for dashboard)
+  getAnalyticsData: async (): Promise<ApiResponse<AnalyticsData>> => {
+    try {
+      // Fetch data from multiple endpoints and combine
+      const [customersResponse, providersResponse, servicesResponse] = await Promise.all([
+        apiClient.get<ApiResponse<{ count: number }>>('/admin/customers/count'),
+        apiClient.get<ApiResponse<ServiceProvider[]>>('/admin/service-providers'),
+        apiClient.get<ApiResponse<Service[]>>('/admin/services')
+      ]);
+
+      // Process and combine the data
+      const analyticsData: AnalyticsData = {
+        totalUsers: customersResponse.data.data.count,
+        totalProviders: providersResponse.data.data.length,
+        totalServices: servicesResponse.data.data.length,
+        totalTransactions: 0, // Would need separate endpoint
+        revenue: 0, // Would need separate endpoint
+        userGrowth: [], // Would need historical data endpoint
+        servicesByCategory: [], // Will be calculated from services data
+        topProviders: [], // Will be calculated from providers data
+        monthlyRevenue: [] // Would need separate endpoint
+      };
+
+      return {
+        success: true,
+        message: 'Analytics data fetched successfully',
+        data: analyticsData
+      };
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        throw new Error(axiosError.response?.data?.message || 'Failed to fetch analytics data');
       } else if (error && typeof error === 'object' && 'request' in error) {
         throw new Error('Network error. Please check your connection.');
       } else {

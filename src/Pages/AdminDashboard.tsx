@@ -752,6 +752,7 @@ const AdminDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'verified' | 'pending'>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [customerCount, setCustomerCount] = useState<number>(0);
 
   useEffect(() => {
     // Initialize admin profile from localStorage
@@ -801,6 +802,20 @@ const AdminDashboard: React.FC = () => {
       } catch (error) {
         console.error('Error fetching service providers:', error);
         showErrorToast('Failed to load service providers');
+      }
+
+      // Fetch customer count
+      try {
+        const customerCountResponse = await adminApi.getCustomerCount();
+        if (customerCountResponse.success) {
+          setCustomerCount(customerCountResponse.data.count);
+          console.log('Customer count loaded:', customerCountResponse.data.count);
+        } else {
+          console.error('Failed to fetch customer count:', customerCountResponse.message);
+        }
+      } catch (error) {
+        console.error('Error fetching customer count:', error);
+        // Don't show error toast for customer count since it's not critical
       }
 
     } catch (error) {
@@ -1014,18 +1029,24 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* Service Provider Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatCard
+                title="Total Customers"
+                value={customerCount}
+                icon={<Users className="w-6 h-6 text-white" />}
+                color="bg-blue-500"
+              />
               <StatCard
                 title="Total Providers"
                 value={serviceProviders?.length || 0}
                 icon={<UserCheck className="w-6 h-6 text-white" />}
-                color="bg-blue-500"
+                color="bg-green-500"
               />
               <StatCard
                 title="Verified Providers"
                 value={serviceProviders?.filter(p => p.isVerified).length || 0}
                 icon={<CheckCircle className="w-6 h-6 text-white" />}
-                color="bg-green-500"
+                color="bg-emerald-500"
               />
               <StatCard
                 title="Pending Approvals"
@@ -1105,11 +1126,11 @@ const AdminDashboard: React.FC = () => {
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
-                Live Analytics
+                Analytics Dashboard
               </h2>
               <div className="space-y-4">
                 <p className="text-gray-600">
-                  View real-time charts and performance metrics for comprehensive business insights.
+                  View graphical charts and performance metrics for comprehensive business insights.
                 </p>
                 <button
                   onClick={() => setIsAnalyticsDashboardOpen(true)}
