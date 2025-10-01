@@ -9,11 +9,33 @@ import Footer from '../components/Footer';
 import ConfirmationPanel from '../components/Messaging/ConfirmationPanel';
 
 const ConversationViewContent: React.FC<{ currentUser: UserProfile; conversationId: string }> = ({ currentUser, conversationId }) => {
+  const [serviceProvider, setServiceProvider] = useState<any>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<'USER' | 'PROVIDER'>('USER');
+
+  useEffect(() => {
+    const fetchServiceProvider = async () => {
+      try {
+        const serviceRes = await serviceApi.getServiceByConversationId(conversationId);
+        if (serviceRes.success && serviceRes.data && serviceRes.data.provider) {
+          setServiceProvider(serviceRes.data.provider);
+          const provider = serviceRes.data.provider as any;
+          const providerUserId = provider.userId;
+          const isProvider = currentUser.id === providerUserId;
+          const role = isProvider ? 'PROVIDER' : 'USER';
+          setCurrentUserRole(role);
+        }
+      } catch (err) {
+        console.error('Failed to fetch service provider:', err);
+      }
+    };
+    fetchServiceProvider();
+  }, [conversationId, currentUser.id]);
+
   return (
     <MessagingProvider userId={currentUser.id}>
       <ConversationViewInner 
         conversationId={conversationId} 
-        currentUserRole={currentUser.role as any} 
+        currentUserRole={currentUserRole} 
         currentUserId={currentUser.id} 
       />
     </MessagingProvider>
