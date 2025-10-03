@@ -16,9 +16,11 @@ import PrintingServiceProviderProfile from "./Pages/PrintingServiceProviderProfi
 import Signup from './Pages/Signup.tsx'
 import SignIn from './Pages/SignIn.tsx'
 import BrowseServices from './Pages/BrowseServices';
+import BrowseServicesEnhanced from './Pages/BrowseServicesEnhanced';
 import ServiceCategoryPage from './Pages/ServiceCategoryPage';
 import ServiceDetailPage from './Pages/ServiceDetailPage';
 import SearchResultsPage from './Pages/SearchResultsPage';
+import SearchResultsPageEnhanced from './Pages/SearchResultsPageEnhanced';
 import Profile from "./Pages/Profile.tsx";
 import BecomeProvider from "./Pages/BecomeProvider.tsx";
 import Provider from "./Pages/Provider.tsx";
@@ -54,8 +56,10 @@ function App() {
             <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/services" element={<BrowseServices />} />
+            <Route path="/services" element={<BrowseServicesEnhanced />} />
+            <Route path="/services-original" element={<BrowseServices />} />
             <Route path="/services/search" element={<SearchResultsPage />} />
+            <Route path="/search-results-enhanced" element={<SearchResultsPageEnhanced />} />
             <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
             <Route path="/service/:serviceId" element={<ServiceDetailPage />} />
             <Route path="/profile" element={<Profile />} />

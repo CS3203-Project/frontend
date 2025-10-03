@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, Grid3X3, List, ChevronRight, Loader2, Home, Briefcase, Monitor, GraduationCap, Car, Calendar, Building2 } from 'lucide-react';
 import { categoryApi, type Category } from '../api/categoryApi';
-import Orb from '../components/ui/Orb';
+import Orb from '../components/Orb';
 
 // Icon mapping for categories
 const getCategoryIcon = (categoryName: string) => {
@@ -214,8 +214,7 @@ const CategoriesPage: React.FC = () => {
         
         const response = await categoryApi.getCategories({
           includeChildren: true,
-          includeServices: true,
-          withCounts: true
+          includeServices: true
         });
         
         if (response.success && response.data) {
