@@ -245,6 +245,10 @@ export default function Orb({
 
     container.addEventListener('mousemove', handleMouseMove);
     container.addEventListener('mouseleave', handleMouseLeave);
+    gl.canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      // Optionally, show a message or try to restore context
+    });
 
     let rafId: number;
     const update = (t: number) => {
@@ -272,12 +276,13 @@ export default function Orb({
       window.removeEventListener('resize', resize);
       container.removeEventListener('mousemove', handleMouseMove);
       container.removeEventListener('mouseleave', handleMouseLeave);
+      gl.canvas.removeEventListener('webglcontextlost', () => {});
       if (container.contains(gl.canvas)) {
         container.removeChild(gl.canvas);
       }
+      // No renderer.dispose() method in ogl's Renderer, so nothing to call here
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
   return <div ref={ctnDom} className="orb-container" />;

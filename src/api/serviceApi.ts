@@ -13,6 +13,15 @@ export interface CreateServiceRequest {
   videoUrl?: string;
   isActive?: boolean;
   workingTime?: string[];
+  // Location fields
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  serviceRadiusKm?: number;
 }
 
 export interface ServiceResponse {
@@ -28,6 +37,18 @@ export interface ServiceResponse {
   videoUrl?: string;
   isActive: boolean;
   workingTime?: string[];
+  // Location fields
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  serviceRadiusKm?: number;
+  locationLastUpdated?: string;
+  // Distance (calculated on the client side or returned from location search)
+  distance?: number;
   createdAt: string;
   updatedAt?: string;
   provider?: {
@@ -63,6 +84,33 @@ export interface ServiceListResponse extends ApiResponse<ServiceResponse[]> {
     take: number;
   };
 }
+
+// Location search parameters
+export interface LocationSearchParams {
+  latitude: number;
+  longitude: number;
+  radiusKm?: number;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  tags?: string[];
+  isActive?: boolean;
+  skip?: number;
+  take?: number;
+}
+
+// Location-based response types
+export interface LocationInfo {
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+}
+
+export interface LocationResponse extends ApiResponse<LocationInfo> {}
 
 // Service API functions
 export const serviceApi = {
@@ -108,6 +156,36 @@ export const serviceApi = {
   // Delete service
   deleteService: async (id: string): Promise<ApiResponse<void>> => {
     const response = await apiClient.delete<ApiResponse<void>>(`/services/${id}`);
+    return response.data;
+  },
+
+  // Location-based service search
+  searchServicesByLocation: async (params: LocationSearchParams, abortSignal?: AbortSignal): Promise<ServiceListResponse> => {
+    const response = await apiClient.get<ServiceListResponse>('/services/search/location', { 
+      params,
+      signal: abortSignal 
+    });
+    return response.data;
+  },
+
+  // Get location from IP address
+  getLocationFromIP: async (): Promise<LocationResponse> => {
+    const response = await apiClient.get<LocationResponse>('/services/location/ip');
+    return response.data;
+  },
+
+  // Geocode address to coordinates
+  geocodeAddress: async (address: string): Promise<LocationResponse> => {
+    const response = await apiClient.post<LocationResponse>('/services/location/geocode', { address });
+    return response.data;
+  },
+
+  // Reverse geocode coordinates to address
+  reverseGeocode: async (latitude: number, longitude: number): Promise<LocationResponse> => {
+    const response = await apiClient.post<LocationResponse>('/services/location/reverse-geocode', { 
+      latitude, 
+      longitude 
+    });
     return response.data;
   },
 

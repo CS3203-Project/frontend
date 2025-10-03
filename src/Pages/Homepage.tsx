@@ -2,10 +2,12 @@ import ServicesGrid from '../components/ServicesGrid';
 import Orb from '../components/Orb';
 import Footer from '../components/Footer';
 import useServices from '../hooks/useServices';
+import { useLocation } from '../hooks/useLocation';
 import { useEffect, useState, useRef } from 'react';
-import { Search, MapPin, ChevronDown, Globe, Map, Home, X, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Globe, Map, Home, X, Loader2, Sparkles, ArrowRight, Target, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { semanticSearchApi } from '../api/semanticSearchApi';
+import { serviceApi } from '../api/serviceApi';
 import Button from '../components/Button';
 
 type LocationData = {

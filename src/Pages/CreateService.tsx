@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import LocationPicker from '../components/LocationPicker';
 import { serviceApi } from '../api/serviceApi';
 import { categoryApi } from '../api/categoryApi';
 import { userApi } from '../api/userApi';
@@ -9,6 +10,7 @@ import { showSuccessToast, showErrorToast } from '../utils/toastUtils';
 import type { CreateServiceRequest } from '../api/serviceApi';
 import type { Category } from '../api/categoryApi';
 import type { ProviderProfile } from '../api/userApi';
+import type { LocationInfo } from '../services/locationService';
 import { FiUpload, FiX, FiClock, FiEye, FiChevronDown, FiPlus } from 'react-icons/fi';
 import Orb from '../components/Orb';
 
@@ -26,6 +28,8 @@ interface FormData {
   uploadedVideoUrl: string;
   workingTime: WorkingHours;
   isActive: boolean;
+  // Location fields
+  location: LocationInfo & { serviceRadiusKm?: number };
 }
 
 interface FormErrors {
@@ -91,6 +95,7 @@ export default function CreateService() {
     uploadedVideoUrl: '',
     workingTime: defaultWorkingHours,
     isActive: true,
+    location: {}
   });
 
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
@@ -456,6 +461,17 @@ export default function CreateService() {
         videoUrl: videoUrl || undefined,
         workingTime: formatWorkingHoursForAPI(formData.workingTime),
         isActive: formData.isActive,
+        // Location fields (only include if provided)
+        ...(formData.location.latitude && formData.location.longitude && {
+          latitude: formData.location.latitude,
+          longitude: formData.location.longitude,
+          address: formData.location.address,
+          city: formData.location.city,
+          state: formData.location.state,
+          country: formData.location.country,
+          postalCode: formData.location.postalCode,
+          serviceRadiusKm: formData.location.serviceRadiusKm || 10
+        })
       };
 
       console.log('Formatted working time:', formatWorkingHoursForAPI(formData.workingTime));
@@ -535,6 +551,13 @@ export default function CreateService() {
       ...prev,
       video: null,
       uploadedVideoUrl: ''
+    }));
+  };
+
+  const handleLocationChange = (location: LocationInfo & { serviceRadiusKm?: number }) => {
+    setFormData(prev => ({
+      ...prev,
+      location: location
     }));
   };
 
@@ -1114,10 +1137,10 @@ export default function CreateService() {
               </div>
               {formatWorkingHoursForAPI(formData.workingTime).length > 0 && (
                 <div className="mt-6 p-4 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10">
-                  <p className="text-sm font-semibold text-white/90 mb-3 flex items-center">
+                  <div className="text-sm font-semibold text-white/90 mb-3 flex items-center">
                     <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
                     Preview (as saved):
-                  </p>
+                  </div>
                   <div className="text-sm text-white/70 space-y-1">
                     {formatWorkingHoursForAPI(formData.workingTime).map((time, index) => (
                       <div key={index} className="flex items-center">
@@ -1174,6 +1197,38 @@ export default function CreateService() {
                     </div>
                   </div>
                 </label>
+              </div>
+            </div>
+
+            {/* Location Section */}
+            <div className="relative bg-white/5 backdrop-blur-lg p-8 rounded-3xl border border-white/10 shadow-xl group/section">
+              {/* Attractive background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-green-600/5 rounded-3xl"></div>
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center relative z-10">
+                <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-green-400 rounded-full mr-4 shadow-lg shadow-blue-500/30"></div>
+                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Service Location</span>
+                <span className="ml-3 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full border border-blue-400/30">
+                  Optional
+                </span>
+              </h2>
+              
+              <div className="relative z-10">
+                <div className="mb-4">
+                  <p className="text-sm text-white/70 mb-4">
+                    Specify your service location to help customers find services near them. 
+                    If no location is provided, your service will be available everywhere.
+                  </p>
+                </div>
+                
+                <LocationPicker
+                  value={formData.location}
+                  onChange={handleLocationChange}
+                  className="w-full"
+                  disabled={loading || uploading}
+                  required={false}
+                />
               </div>
             </div>
 
