@@ -106,6 +106,30 @@ export interface User {
   isEmailVerified: boolean;
 }
 
+export interface Customer {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  imageUrl?: string;
+  location?: string;
+  address?: string;
+  isEmailVerified: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+  socialmedia: string[];
+  _count: {
+    payments: number;
+    schedules: number;
+    customerReviewsWritten: number;
+    customerReviewsReceived: number;
+    writtenServiceReviews: number;
+  };
+}
+
 export interface Service {
   id: string;
   providerId: string;
@@ -276,23 +300,6 @@ export const adminApi = {
     return localStorage.getItem('adminToken');
   },
 
-  // Get pending service providers for approval
-  getPendingProviders: async (): Promise<ApiResponse<PendingProvider[]>> => {
-    try {
-      const response = await apiClient.get<ApiResponse<PendingProvider[]>>('/admin/providers/pending');
-      return response.data;
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string } } };
-        throw new Error(axiosError.response?.data?.message || 'Failed to fetch pending providers');
-      } else if (error && typeof error === 'object' && 'request' in error) {
-        throw new Error('Network error. Please check your connection.');
-      } else {
-        throw new Error('An unexpected error occurred');
-      }
-    }
-  },
-
   // Update service provider verification status
   updateProviderVerification: async (providerId: string, isVerified: boolean): Promise<ApiResponse<ServiceProvider>> => {
     try {
@@ -379,6 +386,8 @@ export const adminApi = {
     }
   },
 
+
+
   // Get total customer count
   getCustomerCount: async (): Promise<ApiResponse<{ count: number }>> => {
     try {
@@ -388,6 +397,28 @@ export const adminApi = {
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response?: { data?: { message?: string } } };
         throw new Error(axiosError.response?.data?.message || 'Failed to fetch customer count');
+      } else if (error && typeof error === 'object' && 'request' in error) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Get all customers
+  getAllCustomers: async (params?: {
+    skip?: number;
+    take?: number;
+    search?: string;
+    isActive?: boolean;
+  }): Promise<ApiResponse<Customer[]> & { count?: number }> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Customer[]> & { count?: number }>('/admin/customers', { params });
+      return response.data;
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        throw new Error(axiosError.response?.data?.message || 'Failed to fetch customers');
       } else if (error && typeof error === 'object' && 'request' in error) {
         throw new Error('Network error. Please check your connection.');
       } else {
