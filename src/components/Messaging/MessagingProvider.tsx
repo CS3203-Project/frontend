@@ -120,7 +120,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       
       // Load messages for this conversation
       const messagesData = await messagingApi.getMessages(conversation.id, 1, 20);
-      setMessages(messagesData.data.reverse()); // Reverse to show newest at bottom
+      setMessages(messagesData.data); // Keep original order - oldest first, newest last
       setHasMoreMessages(messagesData.totalPages > 1);
       
       // Mark conversation as read if there are unread messages
@@ -196,7 +196,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
         });
         
         // Note: The actual message will be added to the UI when we receive the 'message:sent' confirmation
-        // or when the backend broadcasts it back to us
+        // No need to optimistically add here since we handle it in the sent confirmation
       } else {
         console.log('📤 Sending message via REST API (WebSocket not connected)');
         // Fallback to REST API
@@ -350,8 +350,8 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       const nextPage = messagesPage + 1;
       const messagesData = await messagingApi.getMessages(activeConversation.id, nextPage, 20);
       
-      // Prepend older messages
-      setMessages(prev => [...messagesData.data.reverse(), ...prev]);
+      // Prepend older messages (they go above current messages)
+      setMessages(prev => [...messagesData.data, ...prev]);
       setMessagesPage(nextPage);
       setHasMoreMessages(nextPage < messagesData.totalPages);
       
@@ -366,9 +366,16 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
   useEffect(() => {
     if (!webSocket.socket) return;
 
-    // Handle incoming messages
+    // Handle incoming messages (from other users only)
     const handleMessageReceived = (messageData: MessageResponse) => {
       console.log('📥 Received real-time message:', messageData);
+      
+      // Only handle messages from other users (not our own messages)
+      if (messageData.fromId === userId) {
+        console.log('Ignoring own message in received handler');
+        return;
+      }
+      
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
@@ -388,13 +395,20 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
             : conv
         )
       );
-      // Update unread count
+      // Update unread count only for messages from others
       loadUnreadCount();
     };
 
-    // Handle message sent confirmation
+    // Handle message sent confirmation (our own messages only)
     const handleMessageSent = (messageData: MessageResponse) => {
       console.log('📤 Message sent confirmation:', messageData);
+      
+      // Only handle our own messages in sent confirmation
+      if (messageData.fromId !== userId) {
+        console.log('Ignoring other user message in sent handler');
+        return;
+      }
+      
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
@@ -520,7 +534,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       webSocket.off('user:online', handleUserOnline);
       webSocket.off('user:offline', handleUserOffline);
     };
-  }, [webSocket.socket, activeConversation]);
+  }, [webSocket.socket, activeConversation?.id, userId]); // Only depend on essential values that affect the handlers
 
   // Request online users periodically when connected
   useEffect(() => {
@@ -546,10 +560,11 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
   // Ensure user joins and enters conversation on connect or when activeConversation changes
   useEffect(() => {
     if (webSocket.isConnected && userId && activeConversation?.id) {
+      console.log('🔌 Joining user and entering conversation:', userId, activeConversation.id);
       webSocket.emit('user:join', { userId });
       webSocket.emit('conversation:enter', { userId, conversationId: activeConversation.id });
     }
-  }, [webSocket.isConnected, userId, activeConversation]);
+  }, [webSocket.isConnected, userId, activeConversation?.id]); // Only depend on essential identifiers
 
   // Cleanup: Leave conversation when component unmounts or user changes
   useEffect(() => {

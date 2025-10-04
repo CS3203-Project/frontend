@@ -246,19 +246,19 @@ const ConversationViewInner: React.FC<{
               </div>
             ) : activeConversation ? (
               <>
-                {/* Left Side - Message Thread (Better proportioned) */}
-                <div className="flex-1 min-w-0 flex flex-col overflow-hidden border-r border-white/20 relative z-10">
-                  <MessageThread />
-                </div>
-                
-                {/* Right Side - Confirmation Panel (Fixed width) */}
-                <div className="w-80 xl:w-96 flex-shrink-0 flex flex-col bg-gradient-to-b from-white/5 to-white/10 backdrop-blur-sm relative z-10">
+                {/* Left Side - Confirmation Panel (Fixed width) */}
+                <div className="w-80 xl:w-96 flex-shrink-0 flex flex-col bg-gradient-to-b from-white/5 to-white/10 backdrop-blur-sm relative z-10 border-r border-white/20">
                   <ConfirmationPanel
                     key={activeConversation.id}
                     conversationId={activeConversation.id}
                     currentUserRole={currentUserRole as 'USER' | 'PROVIDER'}
                     onReviewClick={handleReviewClick}
                   />
+                </div>
+                
+                {/* Right Side - Message Thread (Better proportioned) */}
+                <div className="flex-1 min-w-0 flex flex-col overflow-hidden relative z-10">
+                  <MessageThread />
                 </div>
               </>
             ) : (
