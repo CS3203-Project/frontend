@@ -2,25 +2,12 @@ import ServicesGrid from '../components/ServicesGrid';
 import Orb from '../components/Orb';
 import Footer from '../components/Footer';
 import useServices from '../hooks/useServices';
-import { useLocation } from '../hooks/useLocation';
-import { useEffect, useState, useRef } from 'react';
-import { Search, MapPin, ChevronDown, Globe, Map, Home, X, Loader2, Sparkles, ArrowRight, Target, Navigation } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { semanticSearchApi } from '../api/semanticSearchApi';
-import { serviceApi } from '../api/serviceApi';
+import { hybridSearchApi, type LocationParams } from '../api/hybridSearchApi';
+import LocationPickerAdvanced from '../components/LocationPickerAdvanced';
 import Button from '../components/Button';
-
-type LocationData = {
-  [country: string]: {
-    [province: string]: string[];
-  };
-};
-
-type Location = {
-  country: string;
-  province: string;
-  city: string;
-};
 
 export default function Homepage() {
   const { services, loading, error, refetch } = useServices({
@@ -29,73 +16,56 @@ export default function Homepage() {
   });
 
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedLocation, setSelectedLocation] = useState<Location>({
-    country: 'Sri Lanka',
-    province: 'All States',
-    city: 'All Cities',
-  });
-  const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
-  const [locationStep, setLocationStep] = useState<'country' | 'province' | 'city'>('country');
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [locationFilter, setLocationFilter] = useState<LocationParams | null>(null);
   const navigate = useNavigate();
 
-  const locationData: LocationData = {
-    'Sri Lanka': {
-        'Colombo': ['Colombo', 'Dehiwala-Mount Lavinia', 'Moratuwa', 'Kotte', 'Homagama', 'Kesbewa', 'Maharagama', 'Kolonnawa', 'Kaduwela', 'Ratmalana'],
-        'Gampaha': ['Negombo', 'Gampaha', 'Katunayake', 'Ja-Ela', 'Wattala', 'Kelaniya', 'Minuwangoda', 'Divulapitiya', 'Dompe', 'Attanagalla'],
-        'Kalutara': ['Kalutara', 'Panadura', 'Beruwala', 'Horana', 'Matugama', 'Agalawatta', 'Bandaragama', 'Bulathsinhala', 'Ingiriya', 'Millaniya'],
-        'Kandy': ['Kandy', 'Gampola', 'Nawalapitiya', 'Akurana', 'Peradeniya', 'Katugastota', 'Pilimathalawa', 'Wattegama', 'Galagedara', 'Ududumbara'],
-        'Matale': ['Matale', 'Dambulla', 'Galewela', 'Ukuwela', 'Rattota', 'Naula', 'Pallepola', 'Yatawatta', 'Ambanganga Korale', 'Wilgamuwa'],
-        'Nuwara Eliya': ['Nuwara Eliya', 'Hatton', 'Talawakele', 'Kotagala', 'Ragala', 'Watawala', 'Maskeliya', 'Lindula', 'Ambewela', 'Pundaluoya'],
-        'Galle': ['Galle', 'Hikkaduwa', 'Ambalangoda', 'Baddegama', 'Elpitiya', 'Karandeniya', 'Bentota', 'Balapitiya', 'Ahungalla', 'Wakwella'],
-        'Matara': ['Matara', 'Weligama', 'Hakmana', 'Akurassa', 'Kamburupitiya', 'Deniyaya', 'Devinuwara', 'Dickwella', 'Thihagoda', 'Mulatiyana'],
-        'Hambantota': ['Hambantota', 'Tangalle', 'Tissamaharama', 'Ambalantota', 'Beliatta', 'Weeraketiya', 'Walasmulla', 'Sooriyawewa', 'Katuwana', 'Lunugamvehera'],
-        'All Districts': ['All Towns']
-    }
-  };
-
-  const countries: string[] = Object.keys(locationData);
-  const provinces: string[] = locationData[selectedLocation.country] ? Object.keys(locationData[selectedLocation.country]) : [];
-  const cities: string[] = locationData[selectedLocation.country] && locationData[selectedLocation.country][selectedLocation.province]
-    ? locationData[selectedLocation.country][selectedLocation.province]
-    : [];
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Homepage - Services state:', { services, loading, error });
-  }, [services, loading, error]);
-
-  const handleSearch = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    doSearch();
-  };
+  const popularSearches: string[] = [
+    'Web Development',
+    'Graphic Design', 
+    'Content Writing',
+    'Digital Marketing',
+    'Photography',
+    'Video Editing'
+  ];
 
   const doSearch = async () => {
-    if (!searchQuery.trim()) {
-      console.log('Empty search query');
+    const hasQuery = searchQuery.trim().length > 0;
+    const hasLocation = locationFilter?.latitude && locationFilter?.longitude;
+
+    // Allow search with just query OR just location OR both
+    if (!hasQuery && !hasLocation) {
+      console.log('No search query or location provided - redirecting to browse');
+      navigate('/services');
       return;
     }
 
     try {
       setIsSearching(true);
-      console.log('🔍 Performing semantic search for:', searchQuery, 'in', selectedLocation);
+      console.log('🔍 Performing hybrid search for:', searchQuery, 'with location:', locationFilter);
       
-      const response = await semanticSearchApi.searchServices({
-        query: searchQuery.trim(),
-        threshold: 0.4, // Lower threshold for broader results
-        limit: 20
+      const response = await hybridSearchApi.searchServices({
+        query: hasQuery ? searchQuery.trim() : undefined,
+        location: hasLocation ? locationFilter : undefined,
+        threshold: 0.4,
+        limit: 20,
+        includeWithoutLocation: true
       });
 
       if (response.success) {
         console.log('✅ Search results:', response.data);
         
-        // Navigate to search results page with results
-        navigate('/services/search', { 
+        // Navigate to enhanced search results page
+        navigate('/search-results-enhanced', { 
           state: { 
             results: response.data.results, 
-            query: searchQuery.trim(),
-            location: selectedLocation,
-            searchType: 'semantic'
+            query: hasQuery ? searchQuery.trim() : undefined,
+            location: hasLocation ? {
+              latitude: locationFilter.latitude,
+              longitude: locationFilter.longitude,
+              radius: locationFilter.radius || 10
+            } : undefined,
+            searchType: response.data.searchType
           } 
         });
       } else {
@@ -103,68 +73,17 @@ export default function Homepage() {
         alert('Search failed. Please try again.');
       }
     } catch (error) {
-      console.error('❌ Semantic search error:', error);
-      alert('Search failed. Please check your connection and try again.');
+      console.error('❌ Search error:', error);
+      alert('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
     }
   };
 
-  const openLocationModal = (): void => {
-    setShowLocationModal(true);
-    setLocationStep('country');
+  const handleSearch = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    doSearch();
   };
-
-  const closeLocationModal = (): void => {
-    setShowLocationModal(false);
-    setLocationStep('country');
-  };
-
-  const handleCountrySelect = (country: string): void => {
-    const firstProvince = Object.keys(locationData[country])[0];
-    setSelectedLocation({
-      country: country,
-      province: firstProvince,
-      city: locationData[country][firstProvince][0],
-    });
-    setLocationStep('province');
-  };
-
-  const handleProvinceSelect = (province: string): void => {
-    setSelectedLocation((prev) => ({
-      ...prev,
-      province: province,
-      city: locationData[prev.country][province][0],
-    }));
-    setLocationStep('city');
-  };
-
-  const handleCitySelect = (city: string): void => {
-    setSelectedLocation((prev) => ({
-      ...prev,
-      city: city,
-    }));
-    closeLocationModal();
-  };
-
-  const getLocationDisplayText = (): string => {
-    if (selectedLocation.city === 'All Cities' && selectedLocation.province === 'All States') {
-      return selectedLocation.country;
-    } else if (selectedLocation.city === 'All Cities') {
-      return `${selectedLocation.province}, ${selectedLocation.country}`;
-    } else {
-      return `${selectedLocation.city}, ${selectedLocation.province}`;
-    }
-  };
-
-  const popularSearches: string[] = [
-    "House Cleaning",
-    "Tutoring", 
-    "Plumbing",
-    "Web Design",
-    "Photography",
-    "Personal Trainer"
-  ];
 
   return (
     <div>
@@ -233,18 +152,18 @@ export default function Homepage() {
                     />
                   </div>
 
-                  {/* Location Selector Button */}
-                  <div className="relative">
-                    <button
-                      onClick={openLocationModal}
-                      className="flex items-center justify-between w-full sm:w-56 px-4 py-4 text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20 font-medium"
-                    >
-                      <div className="flex items-center">
-                        <MapPin className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="truncate">{getLocationDisplayText()}</span>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-gray-400 ml-2" />
-                    </button>
+                  {/* Location Picker Component */}
+                  <div className="relative w-full sm:w-56">
+                    <LocationPickerAdvanced
+                      value={locationFilter || undefined}
+                      onChange={setLocationFilter}
+                      placeholder="Set location..."
+                      showRadius={true}
+                      defaultRadius={10}
+                      maxRadius={50}
+                      autoDetect={false}
+                      className="w-full"
+                    />
                   </div>
 
                   {/* Search Button */}
@@ -261,7 +180,7 @@ export default function Homepage() {
                     ) : (
                       <>
                         <Search className="mr-2 h-5 w-5" />
-                        Search
+                        {searchQuery.trim() || locationFilter ? 'Search' : 'Browse'}
                       </>
                     )}
                   </Button>
@@ -275,7 +194,18 @@ export default function Homepage() {
                   {popularSearches.map((search, index) => (
                     <button
                       key={index}
-                      onClick={() => setSearchQuery(search)}
+                      onClick={() => {
+                        setSearchQuery(search);
+                        // Auto-search after a short delay to allow state to update
+                        setTimeout(() => {
+                          const hasQuery = search.trim().length > 0;
+                          const hasLocation = locationFilter?.latitude && locationFilter?.longitude;
+                          
+                          if (hasQuery || hasLocation) {
+                            doSearch();
+                          }
+                        }, 100);
+                      }}
                       className="px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white text-sm rounded-full hover:bg-white/20 transition-all duration-200 border border-white/20 hover:border-white/40"
                     >
                       {search}
@@ -489,191 +419,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* Location Selection Modal */}
-      {showLocationModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">
-                {locationStep === 'country' && 'Select Country'}
-                {locationStep === 'province' && 'Select State/Province'}
-                {locationStep === 'city' && 'Select City'}
-              </h3>
-              <button
-                onClick={closeLocationModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Close location modal"
-                title="Close"
-              >
-                <X className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 max-h-96 overflow-y-auto">
-              {/* Country Selection */}
-              {locationStep === 'country' && (
-                <div className="space-y-2">
-                  {countries.map((country, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCountrySelect(country)}
-                      className="w-full flex items-center p-3 text-left hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200"
-                    >
-                      <Globe className="h-5 w-5 text-gray-400 mr-3" />
-                      <span className="font-medium text-gray-900">{country}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Province/State Selection */}
-              {locationStep === 'province' && (
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setLocationStep('country')}
-                    className="flex items-center text-blue-600 hover:text-blue-700 mb-4 font-medium"
-                  >
-                    <ChevronDown className="h-4 w-4 rotate-90 mr-1" />
-                    Back to Countries
-                  </button>
-                  {provinces.map((province, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleProvinceSelect(province)}
-                      className="w-full flex items-center p-3 text-left hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200"
-                    >
-                      <Map className="h-5 w-5 text-gray-400 mr-3" />
-                      <span className="font-medium text-gray-900">{province}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* City Selection */}
-              {locationStep === 'city' && (
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setLocationStep('province')}
-                    className="flex items-center text-blue-600 hover:text-blue-700 mb-4 font-medium"
-                  >
-                    <ChevronDown className="h-4 w-4 rotate-90 mr-1" />
-                    Back to States/Provinces
-                  </button>
-                  {cities.map((city, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCitySelect(city)}
-                      className="w-full flex items-center p-3 text-left hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200"
-                    >
-                      <Home className="h-5 w-5 text-gray-400 mr-3" />
-                      <span className="font-medium text-gray-900">{city}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Use Current Location Option */}
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <Button className="w-full flex items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium">
-                <MapPin className="h-5 w-5 mr-2" />
-                Use Current Location
-              </Button>
-              <p className="text-xs text-gray-500 text-center mt-2">
-                We'll detect your location automatically
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Call to Action Section for Service Providers */}
-      <section className="relative py-20 bg-gradient-to-br from-purple-900 via-black to-gray-900 overflow-hidden">
-        {/* Background Orb */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 opacity-20">
-          <div className="w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-8">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 text-purple-300 text-sm font-medium mb-6">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Join Our Provider Network
-            </div>
-            
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Turn Your Skills Into
-              <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                Income?
-              </span>
-            </h2>
-            
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Join thousands of professionals already earning on our platform. Set your own rates, 
-              work flexible hours, and build your reputation.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="p-3 bg-green-600/20 rounded-xl w-fit mx-auto mb-4">
-                <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Earn More</h3>
-              <p className="text-gray-400 text-sm">Set competitive rates and increase your income potential</p>
-            </div>
-            
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="p-3 bg-blue-600/20 rounded-xl w-fit mx-auto mb-4">
-                <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Stay Protected</h3>
-              <p className="text-gray-400 text-sm">Secure payments and verified customer base</p>
-            </div>
-            
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="p-3 bg-purple-600/20 rounded-xl w-fit mx-auto mb-4">
-                <svg className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Grow Fast</h3>
-              <p className="text-gray-400 text-sm">Build your reputation and expand your client base</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <Button
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-              onClick={() => navigate('/become-provider')}
-            >
-              <span className="flex items-center">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Become a Provider
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg"
-              onClick={() => navigate('/services')}
-            >
-              Browse Services
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
       <Footer />
     </div>
   );
 }
-

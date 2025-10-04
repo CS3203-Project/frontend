@@ -680,7 +680,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
 
   return (
     <Link
-      to={`/services/category/${category.slug}`}
+      to={`/services/${category.slug}`}
       className={`group block transform transition-all duration-300 hover:scale-105 ${
         viewMode === 'list' ? 'p-4' : ''
       }`}

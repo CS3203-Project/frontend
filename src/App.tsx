@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import { Chatbot } from './components/Chatbot';
 import Homepage from './Pages/Homepage.js'
+import HomepageEnhanced from './Pages/HomepageEnhanced';
 import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
@@ -44,7 +45,8 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Homepage />} />
+            <Route path="/" element={<HomepageEnhanced />} />
+            <Route path="/homepage-original" element={<Homepage />} />
             <Route path="/support" element={<Support />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/stories" element={<SucessStories />} />
