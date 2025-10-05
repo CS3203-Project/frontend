@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext';
+import { LoaderProvider } from './components/LoaderContext';
 import Layout from './components/Layout';
 import { Chatbot } from './components/Chatbot';
 import Homepage from './Pages/Homepage.js'
@@ -42,9 +43,10 @@ import AnalyticsDashboard from "./Pages/AnalyticsDashboard.tsx";
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
+      <LoaderProvider>
+        <Router>
+          <Layout>
+            <Routes>
             <Route path="/" element={<HomepageEnhanced />} />
             <Route path="/homepage-original" element={<Homepage />} />
             <Route path="/support" element={<Support />} />
@@ -87,6 +89,7 @@ function App() {
           <Chatbot />
         </Layout>
       </Router>
+      </LoaderProvider>
     </AuthProvider>
   )
 }

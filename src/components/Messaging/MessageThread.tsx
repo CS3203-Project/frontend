@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Clock, Circle, Wifi } from 'lucide-react';
 import { useMessaging } from './MessagingProvider';
-import { userApi } from '../../api/userApi';
+import { userApi, type UserProfile } from '../../api/userApi';
 import type { MessageResponse } from '../../api/messagingApi';
-import type { UserProfile } from '../../api/userApi';
+import Loader from '../Loader';
 
 interface MessageThreadProps {
   className?: string;
@@ -253,17 +254,19 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
       >
         {loading && messages.length === 0 && (
           <div className="text-center py-8">
-            <div className="text-green-400 font-mono text-sm mb-2">
+            <div className="text-green-400 font-mono text-sm mb-4">
               $ Initializing connection...
             </div>
-            <div className="animate-pulse text-green-400 font-mono text-xs">
+            <Loader size="md" variant="accent" />
+            <div className="animate-pulse text-green-400 font-mono text-xs mt-4">
               ████████████████████████████████
             </div>
           </div>
         )}
 
         {loading && messages.length > 0 && (
-          <div className="text-green-400 font-mono text-xs py-2">
+          <div className="text-green-400 font-mono text-xs py-2 flex items-center justify-center space-x-2">
+            <Loader size="sm" variant="accent" />
             <span className="animate-pulse">$ Loading previous messages...</span>
           </div>
         )}

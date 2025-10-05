@@ -5,6 +5,7 @@ import { userApi } from '../../api/userApi';
 import type { ConversationWithLastMessage, MessageResponse } from '../../api/messagingApi';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLoader } from '../LoaderContext';
 
 interface MessagingContextType {
   conversations: ConversationWithLastMessage[];

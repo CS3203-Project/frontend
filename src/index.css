@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Import custom loader styles */
+@import "./components/Loader.css";
+
 /* CSS Custom Properties for Dark Theme */
 :root {
   /* Dark color palette */
