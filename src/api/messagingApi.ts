@@ -177,7 +177,8 @@ export const messagingApi = {
   },
 
   async getMessages(conversationId: string, page = 1, limit = 20): Promise<PaginatedResponse<MessageResponse>> {
-    const response = await fetch(`${BASE_URL}/messages?conversationId=${conversationId}&page=${page}&limit=${limit}`);
+    // Add ordering parameter to fetch newest messages first (reverse chronological)
+    const response = await fetch(`${BASE_URL}/messages?conversationId=${conversationId}&page=${page}&limit=${limit}&order=desc`);
     if (!response.ok) throw new Error('Failed to get messages');
     return response.json();
   },

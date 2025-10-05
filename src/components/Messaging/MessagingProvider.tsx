@@ -6,6 +6,7 @@ import type { ConversationWithLastMessage, MessageResponse } from '../../api/mes
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLoader } from '../LoaderContext';
+import { sortMessagesByTimestamp, insertMessageInOrder, mergeMessagesInOrder, debugMessageOrder } from '../../utils/messageOrdering';
 
 interface MessagingContextType {
   conversations: ConversationWithLastMessage[];
@@ -119,9 +120,15 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
         });
       }
       
-      // Load messages for this conversation
+      // Load messages for this conversation - Get NEWEST messages first
       const messagesData = await messagingApi.getMessages(conversation.id, 1, 20);
-      setMessages(messagesData.data); // Keep original order - oldest first, newest last
+      
+      // CRITICAL FIX: Since backend now returns newest first, reverse to get chronological order
+      // Backend returns: [newest...oldest], we need: [oldest...newest] for UI display
+      const orderedMessages = sortMessagesByTimestamp(messagesData.data);
+      debugMessageOrder(orderedMessages, 'Initial Load - Latest Messages');
+      
+      setMessages(orderedMessages);
       setHasMoreMessages(messagesData.totalPages > 1);
       
       // Mark conversation as read if there are unread messages
@@ -207,8 +214,14 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
           toId: recipientId,
           conversationId: activeConversation.id,
         });
-        // Add message to current messages
-        setMessages(prev => [...prev, newMessage]);
+        
+        // CRITICAL FIX: Use utility function to maintain chronological order
+        setMessages(prev => {
+          const updatedMessages = insertMessageInOrder(prev, newMessage);
+          debugMessageOrder(updatedMessages, 'REST API Send');
+          return updatedMessages;
+        });
+        
         // Update the conversation's last message
         setConversations(prev => 
           prev.map(conv => 
@@ -349,10 +362,22 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     try {
       setLoading(true);
       const nextPage = messagesPage + 1;
+      
+      // Fetch older messages (next page in reverse chronological order)
       const messagesData = await messagingApi.getMessages(activeConversation.id, nextPage, 20);
       
-      // Prepend older messages (they go above current messages)
-      setMessages(prev => [...messagesData.data, ...prev]);
+      // CRITICAL FIX: Backend returns newer-to-older, we need chronological order
+      const orderedNewMessages = sortMessagesByTimestamp(messagesData.data);
+      
+      // Use utility function to merge OLDER messages with current messages
+      setMessages(prev => {
+        // Since we're loading OLDER messages, they should come BEFORE current messages
+        const mergedMessages = [...orderedNewMessages, ...prev];
+        const finalOrdered = sortMessagesByTimestamp(mergedMessages);
+        debugMessageOrder(finalOrdered, `Load More Messages - Page ${nextPage}`);
+        return finalOrdered;
+      });
+      
       setMessagesPage(nextPage);
       setHasMoreMessages(nextPage < messagesData.totalPages);
       
@@ -380,12 +405,10 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
-          // Check if message already exists to avoid duplicates
-          const existsIndex = prev.findIndex(msg => msg.id === messageData.id);
-          if (existsIndex === -1) {
-            return [...prev, messageData];
-          }
-          return prev;
+          // CRITICAL FIX: Use utility function to maintain chronological order
+          const updatedMessages = insertMessageInOrder(prev, messageData);
+          debugMessageOrder(updatedMessages, 'Message Received');
+          return updatedMessages;
         });
       }
       // Update conversations list with new last message
@@ -413,12 +436,10 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
-          // Check if message already exists to avoid duplicates
-          const existsIndex = prev.findIndex(msg => msg.id === messageData.id);
-          if (existsIndex === -1) {
-            return [...prev, messageData];
-          }
-          return prev;
+          // CRITICAL FIX: Use utility function to maintain chronological order
+          const updatedMessages = insertMessageInOrder(prev, messageData);
+          debugMessageOrder(updatedMessages, 'Message Sent');
+          return updatedMessages;
         });
       }
       // Update conversations list with new last message

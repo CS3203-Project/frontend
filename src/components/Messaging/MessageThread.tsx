@@ -31,16 +31,18 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
 
   // Scroll to bottom when new messages arrive or when conversation changes
   useEffect(() => {
-    if (messagesEndRef.current) {
-      // Always scroll to bottom for new messages (WhatsApp behavior)
-      requestAnimationFrame(() => {
+    if (messagesEndRef.current && messages.length > 0) {
+      // Add a small delay to ensure messages are fully rendered and ordered
+      const scrollTimeout = setTimeout(() => {
         if (messagesEndRef.current) {
           messagesEndRef.current.scrollIntoView({ 
             behavior: 'smooth',
             block: 'end'
           });
         }
-      });
+      }, 100); // 100ms delay to ensure DOM is updated
+      
+      return () => clearTimeout(scrollTimeout);
     }
   }, [messages.length, activeConversation?.id]); // Depend on message count and conversation change
 
