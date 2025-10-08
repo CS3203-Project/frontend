@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Star, DollarSign, ArrowRight, Play, MessageCircle, Heart, Award, Headphones, Sparkles, TrendingUp, Users, CheckCircle } from 'lucide-react'
+import { Star, DollarSign, ArrowRight, Play, MessageCircle, Heart, Award, Headphones, Sparkles, Users, CheckCircle } from 'lucide-react'
 import Button from '../components/Button'
 
 export default function SuccessStories() {

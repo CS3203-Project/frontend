@@ -5,6 +5,8 @@ import { userApi } from '../../api/userApi';
 import type { ConversationWithLastMessage, MessageResponse } from '../../api/messagingApi';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLoader } from '../LoaderContext';
+import { sortMessagesByTimestamp, insertMessageInOrder, mergeMessagesInOrder, debugMessageOrder } from '../../utils/messageOrdering';
 
 interface MessagingContextType {
   conversations: ConversationWithLastMessage[];
@@ -118,9 +120,15 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
         });
       }
       
-      // Load messages for this conversation
+      // Load messages for this conversation - Get NEWEST messages first
       const messagesData = await messagingApi.getMessages(conversation.id, 1, 20);
-      setMessages(messagesData.data.reverse()); // Reverse to show newest at bottom
+      
+      // CRITICAL FIX: Since backend now returns newest first, reverse to get chronological order
+      // Backend returns: [newest...oldest], we need: [oldest...newest] for UI display
+      const orderedMessages = sortMessagesByTimestamp(messagesData.data);
+      debugMessageOrder(orderedMessages, 'Initial Load - Latest Messages');
+      
+      setMessages(orderedMessages);
       setHasMoreMessages(messagesData.totalPages > 1);
       
       // Mark conversation as read if there are unread messages
@@ -196,7 +204,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
         });
         
         // Note: The actual message will be added to the UI when we receive the 'message:sent' confirmation
-        // or when the backend broadcasts it back to us
+        // No need to optimistically add here since we handle it in the sent confirmation
       } else {
         console.log('📤 Sending message via REST API (WebSocket not connected)');
         // Fallback to REST API
@@ -206,8 +214,14 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
           toId: recipientId,
           conversationId: activeConversation.id,
         });
-        // Add message to current messages
-        setMessages(prev => [...prev, newMessage]);
+        
+        // CRITICAL FIX: Use utility function to maintain chronological order
+        setMessages(prev => {
+          const updatedMessages = insertMessageInOrder(prev, newMessage);
+          debugMessageOrder(updatedMessages, 'REST API Send');
+          return updatedMessages;
+        });
+        
         // Update the conversation's last message
         setConversations(prev => 
           prev.map(conv => 
@@ -348,10 +362,22 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
     try {
       setLoading(true);
       const nextPage = messagesPage + 1;
+      
+      // Fetch older messages (next page in reverse chronological order)
       const messagesData = await messagingApi.getMessages(activeConversation.id, nextPage, 20);
       
-      // Prepend older messages
-      setMessages(prev => [...messagesData.data.reverse(), ...prev]);
+      // CRITICAL FIX: Backend returns newer-to-older, we need chronological order
+      const orderedNewMessages = sortMessagesByTimestamp(messagesData.data);
+      
+      // Use utility function to merge OLDER messages with current messages
+      setMessages(prev => {
+        // Since we're loading OLDER messages, they should come BEFORE current messages
+        const mergedMessages = [...orderedNewMessages, ...prev];
+        const finalOrdered = sortMessagesByTimestamp(mergedMessages);
+        debugMessageOrder(finalOrdered, `Load More Messages - Page ${nextPage}`);
+        return finalOrdered;
+      });
+      
       setMessagesPage(nextPage);
       setHasMoreMessages(nextPage < messagesData.totalPages);
       
@@ -366,18 +392,23 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
   useEffect(() => {
     if (!webSocket.socket) return;
 
-    // Handle incoming messages
+    // Handle incoming messages (from other users only)
     const handleMessageReceived = (messageData: MessageResponse) => {
       console.log('📥 Received real-time message:', messageData);
+      
+      // Only handle messages from other users (not our own messages)
+      if (messageData.fromId === userId) {
+        console.log('Ignoring own message in received handler');
+        return;
+      }
+      
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
-          // Check if message already exists to avoid duplicates
-          const existsIndex = prev.findIndex(msg => msg.id === messageData.id);
-          if (existsIndex === -1) {
-            return [...prev, messageData];
-          }
-          return prev;
+          // CRITICAL FIX: Use utility function to maintain chronological order
+          const updatedMessages = insertMessageInOrder(prev, messageData);
+          debugMessageOrder(updatedMessages, 'Message Received');
+          return updatedMessages;
         });
       }
       // Update conversations list with new last message
@@ -388,22 +419,27 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
             : conv
         )
       );
-      // Update unread count
+      // Update unread count only for messages from others
       loadUnreadCount();
     };
 
-    // Handle message sent confirmation
+    // Handle message sent confirmation (our own messages only)
     const handleMessageSent = (messageData: MessageResponse) => {
       console.log('📤 Message sent confirmation:', messageData);
+      
+      // Only handle our own messages in sent confirmation
+      if (messageData.fromId !== userId) {
+        console.log('Ignoring other user message in sent handler');
+        return;
+      }
+      
       // Add message to current conversation if it matches active conversation
       if (activeConversation && messageData.conversationId === activeConversation.id) {
         setMessages(prev => {
-          // Check if message already exists to avoid duplicates
-          const existsIndex = prev.findIndex(msg => msg.id === messageData.id);
-          if (existsIndex === -1) {
-            return [...prev, messageData];
-          }
-          return prev;
+          // CRITICAL FIX: Use utility function to maintain chronological order
+          const updatedMessages = insertMessageInOrder(prev, messageData);
+          debugMessageOrder(updatedMessages, 'Message Sent');
+          return updatedMessages;
         });
       }
       // Update conversations list with new last message
@@ -520,7 +556,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
       webSocket.off('user:online', handleUserOnline);
       webSocket.off('user:offline', handleUserOffline);
     };
-  }, [webSocket.socket, activeConversation]);
+  }, [webSocket.socket, activeConversation?.id, userId]); // Only depend on essential values that affect the handlers
 
   // Request online users periodically when connected
   useEffect(() => {
@@ -546,10 +582,11 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children, 
   // Ensure user joins and enters conversation on connect or when activeConversation changes
   useEffect(() => {
     if (webSocket.isConnected && userId && activeConversation?.id) {
+      console.log('🔌 Joining user and entering conversation:', userId, activeConversation.id);
       webSocket.emit('user:join', { userId });
       webSocket.emit('conversation:enter', { userId, conversationId: activeConversation.id });
     }
-  }, [webSocket.isConnected, userId, activeConversation]);
+  }, [webSocket.isConnected, userId, activeConversation?.id]); // Only depend on essential identifiers
 
   // Cleanup: Leave conversation when component unmounts or user changes
   useEffect(() => {

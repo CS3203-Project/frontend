@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { userApi } from '../api/userApi';
 import { useAuth } from '../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { Mail, Lock, Loader, Eye, EyeOff, Sparkles, ArrowRight, Shield, Star } from 'lucide-react';
+import { Mail, Lock, Loader, Eye, EyeOff, ArrowRight, Shield, Star } from 'lucide-react';
 import Orb from '../components/Orb';
 
 export default function SignIn() {

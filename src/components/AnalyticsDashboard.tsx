@@ -14,7 +14,6 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
-  TrendingUp,
   Users,
   ShoppingBag,
   UserCheck,
@@ -53,9 +52,13 @@ interface AnalyticsData {
   totalServices: number;
   totalActiveServices: number;
   totalVerifiedProviders: number;
+  totalActiveCustomers: number;
+  totalVerifiedCustomers: number;
   servicesByCategory: Array<{ category: string; count: number; percentage: number }>;
   providersByLocation: Array<{ location: string; count: number }>;
+  customersByLocation: Array<{ location: string; count: number }>;
   servicesByStatus: Array<{ status: string; count: number }>;
+  customersByStatus: Array<{ status: string; count: number }>;
   topProviders: Array<{ name: string; services: number; rating: number; location: string }>;
   recentActivity: Array<{ type: string; count: number; date: string }>;
 }
@@ -70,15 +73,17 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
       setLoading(true);
       
       // Fetch data from multiple endpoints
-      const [customersResponse, providersResponse, servicesResponse] = await Promise.all([
+      const [customersResponse, providersResponse, servicesResponse, allCustomersResponse] = await Promise.all([
         adminApi.getCustomerCount(),
         adminApi.getAllServiceProviders(),
-        adminApi.getAllServices()
+        adminApi.getAllServices(),
+        adminApi.getAllCustomers()
       ]);
 
-      if (customersResponse.success && providersResponse.success && servicesResponse.success) {
+      if (customersResponse.success && providersResponse.success && servicesResponse.success && allCustomersResponse.success) {
         const services = servicesResponse.data;
         const providers = providersResponse.data;
+        const customers = allCustomersResponse.data;
         
         // Process services by category
         const categoryMap = new Map<string, number>();
@@ -110,12 +115,35 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
           .sort((a, b) => b.count - a.count)
           .slice(0, 5); // Top 5 locations
 
+        // Process customers by location
+        const customerLocationMap = new Map<string, number>();
+        customers.forEach(customer => {
+          const location = customer.location || 'Unknown';
+          customerLocationMap.set(location, (customerLocationMap.get(location) || 0) + 1);
+        });
+        
+        const customersByLocation = Array.from(customerLocationMap.entries())
+          .map(([location, count]) => ({ location, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5); // Top 5 locations
+
         // Services by status
         const activeServices = services.filter(s => s.isActive).length;
         const inactiveServices = services.length - activeServices;
         const servicesByStatus = [
           { status: 'Active', count: activeServices },
           { status: 'Inactive', count: inactiveServices }
+        ];
+
+        // Customers by status
+        const activeCustomers = customers.filter(c => c.isActive).length;
+        const inactiveCustomers = customers.length - activeCustomers;
+        const verifiedCustomers = customers.filter(c => c.isEmailVerified).length;
+        const customersByStatus = [
+          { status: 'Active', count: activeCustomers },
+          { status: 'Inactive', count: inactiveCustomers },
+          { status: 'Email Verified', count: verifiedCustomers },
+          { status: 'Email Unverified', count: customers.length - verifiedCustomers }
         ];
 
         // Top providers by rating only
@@ -142,6 +170,12 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
             const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
             return created > weekAgo;
+          }).length, date: 'This week' },
+          { type: 'New Customers', count: customers.filter(c => {
+            const created = new Date(c.createdAt);
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return created > weekAgo;
           }).length, date: 'This week' }
         ];
 
@@ -151,9 +185,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
           totalServices: services.length,
           totalActiveServices: activeServices,
           totalVerifiedProviders: providers.filter(p => p.isVerified).length,
+          totalActiveCustomers: activeCustomers,
+          totalVerifiedCustomers: verifiedCustomers,
           servicesByCategory,
           providersByLocation,
+          customersByLocation,
           servicesByStatus,
+          customersByStatus,
           topProviders,
           recentActivity
         };
@@ -227,6 +265,35 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
     ],
   } : { labels: [], datasets: [] };
 
+  const customersByLocationData = data ? {
+    labels: data.customersByLocation.map(item => item.location),
+    datasets: [
+      {
+        label: 'Customers',
+        data: data.customersByLocation.map(item => item.count),
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: 'rgba(16, 185, 129, 1)',
+        borderWidth: 1,
+      },
+    ],
+  } : { labels: [], datasets: [] };
+
+  const customersByStatusData = data ? {
+    labels: data.customersByStatus.map(item => item.status),
+    datasets: [
+      {
+        data: data.customersByStatus.map(item => item.count),
+        backgroundColor: [
+          '#10B981', // Green for Active
+          '#EF4444', // Red for Inactive
+          '#3B82F6', // Blue for Email Verified
+          '#F59E0B', // Orange for Email Unverified
+        ],
+        borderWidth: 0,
+      },
+    ],
+  } : { labels: [], datasets: [] };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden">
@@ -265,7 +332,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
         <div className="p-6 overflow-y-auto max-h-[calc(95vh-100px)]">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           ) : data ? (
             <div className="space-y-6">
@@ -276,7 +343,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
                     <div>
                       <p className="text-sm font-medium text-blue-600">Total Customers</p>
                       <p className="text-3xl font-bold text-blue-900">{data.totalUsers.toLocaleString()}</p>
-                      <p className="text-sm text-blue-700 mt-1">Registered users</p>
+                      <p className="text-sm text-blue-700 mt-1">
+                        {data.totalActiveCustomers} active
+                      </p>
                     </div>
                     <Users className="w-10 h-10 text-blue-500" />
                   </div>
@@ -308,16 +377,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+                <div className="bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-xl p-6 border border-cyan-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-orange-600">Verification Rate</p>
-                      <p className="text-3xl font-bold text-orange-900">
-                        {data.totalProviders > 0 ? Math.round((data.totalVerifiedProviders / data.totalProviders) * 100) : 0}%
+                      <p className="text-sm font-medium text-cyan-600">Verified Customers</p>
+                      <p className="text-3xl font-bold text-cyan-900">{data.totalVerifiedCustomers.toLocaleString()}</p>
+                      <p className="text-sm text-cyan-700 mt-1">
+                        {((data.totalVerifiedCustomers / data.totalUsers) * 100).toFixed(1)}% verified
                       </p>
-                      <p className="text-sm text-orange-700 mt-1">Provider approval rate</p>
                     </div>
-                    <TrendingUp className="w-10 h-10 text-orange-500" />
+                    <UserCheck className="w-10 h-10 text-cyan-500" />
                   </div>
                 </div>
               </div>
@@ -368,6 +437,49 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
                         scales: {
                           y: {
                             beginAtZero: true,
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Customers by Location */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Customers by Location</h3>
+                  <div className="h-80">
+                    <Bar
+                      data={customersByLocationData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Customer Status */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Status</h3>
+                  <div className="h-80">
+                    <Doughnut
+                      data={customersByStatusData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom',
                           },
                         },
                       }}

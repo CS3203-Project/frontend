@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Heart, User } from 'lucide-react';
+import { Star, Heart, User, MapPin } from 'lucide-react';
 import type { Service } from '../../data/servicesData';
 import type { ServiceResponse } from '../../api/serviceApi';
 
@@ -132,6 +132,34 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
             }
           </span>
         </div>
+
+        {/* Location Information */}
+        {(service.city || service.address || (service.latitude && service.longitude)) && (
+          <div className="flex items-center mt-2">
+            <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mr-2 border border-white/20">
+              <MapPin className="w-4 h-4 text-gray-300" />
+            </div>
+            <span className="text-sm text-gray-300 truncate">
+              {service.city && service.state ? 
+                `${service.city}, ${service.state}` : 
+                service.city || 
+                service.address || 
+                (service.latitude && service.longitude ? 
+                  `${service.latitude.toFixed(2)}, ${service.longitude.toFixed(2)}` : 
+                  'Location available'
+                )
+              }
+              {service.distance && (
+                <span className="text-blue-300 ml-1">
+                  • {service.distance < 1 ? 
+                    `${Math.round(service.distance * 1000)}m` : 
+                    `${service.distance.toFixed(1)}km`
+                  } away
+                </span>
+              )}
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center">

@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Clock, Circle, Wifi } from 'lucide-react';
 import { useMessaging } from './MessagingProvider';
-import { userApi } from '../../api/userApi';
+import { userApi, type UserProfile } from '../../api/userApi';
 import type { MessageResponse } from '../../api/messagingApi';
-import type { UserProfile } from '../../api/userApi';
+import Loader from '../Loader';
 
 interface MessageThreadProps {
   className?: string;
@@ -28,12 +29,22 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when new messages arrive
+  // Scroll to bottom when new messages arrive or when conversation changes
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current && messages.length > 0) {
+      // Add a small delay to ensure messages are fully rendered and ordered
+      const scrollTimeout = setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'end'
+          });
+        }
+      }, 100); // 100ms delay to ensure DOM is updated
+      
+      return () => clearTimeout(scrollTimeout);
     }
-  }, [messages]);
+  }, [messages.length, activeConversation?.id]); // Depend on message count and conversation change
 
   // Fetch contact profile when conversation changes
   useEffect(() => {
@@ -158,10 +169,15 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
       groups[dateKey].push(message);
     });
     
-    return Object.entries(groups).map(([date, msgs]) => ({
-      date,
-      messages: msgs
-    }));
+    // Sort groups chronologically - oldest dates first, newest dates last
+    return Object.entries(groups)
+      .map(([date, msgs]) => ({
+        date,
+        messages: msgs,
+        sortKey: new Date(date).getTime() // Add sort key for chronological ordering
+      }))
+      .sort((a, b) => a.sortKey - b.sortKey) // Sort by date ascending (oldest first)
+      .map(({ date, messages }) => ({ date, messages })); // Remove sort key from final result
   };
 
   if (!activeConversation) {
@@ -229,10 +245,10 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
         </div>
       </div>
 
-      {/* Messages - Terminal Style */}
+      {/* Messages - Terminal Style with Message Bubbles */}
       <div 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-1 bg-gray-900"
+        className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"
         style={{ 
           scrollbarWidth: 'thin',
           scrollbarColor: '#4B5563 #1F2937'
@@ -240,23 +256,25 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
       >
         {loading && messages.length === 0 && (
           <div className="text-center py-8">
-            <div className="text-green-400 font-mono text-sm mb-2">
+            <div className="text-green-400 font-mono text-sm mb-4">
               $ Initializing connection...
             </div>
-            <div className="animate-pulse text-green-400 font-mono text-xs">
+            <Loader size="md" variant="accent" />
+            <div className="animate-pulse text-green-400 font-mono text-xs mt-4">
               ████████████████████████████████
             </div>
           </div>
         )}
 
         {loading && messages.length > 0 && (
-          <div className="text-green-400 font-mono text-xs py-2">
+          <div className="text-green-400 font-mono text-xs py-2 flex items-center justify-center space-x-2">
+            <Loader size="sm" variant="accent" />
             <span className="animate-pulse">$ Loading previous messages...</span>
           </div>
         )}
 
         {messageGroups.map(({ date, messages: groupMessages }) => (
-          <div key={date} className="space-y-1">
+          <div key={date} className="space-y-3">
             {/* Date separator - Terminal style */}
             <div className="flex items-center justify-center py-2">
               <div className="text-gray-500 text-xs font-mono px-2">
@@ -265,7 +283,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
             </div>
 
             {/* Messages for this date */}
-            <div className="space-y-1">
+            <div className="space-y-3">
               {groupMessages.map((message, index) => {
                 const isOwnMessage = message.fromId === currentUserId;
                 const timestamp = formatTime(message.createdAt);
@@ -273,17 +291,55 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
                 const messageId = `#${String(index + 1).padStart(3, '0')}`;
                 
                 return (
-                  <div key={message.id} className="font-mono text-sm">
-                    {/* Message header with timestamp and user */}
-                    <div className={`flex items-center space-x-2 mb-1 ${isOwnMessage ? 'text-blue-400' : 'text-green-400'}`}>
-                      <span className="text-gray-500 text-xs">{timestamp}</span>
-                      <span className="text-xs">{messageId}</span>
-                      <span className="font-bold">{username}</span>
-                    </div>
-                    
-                    {/* Message content */}
-                    <div className={`pl-4 pb-2 ${isOwnMessage ? 'text-blue-300' : 'text-green-300'}`}>
-                      <span className="break-words">{message.content}</span>
+                  <div key={`${message.id}-${index}`} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${
+                      isOwnMessage 
+                        ? 'bg-green-500/20 border-green-400/30' 
+                        : 'bg-white/10 border-white/20'
+                    } backdrop-blur-sm rounded-xl p-4 border shadow-xl relative overflow-hidden group transition-all duration-300 hover:${
+                      isOwnMessage 
+                        ? 'border-green-400/50 bg-green-500/30' 
+                        : 'border-white/30 bg-white/15'
+                    }`}>
+                      
+                      {/* Shimmering gradient effect */}
+                      <div className={`absolute inset-0 bg-gradient-to-r from-transparent ${
+                        isOwnMessage 
+                          ? 'via-green-400/10 to-transparent' 
+                          : 'via-white/5 to-transparent'
+                      } transform -skew-x-12 group-hover:animate-pulse rounded-xl`}></div>
+                      
+                      {/* Message header with timestamp and user */}
+                      <div className={`flex items-center space-x-2 mb-2 text-xs font-mono ${
+                        isOwnMessage ? 'text-green-200' : 'text-green-300'
+                      } relative z-10`}>
+                        <span className="text-gray-400">{timestamp}</span>
+                        <span>{messageId}</span>
+                        <span className="font-bold">{username}</span>
+                      </div>
+                      
+                      {/* Message content */}
+                      <div className={`font-mono text-sm break-words ${
+                        isOwnMessage ? 'text-white' : 'text-gray-100'
+                      } relative z-10`}>
+                        {message.content}
+                      </div>
+
+                      {/* Read receipt for own messages */}
+                      {isOwnMessage && (
+                        <div className="flex justify-end mt-2 relative z-10">
+                          {message.receivedAt ? (
+                            <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg className="w-3 h-3 text-green-400/60" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -303,7 +359,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
           </div>
         )}
 
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} style={{ height: '1px', marginTop: '8px' }} />
       </div>
 
       {/* Message input - Terminal Style */}

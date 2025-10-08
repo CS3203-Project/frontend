@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext';
+import { LoaderProvider } from './components/LoaderContext';
 import Layout from './components/Layout';
 import { Chatbot } from './components/Chatbot';
 import Homepage from './Pages/Homepage.js'
+import HomepageEnhanced from './Pages/HomepageEnhanced';
 import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
@@ -16,9 +18,11 @@ import PrintingServiceProviderProfile from "./Pages/PrintingServiceProviderProfi
 import Signup from './Pages/Signup.tsx'
 import SignIn from './Pages/SignIn.tsx'
 import BrowseServices from './Pages/BrowseServices';
+import BrowseServicesEnhanced from './Pages/BrowseServicesEnhanced';
 import ServiceCategoryPage from './Pages/ServiceCategoryPage';
 import ServiceDetailPage from './Pages/ServiceDetailPage';
 import SearchResultsPage from './Pages/SearchResultsPage';
+import SearchResultsPageEnhanced from './Pages/SearchResultsPageEnhanced';
 import Profile from "./Pages/Profile.tsx";
 import BecomeProvider from "./Pages/BecomeProvider.tsx";
 import Provider from "./Pages/Provider.tsx";
@@ -39,10 +43,12 @@ import AnalyticsDashboard from "./Pages/AnalyticsDashboard.tsx";
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Homepage />} />
+      <LoaderProvider>
+        <Router>
+          <Layout>
+            <Routes>
+            <Route path="/" element={<HomepageEnhanced />} />
+            <Route path="/homepage-original" element={<Homepage />} />
             <Route path="/support" element={<Support />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/stories" element={<SucessStories />} />
@@ -54,8 +60,10 @@ function App() {
             <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/services" element={<BrowseServices />} />
+            <Route path="/services" element={<BrowseServicesEnhanced />} />
+            <Route path="/services-original" element={<BrowseServices />} />
             <Route path="/services/search" element={<SearchResultsPage />} />
+            <Route path="/search-results-enhanced" element={<SearchResultsPageEnhanced />} />
             <Route path="/services/:categorySlug" element={<ServiceCategoryPage />} />
             <Route path="/service/:serviceId" element={<ServiceDetailPage />} />
             <Route path="/profile" element={<Profile />} />
@@ -81,6 +89,7 @@ function App() {
           <Chatbot />
         </Layout>
       </Router>
+      </LoaderProvider>
     </AuthProvider>
   )
 }

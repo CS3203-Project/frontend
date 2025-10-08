@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.PROD 
+    ? '/api' // In production, use relative path (will be proxied)
+    : 'http://localhost:3000/api', // In development, use direct URL
   headers: {
     'Content-Type': 'application/json',
   },

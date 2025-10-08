@@ -10,7 +10,6 @@ import {
   Settings,
   Search,
   Filter,
-  Download,
   Calendar,
   AlertTriangle,
   Clock,
@@ -22,8 +21,8 @@ import {
   LogOut
 } from 'lucide-react';
 import Button from '../components/Button';
-import ReportGenerator from '../components/ReportGenerator';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
+import ReportGenerator from '../components/ReportGenerator';
 import { adminApi, type ServiceProvider, type AdminProfile } from '../api/adminApi';
 import { showSuccessToast, showErrorToast } from '../utils/toastUtils';
 
@@ -742,8 +741,8 @@ const AdminDashboard: React.FC = () => {
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isReportGeneratorOpen, setIsReportGeneratorOpen] = useState(false);
   const [isAnalyticsDashboardOpen, setIsAnalyticsDashboardOpen] = useState(false);
+  const [isReportGeneratorOpen, setIsReportGeneratorOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'providers' | 'profile'>('overview');
@@ -1073,52 +1072,6 @@ const AdminDashboard: React.FC = () => {
                     </span>
                   )}
                 </Button>
-                <Button 
-                  onClick={() => setIsReportGeneratorOpen(true)}
-                  className="justify-start" 
-                  variant="outline"
-                >
-                  <Filter className="w-5 h-5 mr-3" />
-                  Generate Reports
-                </Button>
-              </div>
-            </div>
-
-            {/* Quick Reports */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <Download className="w-5 h-5 mr-2 text-blue-600" />
-                Quick Reports
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setIsReportGeneratorOpen(true)}
-                  className="flex items-center justify-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-all group"
-                >
-                  <TrendingUp className="w-4 h-4 text-blue-600 mr-2" />
-                  <span className="text-sm font-medium text-blue-700">Analytics Report</span>
-                </button>
-                <button
-                  onClick={() => setIsReportGeneratorOpen(true)}
-                  className="flex items-center justify-center p-3 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg hover:from-green-100 hover:to-green-200 transition-all group"
-                >
-                  <Users className="w-4 h-4 text-green-600 mr-2" />
-                  <span className="text-sm font-medium text-green-700">User Report</span>
-                </button>
-                <button
-                  onClick={() => setIsReportGeneratorOpen(true)}
-                  className="flex items-center justify-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all group"
-                >
-                  <ShoppingBag className="w-4 h-4 text-purple-600 mr-2" />
-                  <span className="text-sm font-medium text-purple-700">Service Report</span>
-                </button>
-                <button
-                  onClick={() => setIsReportGeneratorOpen(true)}
-                  className="flex items-center justify-center p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg hover:from-yellow-100 hover:to-yellow-200 transition-all group"
-                >
-                  <UserCheck className="w-4 h-4 text-yellow-600 mr-2" />
-                  <span className="text-sm font-medium text-yellow-700">Provider Report</span>
-                </button>
               </div>
             </div>
 
@@ -1139,6 +1092,27 @@ const AdminDashboard: React.FC = () => {
                   <TrendingUp className="w-5 h-5 text-indigo-600 mr-3" />
                   <span className="text-lg font-medium text-indigo-700">Open Analytics Dashboard</span>
                   <ExternalLink className="w-4 h-4 text-indigo-500 ml-2" />
+                </button>
+              </div>
+            </div>
+
+            {/* Report Generator */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <ShoppingBag className="w-5 h-5 mr-2 text-blue-600" />
+                Report Generator
+              </h2>
+              <div className="space-y-4">
+                <p className="text-gray-600">
+                  Generate comprehensive reports for customers, providers, and services. Download as PDF.
+                </p>
+                <button
+                  onClick={() => setIsReportGeneratorOpen(true)}
+                  className="w-full flex items-center justify-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-cyan-100 transition-all group"
+                >
+                  <ShoppingBag className="w-5 h-5 text-blue-600 mr-3" />
+                  <span className="text-lg font-medium text-blue-700">Generate Reports</span>
+                  <ExternalLink className="w-4 h-4 text-blue-500 ml-2" />
                 </button>
               </div>
             </div>
@@ -1337,6 +1311,9 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
+      
+      {/* Modals Section */}
+      <div>
 
       {/* Provider Details Modal */}
       <ProviderDetailsModal
@@ -1349,16 +1326,16 @@ const AdminDashboard: React.FC = () => {
         onApprove={handleApproveProvider}
       />
 
-      {/* Report Generator Modal */}
-      <ReportGenerator
-        isOpen={isReportGeneratorOpen}
-        onClose={() => setIsReportGeneratorOpen(false)}
-      />
-
       {/* Analytics Dashboard Modal */}
       <AnalyticsDashboard
         isOpen={isAnalyticsDashboardOpen}
         onClose={() => setIsAnalyticsDashboardOpen(false)}
+      />
+
+      {/* Report Generator Modal */}
+      <ReportGenerator
+        isOpen={isReportGeneratorOpen}
+        onClose={() => setIsReportGeneratorOpen(false)}
       />
 
       {/* Confirmation Modal for Approve Action */}
@@ -1371,6 +1348,8 @@ const AdminDashboard: React.FC = () => {
         confirmButtonText="Yes, Approve"
         confirmButtonColor="bg-green-600 hover:bg-green-700"
       />
+      
+      </div>
     </div>
   );
 };

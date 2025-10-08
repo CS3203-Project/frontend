@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Mail, Lock, User, Phone, MapPin, Home, Check, Eye, EyeOff, Loader, ArrowRight, Sparkles, Shield, Star, Users, Zap, Heart, Award, TrendingUp, Clock } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, Home, Check, Eye, EyeOff, Loader, ArrowRight, Shield, Star, Zap } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Orb from '../components/Orb';
 import { userApi, type RegisterUserData } from '../api/userApi';

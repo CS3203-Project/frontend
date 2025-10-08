@@ -32,6 +32,16 @@ interface DetailedService {
   };
   tags: string[];
   workingTime: string[];
+  // Location fields
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  serviceRadiusKm?: number;
+  locationLastUpdated?: string;
   provider: {
     id?: string;
     name: string;
@@ -133,6 +143,16 @@ const ServiceDetailPage: React.FC = () => {
       },
       tags: apiService.tags || [],
       workingTime: apiService.workingTime || [],
+      // Location fields
+      latitude: apiService.latitude,
+      longitude: apiService.longitude,
+      address: apiService.address,
+      city: apiService.city,
+      state: apiService.state,
+      country: apiService.country,
+      postalCode: apiService.postalCode,
+      serviceRadiusKm: apiService.serviceRadiusKm,
+      locationLastUpdated: apiService.locationLastUpdated,
       provider: {
         id: apiService.provider?.id,
         name: apiService.provider?.user ? 
@@ -907,6 +927,76 @@ const ServiceDetailPage: React.FC = () => {
                       {service.description || 'No description available for this service.'}
                     </p>
                   </div>
+
+                  {/* Service Location */}
+                  {(service.address || (service.latitude && service.longitude)) && (
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <div className="p-2 bg-gradient-to-r from-red-100/80 to-pink-100/80 dark:from-red-900/40 dark:to-pink-900/40 backdrop-blur-sm rounded-lg mr-3">
+                          <MapPin className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        Service Location
+                      </h3>
+                      <div className="bg-gradient-to-r from-gray-50/60 to-blue-50/40 dark:from-black/30 dark:to-blue-950/40 backdrop-blur-sm rounded-2xl p-4 border border-gray-100/50 dark:border-gray-600/50">
+                        <div className="space-y-3">
+                          {service.address && (
+                            <div className="flex items-start bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-100/50 dark:border-gray-600/50">
+                              <div className="p-2 bg-gradient-to-r from-blue-100/80 to-purple-100/80 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm rounded-lg mr-3 flex-shrink-0">
+                                <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                  {service.address}
+                                </span>
+                                {(service.city || service.state || service.country) && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    {[service.city, service.state, service.country].filter(Boolean).join(', ')}
+                                    {service.postalCode && ` ${service.postalCode}`}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {service.serviceRadiusKm && (
+                            <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-100/50 dark:border-gray-600/50">
+                              <div className="p-2 bg-gradient-to-r from-green-100/80 to-emerald-100/80 dark:from-green-900/40 dark:to-emerald-900/40 backdrop-blur-sm rounded-lg mr-3">
+                                <div className="w-4 h-4 border-2 border-green-600 dark:border-green-400 rounded-full flex items-center justify-center">
+                                  <div className="w-1 h-1 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                                </div>
+                              </div>
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                  Service Area: {service.serviceRadiusKm} km radius
+                                </span>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  Provider can travel up to {service.serviceRadiusKm} km from the service location
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {service.latitude && service.longitude && (
+                            <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-100/50 dark:border-gray-600/50">
+                              <div className="p-2 bg-gradient-to-r from-purple-100/80 to-pink-100/80 dark:from-purple-900/40 dark:to-pink-900/40 backdrop-blur-sm rounded-lg mr-3">
+                                <div className="w-4 h-4 text-purple-600 dark:text-purple-400 font-mono text-xs flex items-center justify-center">
+                                  📍
+                                </div>
+                              </div>
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                  Coordinates
+                                </span>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  {service.latitude.toFixed(6)}, {service.longitude.toFixed(6)}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Working Hours */}
                   {service.workingTime && service.workingTime.length > 0 && (

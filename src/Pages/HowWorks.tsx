@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, MessageCircle, CreditCard, Star, Users, Shield, TrendingUp, CheckCircle, ArrowRight, Clock, Award, Heart, Play, Sparkles, Zap, Target } from 'lucide-react'
+import { Search, MessageCircle, CreditCard, Star, Users, Shield, TrendingUp, CheckCircle, ArrowRight, Clock, Award, Heart, Sparkles, Zap, Target } from 'lucide-react'
 import Button from '../components/Button'
 
 export default function HowWorks() {

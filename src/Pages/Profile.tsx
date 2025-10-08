@@ -28,6 +28,7 @@ import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
 import CompanyModal from '../components/Profile/CompanyModal';
+import LocationPicker from '../components/LocationPicker';
 import { uploadMultipleImages } from '../utils/imageUpload';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
@@ -74,7 +75,16 @@ export default function Profile() {
     tags: [] as string[],
     images: [] as string[],
     isActive: true,
-    workingTime: [] as string[]
+    workingTime: [] as string[],
+    // Location fields
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
+    address: '',
+    city: '',
+    state: '',
+    country: '',
+    postalCode: '',
+    serviceRadiusKm: 10
   });
 
 
@@ -248,6 +258,15 @@ export default function Profile() {
     images?: string[];
     isActive: boolean;
     workingTime?: string[];
+    // Location fields
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    serviceRadiusKm?: number;
   }) => {
     setSelectedService(service);
     setServiceFormData({
@@ -258,7 +277,16 @@ export default function Profile() {
       tags: service.tags || [],
       images: service.images || [],
       isActive: service.isActive ?? true,
-      workingTime: service.workingTime || []
+      workingTime: service.workingTime || [],
+      // Location fields
+      latitude: service.latitude,
+      longitude: service.longitude,
+      address: service.address || '',
+      city: service.city || '',
+      state: service.state || '',
+      country: service.country || '',
+      postalCode: service.postalCode || '',
+      serviceRadiusKm: service.serviceRadiusKm || 10
     });
     setShowUpdateServiceModal(true);
   };
@@ -296,6 +324,20 @@ export default function Profile() {
     setServiceFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleLocationChange = (location: any) => {
+    setServiceFormData(prev => ({
+      ...prev,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      address: location.address || '',
+      city: location.city || '',
+      state: location.state || '',
+      country: location.country || '',
+      postalCode: location.postalCode || '',
+      serviceRadiusKm: location.serviceRadiusKm || prev.serviceRadiusKm || 10
     }));
   };
 
@@ -1427,6 +1469,27 @@ export default function Profile() {
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-gray-400 backdrop-blur-sm"
                   placeholder="Monday-Friday 9AM-5PM, Weekends flexible"
                   title="Working time schedule"
+                />
+              </div>
+
+              {/* Location Picker */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Service Location
+                </label>
+                <LocationPicker
+                  value={{
+                    latitude: serviceFormData.latitude,
+                    longitude: serviceFormData.longitude,
+                    address: serviceFormData.address,
+                    city: serviceFormData.city,
+                    state: serviceFormData.state,
+                    country: serviceFormData.country,
+                    postalCode: serviceFormData.postalCode,
+                    serviceRadiusKm: serviceFormData.serviceRadiusKm
+                  }}
+                  onChange={handleLocationChange}
+                  className="w-full"
                 />
               </div>
 

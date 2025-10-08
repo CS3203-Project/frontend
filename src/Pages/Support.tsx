@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Mail, Phone, MessageCircle, Book, Users, Shield, DollarSign, ChevronDown, ChevronUp, Headphones, Clock, Star, Zap, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
