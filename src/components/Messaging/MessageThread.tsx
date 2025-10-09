@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Clock, Circle, Wifi } from 'lucide-react';
+
 import { useMessaging } from './MessagingProvider';
 import { userApi, type UserProfile } from '../../api/userApi';
 import type { MessageResponse } from '../../api/messagingApi';
 import Loader from '../Loader';
+import { formatMessageTime, formatMessageDate, TimezoneConfigs, validateTimezoneSetup } from '../../utils/timezone';
 
 interface MessageThreadProps {
   className?: string;
@@ -21,6 +22,33 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
     checkUserOnlineStatus,
     onlineUsers, // Add onlineUsers to trigger re-renders when it changes
   } = useMessaging();
+
+  // Enable/disable debug mode - set to true to show timestamp processing debug info
+  const DEBUG_TIMEZONE = true;
+
+  // Validate timezone setup on component mount
+  useEffect(() => {
+    const validation = validateTimezoneSetup();
+    if (!validation.isValid) {
+      console.warn('⚠️ [MessageThread] Timezone validation failed:', validation.issues);
+    } else {
+      console.log(`✅ [MessageThread] Timezone system validated: ${validation.timezone}`);
+    }
+    
+    // Also log Sri Lanka specific info
+    console.log('🇱🇰 [MessageThread] Sri Lanka Timezone Info:');
+    console.log(`   Browser Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+    console.log(`   Current UTC Time: ${new Date().toISOString()}`);
+    console.log(`   Current Sri Lanka Time: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' })}`);
+    
+    // Test time conversion
+    const testTimestamp = new Date().toISOString();
+    const testFormatted = formatMessageTime(testTimestamp, { 
+      forceTimezone: 'Asia/Colombo', 
+      debug: true 
+    });
+    console.log(`   Test Conversion: ${testTimestamp} → ${testFormatted}`);
+  }, []);
   
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -139,45 +167,49 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
   };
 
   const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Use auto-detect timezone instead of forcing Sri Lanka
+    return formatMessageTime(dateString, {
+      // Remove forceTimezone to use browser's detected timezone
+      debug: DEBUG_TIMEZONE,
+      use12Hour: false,
+      locale: 'en-US'
+    });
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-    }
+    // Use auto-detect timezone instead of forcing Sri Lanka  
+    return formatMessageDate(dateString, {
+      // Remove forceTimezone to use browser's detected timezone
+      debug: DEBUG_TIMEZONE,
+      locale: 'en-US'
+    });
   };
 
   const groupMessagesByDate = (messages: MessageResponse[]) => {
-    const groups: { [key: string]: MessageResponse[] } = {};
-    
+    const groups: { [key: string]: { messages: MessageResponse[], dateObject: Date } } = {};
+
     messages.forEach(message => {
-      const dateKey = new Date(message.createdAt).toDateString();
+      const dateObj = new Date(message.createdAt);
+      const dateKey = dateObj.toDateString(); // Use readable key but store actual date for formatting
       if (!groups[dateKey]) {
-        groups[dateKey] = [];
+        groups[dateKey] = {
+          messages: [],
+          dateObject: dateObj
+        };
       }
-      groups[dateKey].push(message);
+      groups[dateKey].messages.push(message);
     });
-    
+
     // Sort groups chronologically - oldest dates first, newest dates last
     return Object.entries(groups)
-      .map(([date, msgs]) => ({
-        date,
-        messages: msgs,
-        sortKey: new Date(date).getTime() // Add sort key for chronological ordering
+      .map(([dateKey, data]) => ({
+        dateKey,
+        dateObject: data.dateObject,
+        messages: data.messages,
+        sortKey: data.dateObject.getTime()
       }))
       .sort((a, b) => a.sortKey - b.sortKey) // Sort by date ascending (oldest first)
-      .map(({ date, messages }) => ({ date, messages })); // Remove sort key from final result
+      .map(({ dateKey, dateObject, messages }) => ({ dateKey, dateObject, messages })); // Remove sort key from final result
   };
 
   if (!activeConversation) {
@@ -273,12 +305,12 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
           </div>
         )}
 
-        {messageGroups.map(({ date, messages: groupMessages }) => (
-          <div key={date} className="space-y-3">
+        {messageGroups.map(({ dateKey, dateObject, messages: groupMessages }) => (
+          <div key={dateKey} className="space-y-3">
             {/* Date separator - Terminal style */}
             <div className="flex items-center justify-center py-2">
               <div className="text-gray-500 text-xs font-mono px-2">
-                ─────────── {formatDate(date)} ───────────
+                ─────────── {formatDate(dateObject.toISOString())} ───────────
               </div>
             </div>
 
@@ -289,57 +321,86 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
                 const timestamp = formatTime(message.createdAt);
                 const username = isOwnMessage ? 'YOU' : contactName.toUpperCase().replace(/\s+/g, '_');
                 const messageId = `#${String(index + 1).padStart(3, '0')}`;
-                
+
+                // Log timezone info for first message only (to avoid spam)
+                if (DEBUG_TIMEZONE && index === 0) {
+                  const utcDate = new Date(message.createdAt);
+                  const currentTime = new Date();
+                  
+                  console.log(`🌍 [MessageThread] Timezone Debug Analysis:
+                    
+                    📨 MESSAGE TIMESTAMP (This is from when the message was sent):
+                    Raw: ${message.createdAt}
+                    UTC: ${utcDate.toISOString()}
+                    UTC Time: ${utcDate.getUTCHours()}:${utcDate.getUTCMinutes().toString().padStart(2, '0')}:${utcDate.getUTCSeconds().toString().padStart(2, '0')}
+                    Your Local: ${utcDate.toLocaleString()}
+                    Display: ${timestamp}
+                    
+                    🕐 CURRENT TIME (Right now):
+                    Current UTC: ${currentTime.toISOString()}
+                    Current UTC Time: ${currentTime.getUTCHours()}:${currentTime.getUTCMinutes().toString().padStart(2, '0')}:${currentTime.getUTCSeconds().toString().padStart(2, '0')}
+                    Your Current Local: ${currentTime.toLocaleString()}
+                    Browser Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+                    
+                    ⚠️  IMPORTANT: The message timestamp (${utcDate.getUTCHours()}:${utcDate.getUTCMinutes().toString().padStart(2, '0')}) is from EARLIER, 
+                    not from current time (${currentTime.getUTCHours()}:${currentTime.getUTCMinutes().toString().padStart(2, '0')})!
+                    
+                    🧮 If you send a NEW message RIGHT NOW, it should show: ${formatTime(currentTime.toISOString())}
+                  `);
+                }
+
                 return (
                   <div key={`${message.id}-${index}`} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${
-                      isOwnMessage 
-                        ? 'bg-green-500/20 border-green-400/30' 
-                        : 'bg-white/10 border-white/20'
-                    } backdrop-blur-sm rounded-xl p-4 border shadow-xl relative overflow-hidden group transition-all duration-300 hover:${
-                      isOwnMessage 
-                        ? 'border-green-400/50 bg-green-500/30' 
-                        : 'border-white/30 bg-white/15'
-                    }`}>
-                      
-                      {/* Shimmering gradient effect */}
-                      <div className={`absolute inset-0 bg-gradient-to-r from-transparent ${
-                        isOwnMessage 
-                          ? 'via-green-400/10 to-transparent' 
-                          : 'via-white/5 to-transparent'
-                      } transform -skew-x-12 group-hover:animate-pulse rounded-xl`}></div>
-                      
-                      {/* Message header with timestamp and user */}
-                      <div className={`flex items-center space-x-2 mb-2 text-xs font-mono ${
-                        isOwnMessage ? 'text-green-200' : 'text-green-300'
-                      } relative z-10`}>
-                        <span className="text-gray-400">{timestamp}</span>
-                        <span>{messageId}</span>
-                        <span className="font-bold">{username}</span>
-                      </div>
-                      
-                      {/* Message content */}
-                      <div className={`font-mono text-sm break-words ${
-                        isOwnMessage ? 'text-white' : 'text-gray-100'
-                      } relative z-10`}>
-                        {message.content}
-                      </div>
+                    <div className="flex flex-col max-w-xs lg:max-w-md xl:max-w-lg">
+                      <div className={`${
+                        isOwnMessage
+                          ? 'bg-green-500/20 border-green-400/30'
+                          : 'bg-white/10 border-white/20'
+                      } backdrop-blur-sm rounded-xl p-4 border shadow-xl relative overflow-hidden group transition-all duration-300 hover:${
+                        isOwnMessage
+                          ? 'border-green-400/50 bg-green-500/30'
+                          : 'border-white/30 bg-white/15'
+                      }`}>
 
-                      {/* Read receipt for own messages */}
-                      {isOwnMessage && (
-                        <div className="flex justify-end mt-2 relative z-10">
-                          {message.receivedAt ? (
-                            <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          ) : (
-                            <svg className="w-3 h-3 text-green-400/60" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
+                        {/* Shimmering gradient effect */}
+                        <div className={`absolute inset-0 bg-gradient-to-r from-transparent ${
+                          isOwnMessage
+                            ? 'via-green-400/10 to-transparent'
+                            : 'via-white/5 to-transparent'
+                        } transform -skew-x-12 group-hover:animate-pulse rounded-xl`}></div>
+
+                        {/* Message header with timestamp and user */}
+                        <div className={`flex items-center space-x-2 mb-2 text-xs font-mono ${
+                          isOwnMessage ? 'text-green-200' : 'text-green-300'
+                        } relative z-10`}>
+                          <span className="text-gray-400">{timestamp}</span>
+                          <span>{messageId}</span>
+                          <span className="font-bold">{username}</span>
                         </div>
-                      )}
+
+                        {/* Message content */}
+                        <div className={`font-mono text-sm break-words ${
+                          isOwnMessage ? 'text-white' : 'text-gray-100'
+                        } relative z-10`}>
+                          {message.content}
+                        </div>
+
+                        {/* Read receipt for own messages */}
+                        {isOwnMessage && (
+                          <div className="flex justify-end mt-2 relative z-10">
+                            {message.receivedAt ? (
+                              <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3 h-3 text-green-400/60" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
