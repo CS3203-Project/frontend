@@ -7,6 +7,7 @@ import type { UserProfile } from '../api/userApi';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmationPanel from '../components/Messaging/ConfirmationPanel';
+import RatingModal from '../components/Messaging/RatingModal';
 
 const ConversationViewContent: React.FC<{ currentUser: UserProfile; conversationId: string }> = ({ currentUser, conversationId }) => {
   const [serviceProvider, setServiceProvider] = useState<any>(null);
@@ -42,21 +43,24 @@ const ConversationViewContent: React.FC<{ currentUser: UserProfile; conversation
   );
 };
 
-const ConversationViewInner: React.FC<{ 
-  conversationId: string; 
-  currentUserRole: 'USER'|'PROVIDER'|string; 
+const ConversationViewInner: React.FC<{
+  conversationId: string;
+  currentUserRole: 'USER'|'PROVIDER'|string;
   currentUserId: string;
 }> = ({ conversationId, currentUserRole, currentUserId }) => {
-  const { 
-    conversations, 
-    activeConversation, 
-    selectConversation, 
+  const {
+    conversations,
+    activeConversation,
+    selectConversation,
     loadConversations,
-    loading 
+    loading
   } = useMessaging();
   const navigate = useNavigate();
   const [conversationLoading, setConversationLoading] = useState(true);
   const [conversationError, setConversationError] = useState<string | null>(null);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [ratingType, setRatingType] = useState<'customer' | 'service'>('customer');
+  const [serviceData, setServiceData] = useState<any>(null);
 
   // Auto-select conversation based on URL parameter
   useEffect(() => {
@@ -140,11 +144,13 @@ const ConversationViewInner: React.FC<{
       const data = await res.json();
       if (data.customerConfirmation && data.providerConfirmation) {
         if (currentUserRole === 'USER') {
-          // Get the service ID from the conversation
+          // Get the service from the conversation for rating
           try {
             const serviceResponse = await serviceApi.getServiceByConversationId(activeConversation.id);
             if (serviceResponse.success && serviceResponse.data) {
-              navigate(`/rate-service/${serviceResponse.data.id}`);
+              setServiceData(serviceResponse.data);
+              setRatingType('service');
+              setRatingModalOpen(true);
             } else {
               alert('Service information not found for this conversation.');
             }
@@ -153,9 +159,9 @@ const ConversationViewInner: React.FC<{
             alert('Failed to get service information. Please try again.');
           }
         } else if (currentUserRole === 'PROVIDER') {
-          // Find the customerId from the conversation
-          const customerId = activeConversation.userIds.find((id: string) => id !== currentUserId);
-          navigate(`/rate-customer/${activeConversation.id}`, { state: { customerId } });
+          // Rate customer - modal will handle finding customer ID
+          setRatingType('customer');
+          setRatingModalOpen(true);
         }
       } else {
         alert('Both customer and provider must confirm the booking before rating.');
@@ -163,6 +169,11 @@ const ConversationViewInner: React.FC<{
     } catch (error) {
       alert('Failed to check confirmation status. Please try again.');
     }
+  };
+
+  const handleCloseRatingModal = () => {
+    setRatingModalOpen(false);
+    setServiceData(null);
   };
 
   if (conversationError) {
@@ -285,6 +296,17 @@ const ConversationViewInner: React.FC<{
         </div>
       </main>
       <Footer />
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={ratingModalOpen}
+        onClose={handleCloseRatingModal}
+        ratingType={ratingType}
+        conversation={activeConversation || undefined}
+        conversationId={conversationId}
+        currentUserId={currentUserId}
+        serviceData={serviceData}
+      />
     </div>
   );
 };
