@@ -409,7 +409,7 @@ const BrowseServices: React.FC = () => {
               {state.semanticSearchResults.map((service) => (
                 <Link
                   key={service.id}
-                  to={`/services/detail/${service.id}`}
+                  to={`/service/${service.id}`}
                   className="group block bg-white/10 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-white/20 hover:shadow-md hover:border-white/30 transition-all duration-200 hover:-translate-y-1"
                 >
                   <div className="flex items-start space-x-3">

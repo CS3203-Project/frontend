@@ -144,7 +144,7 @@ const SearchResultsPage: React.FC = () => {
             {sortedResults.map((service) => (
               <Link
                 key={service.id}
-                to={`/services/detail/${service.id}`}
+                to={`/service/${service.id}`}
                 className={`group block bg-black/30 backdrop-blur-lg rounded-xl shadow-lg border border-white/10 hover:border-white/20 hover:bg-black/40 transition-all duration-200 hover:-translate-y-1 ${
                   viewMode === 'list' ? 'p-4' : 'p-6'
                 }`}
