@@ -454,14 +454,13 @@ const ServiceDetailPage: React.FC = () => {
   };
 
   const handlePaymentSuccess = (paymentId: string) => {
-    toast.success('Payment successful! You can now contact the provider.');
     console.log('Payment completed:', paymentId);
-    // Optionally redirect to conversation or service confirmation
+    // The PaymentModal will handle showing the success popup and navigation to profile
   };
 
   const handlePaymentError = (error: string) => {
-    toast.error('Payment failed: ' + error);
     console.error('Payment error:', error);
+    // The PaymentModal will handle showing the error popup
   };
 
   const nextImage = () => {

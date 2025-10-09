@@ -484,6 +484,150 @@ export const adminApi = {
     }
   },
 
+  // Payment Analytics API methods
+  getPaymentAnalytics: async (): Promise<{
+    statistics: {
+      totalRevenue: number;
+      totalTransactions: number;
+      averageTransactionValue: number;
+      successfulTransactions: number;
+      failedTransactions: number;
+      pendingTransactions: number;
+      totalPlatformFees: number;
+      totalProviderEarnings: number;
+    };
+    statusDistribution: {
+      status: string;
+      count: number;
+      percentage: number;
+    }[];
+    monthlyComparison: {
+      currentMonth: number;
+      previousMonth: number;
+      growthPercentage: number;
+    };
+  }> => {
+    try {
+      const response = await apiClient.get('/admin/analytics/payments');
+      return response.data.success ? response.data.data : response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Unauthorized access. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      } else if (error.code === 'NETWORK_ERROR') {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('Failed to fetch payment analytics');
+      }
+    }
+  },
+
+  getRevenueChart: async (startDate?: string, endDate?: string): Promise<{
+    date: string;
+    revenue: number;
+    transactions: number;
+  }[]> => {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const response = await apiClient.get(`/admin/analytics/revenue-chart?${params.toString()}`);
+      return response.data.success ? response.data.data : response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Unauthorized access. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      } else if (error.code === 'NETWORK_ERROR') {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('Failed to fetch revenue chart data');
+      }
+    }
+  },
+
+  getTopProviders: async (limit?: number): Promise<{
+    providerId: string;
+    providerName: string;
+    totalRevenue: number;
+    totalTransactions: number;
+  }[]> => {
+    try {
+      const params = new URLSearchParams();
+      if (limit) params.append('limit', limit.toString());
+
+      const response = await apiClient.get(`/admin/analytics/top-providers?${params.toString()}`);
+      return response.data.success ? response.data.data : response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Unauthorized access. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      } else if (error.code === 'NETWORK_ERROR') {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('Failed to fetch top providers');
+      }
+    }
+  },
+
+  getRecentPayments: async (limit?: number): Promise<{
+    id: string;
+    amount: number;
+    currency: string;
+    status: string;
+    serviceName: string;
+    providerName: string;
+    customerName: string;
+    createdAt: string;
+  }[]> => {
+    try {
+      const params = new URLSearchParams();
+      if (limit) params.append('limit', limit.toString());
+
+      const response = await apiClient.get(`/admin/analytics/recent-payments?${params.toString()}`);
+      return response.data.success ? response.data.data : response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Unauthorized access. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      } else if (error.code === 'NETWORK_ERROR') {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('Failed to fetch recent payments');
+      }
+    }
+  },
+
+  getPaymentStatistics: async (): Promise<{
+    totalRevenue: number;
+    totalTransactions: number;
+    averageTransactionValue: number;
+    successfulTransactions: number;
+    failedTransactions: number;
+    pendingTransactions: number;
+    totalPlatformFees: number;
+    totalProviderEarnings: number;
+  }> => {
+    try {
+      const response = await apiClient.get('/admin/analytics/payment-statistics');
+      return response.data.success ? response.data.data : response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Unauthorized access. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. Admin privileges required.');
+      } else if (error.code === 'NETWORK_ERROR') {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('Failed to fetch payment statistics');
+      }
+    }
+  },
+
 };
 
 export default adminApi;

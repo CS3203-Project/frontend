@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,7 +12,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import {
   Users,
   ShoppingBag,
@@ -21,7 +21,12 @@ import {
   BarChart3,
   MapPin,
   Star,
-  Activity
+  Activity,
+  CreditCard,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import Button from './Button';
 import { adminApi } from '../api/adminApi';
@@ -63,12 +68,30 @@ interface AnalyticsData {
   recentActivity: Array<{ type: string; count: number; date: string }>;
 }
 
+interface PaymentAnalyticsData {
+  totalRevenue: number;
+  totalTransactions: number;
+  averageTransactionAmount: number;
+  pendingPayments: number;
+  completedPayments: number;
+  failedPayments: number;
+  currentMonthRevenue: number;
+  previousMonthRevenue: number;
+  revenueGrowthPercentage: number;
+  revenueData: Array<{ date: string; revenue: number; transactions: number }>;
+  topProviders: Array<{ providerId: string; providerName: string; totalRevenue: number; totalTransactions: number; averageRating?: number }>;
+  recentPayments: Array<{ id: string; amount: number; currency: string; status: string; customerName: string; providerName: string; serviceName?: string; createdAt: string }>;
+}
+
 const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose }) => {
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [paymentData, setPaymentData] = useState<PaymentAnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [activeTab, setActiveTab] = useState<'general' | 'payments'>('general');
+  const [dateRange, setDateRange] = useState('30days');
 
-  const fetchAnalyticsData = async () => {
+  const fetchAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -205,16 +228,66 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const fetchPaymentAnalyticsData = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch payment analytics data
+      const [
+        statsResponse,
+        revenueResponse,
+        providersResponse,
+        paymentsResponse
+      ] = await Promise.all([
+        adminApi.getPaymentStatistics(),
+        adminApi.getRevenueChart(dateRange),
+        adminApi.getTopProviders(10),
+        adminApi.getRecentPayments(20)
+      ]);
+
+      const paymentAnalyticsData: PaymentAnalyticsData = {
+        totalRevenue: statsResponse.totalRevenue || 0,
+        totalTransactions: statsResponse.totalTransactions || 0,
+        averageTransactionAmount: statsResponse.averageTransactionValue || 0,
+        pendingPayments: statsResponse.pendingTransactions || 0,
+        completedPayments: statsResponse.successfulTransactions || 0,
+        failedPayments: statsResponse.failedTransactions || 0,
+        currentMonthRevenue: 0,
+        previousMonthRevenue: 0,
+        revenueGrowthPercentage: 0,
+        revenueData: revenueResponse || [],
+        topProviders: providersResponse || [],
+        recentPayments: paymentsResponse || []
+      };
+
+      setPaymentData(paymentAnalyticsData);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Failed to fetch payment analytics data:', error);
+      showErrorToast('Failed to load payment analytics data');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
 
   useEffect(() => {
     if (isOpen) {
-      fetchAnalyticsData();
+      if (activeTab === 'general') {
+        fetchAnalyticsData();
+      } else {
+        fetchPaymentAnalyticsData();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, activeTab, dateRange, fetchAnalyticsData, fetchPaymentAnalyticsData]);
 
   const refreshData = () => {
-    fetchAnalyticsData();
+    if (activeTab === 'general') {
+      fetchAnalyticsData();
+    } else {
+      fetchPaymentAnalyticsData();
+    }
   };
 
   if (!isOpen) return null;
@@ -307,6 +380,19 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            {activeTab === 'payments' && (
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={loading}
+              >
+                <option value="7days">Last 7 Days</option>
+                <option value="30days">Last 30 Days</option>
+                <option value="90days">Last 90 Days</option>
+                <option value="1year">Last Year</option>
+              </select>
+            )}
             <Button
               onClick={refreshData}
               variant="outline"
@@ -328,13 +414,41 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="border-b border-gray-200 bg-white">
+          <div className="flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('general')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                activeTab === 'general'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Users className="w-4 h-4 inline mr-2" />
+              General Analytics
+            </button>
+            <button
+              onClick={() => setActiveTab('payments')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                activeTab === 'payments'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <CreditCard className="w-4 h-4 inline mr-2" />
+              Payment Analytics
+            </button>
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(95vh-100px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-140px)]">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
-          ) : data ? (
+          ) : activeTab === 'general' && data ? (
             <div className="space-y-6">
               {/* Key Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -556,10 +670,270 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
                 </div>
               </div>
             </div>
+          ) : activeTab === 'payments' && paymentData ? (
+            <div className="space-y-6">
+              {/* Payment Statistics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">Total Revenue</p>
+                      <p className="text-3xl font-bold text-green-900">LKR {paymentData.totalRevenue.toLocaleString()}</p>
+                      <p className="text-sm text-green-700 mt-1">
+                        All time earnings
+                      </p>
+                    </div>
+                    <TrendingUp className="w-10 h-10 text-green-500" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">Total Transactions</p>
+                      <p className="text-3xl font-bold text-blue-900">{paymentData.totalTransactions.toLocaleString()}</p>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Avg: LKR {paymentData.averageTransactionAmount.toLocaleString()}
+                      </p>
+                    </div>
+                    <CreditCard className="w-10 h-10 text-blue-500" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl p-6 border border-yellow-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-600">Pending Payments</p>
+                      <p className="text-3xl font-bold text-yellow-900">{paymentData.pendingPayments.toLocaleString()}</p>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        Awaiting completion
+                      </p>
+                    </div>
+                    <Clock className="w-10 h-10 text-yellow-500" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-600">Success Rate</p>
+                      <p className="text-3xl font-bold text-purple-900">
+                        {paymentData.totalTransactions > 0 
+                          ? ((paymentData.completedPayments / paymentData.totalTransactions) * 100).toFixed(1)
+                          : 0}%
+                      </p>
+                      <p className="text-sm text-purple-700 mt-1">
+                        {paymentData.completedPayments} completed
+                      </p>
+                    </div>
+                    <CheckCircle className="w-10 h-10 text-purple-500" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Revenue Trend Chart */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
+                  <div className="h-80">
+                    {paymentData.revenueData.length > 0 ? (
+                      <Line
+                        data={{
+                          labels: paymentData.revenueData.map(item => new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                          datasets: [
+                            {
+                              label: 'Revenue (LKR)',
+                              data: paymentData.revenueData.map(item => item.revenue),
+                              borderColor: 'rgb(16, 185, 129)',
+                              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                              borderWidth: 3,
+                              fill: true,
+                              tension: 0.4,
+                            }
+                          ]
+                        }}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: 'top' as const,
+                            },
+                            tooltip: {
+                              callbacks: {
+                                label: function(context) {
+                                  return `Revenue: LKR ${context.parsed.y.toLocaleString()}`;
+                                }
+                              }
+                            }
+                          },
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                              ticks: {
+                                callback: function(value) {
+                                  return `LKR ${(Number(value) / 1000).toFixed(0)}K`;
+                                }
+                              }
+                            }
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-500">
+                        <p>No revenue data available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Payment Status Distribution */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Status Distribution</h3>
+                  <div className="h-80">
+                    <Doughnut
+                      data={{
+                        labels: ['Completed', 'Pending', 'Failed'],
+                        datasets: [
+                          {
+                            data: [
+                              paymentData.completedPayments,
+                              paymentData.pendingPayments,
+                              paymentData.failedPayments
+                            ],
+                            backgroundColor: [
+                              '#10B981', // Green for completed
+                              '#F59E0B', // Yellow for pending
+                              '#EF4444'  // Red for failed
+                            ],
+                            borderWidth: 0,
+                          }
+                        ]
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom' as const,
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                const total = paymentData.totalTransactions;
+                                const percentage = total > 0 ? ((context.parsed as number / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                              }
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Providers and Recent Payments */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Top Earning Providers */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+                    Top Earning Providers
+                  </h3>
+                  <div className="space-y-4">
+                    {paymentData.topProviders.length > 0 ? (
+                      paymentData.topProviders.slice(0, 8).map((provider, index) => (
+                        <div key={provider.providerId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                {index + 1}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{provider.providerName}</p>
+                              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                <span>{provider.totalTransactions} transactions</span>
+                                {provider.averageRating && (
+                                  <div className="flex items-center">
+                                    <Star className="w-3 h-3 text-yellow-500 fill-current mr-1" />
+                                    <span>{provider.averageRating.toFixed(1)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900">
+                              LKR {provider.totalRevenue.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                        <p>No provider data available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recent Payments */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Activity className="w-5 h-5 mr-2 text-blue-600" />
+                    Recent Payments
+                  </h3>
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {paymentData.recentPayments.length > 0 ? (
+                      paymentData.recentPayments.slice(0, 10).map((payment) => (
+                        <div key={payment.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            {payment.status === 'completed' && <CheckCircle className="w-4 h-4 text-green-500" />}
+                            {payment.status === 'pending' && <Clock className="w-4 h-4 text-yellow-500" />}
+                            {payment.status === 'failed' && <XCircle className="w-4 h-4 text-red-500" />}
+                            <div>
+                              <p className="font-medium text-gray-900">
+                                {payment.customerName} → {payment.providerName}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(payment.createdAt).toLocaleDateString()} at {new Date(payment.createdAt).toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900">
+                              LKR {payment.amount.toLocaleString()}
+                            </p>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              payment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {payment.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Activity className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                        <p>No recent payments found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <p className="text-gray-500 mb-4">No analytics data available</p>
+                <p className="text-gray-500 mb-4">
+                  {activeTab === 'payments' ? 'No payment analytics data available' : 'No analytics data available'}
+                </p>
                 <Button onClick={refreshData}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Load Data

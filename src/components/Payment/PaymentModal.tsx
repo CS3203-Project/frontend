@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { CreditCard, DollarSign, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { currencyConfig } from '../../services/stripeConfig';
 import StripePaymentWrapper from './StripePaymentWrapper';
+import PaymentStatusPopup from './PaymentStatusPopup';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -26,17 +28,41 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onPaymentSuccess,
   onPaymentError
 }) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState<'details' | 'payment'>('details');
+  const [showStatusPopup, setShowStatusPopup] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'success' | 'error' | 'pending' | 'failed'>('success');
+  const [completedPaymentId, setCompletedPaymentId] = useState<string>('');
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState<string>('');
 
   const handlePaymentSuccess = (paymentId: string) => {
+    setCompletedPaymentId(paymentId);
+    setPaymentStatus('success');
+    setShowStatusPopup(true);
     onPaymentSuccess?.(paymentId);
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentErrorMessage(error);
+    setPaymentStatus('error');
+    setShowStatusPopup(true);
+    onPaymentError?.(error);
+  };
+
+  const handleStatusPopupOk = () => {
+    if (paymentStatus === 'success') {
+      // Navigate to customer profile
+      navigate('/profile');
+    }
+    setShowStatusPopup(false);
     onClose();
     setStep('details'); // Reset for next time
   };
 
-  const handlePaymentError = (error: string) => {
-    onPaymentError?.(error);
-    // Don't close modal on error, allow user to retry
+  const handleCloseModal = () => {
+    onClose();
+    setStep('details'); // Reset for next time
+    setShowStatusPopup(false);
   };
 
   if (!isOpen) return null;
@@ -60,7 +86,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             {step === 'details' ? 'Payment Summary' : 'Complete Payment'}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleCloseModal}
             className="text-gray-400 hover:text-gray-600"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,6 +182,19 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Payment Status Popup */}
+      <PaymentStatusPopup
+        isOpen={showStatusPopup}
+        onClose={() => setShowStatusPopup(false)}
+        status={paymentStatus}
+        paymentId={completedPaymentId}
+        amount={servicePrice}
+        currency={serviceCurrency}
+        errorMessage={paymentErrorMessage}
+        serviceName={serviceName}
+        onOkClick={handleStatusPopupOk}
+      />
     </div>
   );
 };
