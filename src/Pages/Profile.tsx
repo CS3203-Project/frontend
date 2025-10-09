@@ -19,11 +19,15 @@ import {
   Building,
   Plus,
   X,
-  Save
+  Save,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Button from '../components/Button';
 import { userApi } from '../api/userApi';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
+import { paymentApi, type Payment, type ProviderEarnings } from '../api/paymentApi';
 import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
@@ -48,6 +52,14 @@ export default function Profile() {
   const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
   const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
   const [services, setServices] = useState<ServiceResponse[]>([]);
+  
+  // Payment related state
+  const [paymentHistory, setPaymentHistory] = useState<Payment[]>([]);
+  const [earnings, setEarnings] = useState<ProviderEarnings | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentPage, setPaymentPage] = useState(1);
+  const [totalPaymentPages, setTotalPaymentPages] = useState(1);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
   
   // Use AuthContext user data and sync with local state for provider-specific data
   const user = authUser || localUser;
@@ -129,12 +141,59 @@ export default function Profile() {
     }
   }, [user, fetchProviderServices]);
 
+  // Fetch payment history
+  const fetchPaymentHistory = useCallback(async (page: number = 1) => {
+    if (!user) return;
+    
+    console.log('fetchPaymentHistory called for user:', user.email, 'role:', user.role);
+    
+    try {
+      setPaymentLoading(true);
+      console.log('Calling paymentApi.getPaymentHistory...');
+      const response = await paymentApi.getPaymentHistory(page, 10);
+      console.log('Payment history response:', response);
+      console.log('Response.payments length:', response.payments?.length || 0);
+      setPaymentHistory(response.payments || []);
+      setTotalPaymentPages(response.pagination?.pages || 1);
+      setPaymentPage(response.pagination?.page || 1);
+    } catch (error) {
+      console.error('Failed to fetch payment history:', error);
+      // Don't show toast error for payment history as it's not critical
+      // toast.error('Failed to load payment history');
+      setPaymentHistory([]);
+    } finally {
+      setPaymentLoading(false);
+    }
+  }, [user]);
+
+  // Fetch provider earnings
+  const fetchProviderEarnings = useCallback(async () => {
+    if (!user || user.role !== 'PROVIDER') return;
+    
+    try {
+      const earningsData = await paymentApi.getProviderEarnings();
+      console.log('Earnings data received:', earningsData);
+      setEarnings(earningsData);
+    } catch (error) {
+      console.error('Failed to fetch earnings:', error);
+      // Don't show toast error for earnings as it's not critical
+      // toast.error('Failed to load earnings data');
+    }
+  }, [user]);
+
   // Replace the old fetchProfile useEffect with optimized version
   useEffect(() => {
     if (!authLoading && user) {
       fetchProviderData();
+      // Fetch payment data for all users
+      if (user.role === 'PROVIDER') {
+        // Fetch earnings for providers
+        fetchProviderEarnings().catch(err => console.log('Earnings fetch failed:', err));
+      }
+      // Fetch payment history for all users (providers and customers)
+      fetchPaymentHistory().catch(err => console.log('Payment history fetch failed:', err));
     }
-  }, [authLoading, user, fetchProviderData]);
+  }, [authLoading, user, fetchProviderData, fetchProviderEarnings, fetchPaymentHistory]);
 
   const refreshServices = useCallback(() => {
     if (providerProfile?.id) {
@@ -327,11 +386,20 @@ export default function Profile() {
     }));
   };
 
-  const handleLocationChange = (location: any) => {
+  const handleLocationChange = (location: {
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    serviceRadiusKm?: number;
+  }) => {
     setServiceFormData(prev => ({
       ...prev,
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude: location.latitude || prev.latitude,
+      longitude: location.longitude || prev.longitude,
       address: location.address || '',
       city: location.city || '',
       state: location.state || '',
@@ -1232,6 +1300,149 @@ export default function Profile() {
                   )}
                 </div>
 
+                {/* Payment History & Earnings */}
+                <div className="bg-black/30 backdrop-blur-xl rounded-xl shadow-2xl p-6 border border-white/20 relative overflow-hidden">
+                  {/* Animated background glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-emerald-500/5 to-teal-500/5 blur-3xl"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h2 className="text-xl font-semibold text-white drop-shadow-lg">Payment & Earnings</h2>
+                        <p className="text-sm text-gray-400">Your financial overview and transaction history</p>
+                      </div>
+                      <Button
+                        onClick={() => setShowPaymentHistory(!showPaymentHistory)}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border-green-400/30 hover:border-green-400/50 backdrop-blur-sm"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        <span>{showPaymentHistory ? 'Hide History' : 'View History'}</span>
+                      </Button>
+                    </div>
+
+                    {/* Earnings Summary */}
+                    {earnings ? (
+                      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
+                        <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-green-400/20">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-gray-400">Total Earnings</p>
+                              <p className="text-2xl font-bold text-green-400">
+                                LKR {typeof earnings.totalEarnings === 'number' ? earnings.totalEarnings.toFixed(2) : parseFloat(earnings.totalEarnings || '0').toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-black/40 backdrop-blur-sm rounded-lg p-6 border border-gray-400/20 mb-6">
+                        <div className="text-center">
+                          <p className="text-gray-400">No earnings data available yet</p>
+                          <p className="text-sm text-gray-500 mt-1">Start accepting payments to see your earnings here</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Payment History */}
+                    {showPaymentHistory && (
+                      <div className="border-t border-white/10 pt-6">
+                        <h3 className="text-lg font-semibold text-white mb-4">Payment History</h3>
+                        
+                        {paymentLoading ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400 mx-auto mb-3"></div>
+                            <p className="text-gray-400">Loading payment history...</p>
+                          </div>
+                        ) : paymentHistory.length > 0 ? (
+                          <>
+                            <div className="space-y-3">
+                              {paymentHistory.map((payment) => (
+                                <div key={payment.id} className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10 hover:border-white/20 transition-colors">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center space-x-3">
+                                        <div className={`w-3 h-3 rounded-full ${
+                                          payment.status === 'SUCCEEDED' ? 'bg-green-400' : 
+                                          payment.status === 'PENDING' ? 'bg-yellow-400' : 
+                                          payment.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-400'
+                                        }`}></div>
+                                        <div>
+                                          <p className="text-white font-medium">
+                                            {payment.service?.title || 'Service Payment'}
+                                          </p>
+                                          <p className="text-sm text-gray-400">
+                                            {new Date(payment.createdAt).toLocaleDateString('en-US', {
+                                              year: 'numeric',
+                                              month: 'short',
+                                              day: 'numeric',
+                                              hour: '2-digit',
+                                              minute: '2-digit'
+                                            })}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-bold text-white">
+                                        {payment.currency} {typeof payment.amount === 'number' ? payment.amount.toFixed(2) : parseFloat(payment.amount || '0').toFixed(2)}
+                                      </p>
+                                      <p className={`text-sm font-medium ${
+                                        payment.status === 'SUCCEEDED' ? 'text-green-400' : 
+                                        payment.status === 'PENDING' ? 'text-yellow-400' : 
+                                        payment.status === 'FAILED' ? 'text-red-400' : 'text-gray-400'
+                                      }`}>
+                                        {payment.status}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPaymentPages > 1 && (
+                              <div className="flex items-center justify-center space-x-4 mt-6">
+                                <Button
+                                  onClick={() => fetchPaymentHistory(paymentPage - 1)}
+                                  disabled={paymentPage <= 1}
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                  <span>Previous</span>
+                                </Button>
+                                
+                                <span className="text-sm text-gray-400">
+                                  Page {paymentPage} of {totalPaymentPages}
+                                </span>
+                                
+                                <Button
+                                  onClick={() => fetchPaymentHistory(paymentPage + 1)}
+                                  disabled={paymentPage >= totalPaymentPages}
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span>Next</span>
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-center py-8">
+                            <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                            <p className="text-gray-400 mb-2">No payment history yet</p>
+                            <p className="text-sm text-gray-500">Payments from your services will appear here</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Recent Reviews */}
                 {providerProfile.reviews && providerProfile.reviews.length > 0 && (
                   <div className="bg-black/20 backdrop-blur-lg rounded-xl shadow-2xl p-6 border border-white/10">
@@ -1335,24 +1546,153 @@ export default function Profile() {
               </div>
             ) : (
               /* USER role content */
-              <div className="bg-black/20 backdrop-blur-lg rounded-xl shadow-2xl p-8 text-center border border-white/10">
-                <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-400/30">
-                    <User className="h-8 w-8 text-blue-400" />
+              <div className="space-y-6">
+                {/* Welcome Section */}
+                <div className="bg-black/20 backdrop-blur-lg rounded-xl shadow-2xl p-8 text-center border border-white/10">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-400/30">
+                      <User className="h-8 w-8 text-blue-400" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-white mb-2">Welcome to Zia!</h2>
+                    <p className="text-gray-300 mb-6">
+                      You're currently a user on our platform. Upgrade to become a service provider 
+                      to offer your services and start earning!
+                    </p>
+                    <Button
+                      onClick={handleBecomeProvider}
+                      size="lg"
+                      className="flex items-center space-x-2 mx-auto bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 border border-purple-400/20"
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      <span>Become a Service Provider</span>
+                    </Button>
                   </div>
-                  <h2 className="text-2xl font-semibold text-white mb-2">Welcome to Zia!</h2>
-                  <p className="text-gray-300 mb-6">
-                    You're currently a user on our platform. Upgrade to become a service provider 
-                    to offer your services and start earning!
-                  </p>
-                  <Button
-                    onClick={handleBecomeProvider}
-                    size="lg"
-                    className="flex items-center space-x-2 mx-auto bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 border border-purple-400/20"
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    <span>Become a Service Provider</span>
-                  </Button>
+                </div>
+
+                {/* Customer Payment History */}
+                <div className="bg-black/30 backdrop-blur-xl rounded-xl shadow-2xl p-6 border border-white/20 relative overflow-hidden">
+                  {/* Animated background glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 blur-3xl"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h2 className="text-xl font-semibold text-white drop-shadow-lg">Payment History</h2>
+                        <p className="text-sm text-gray-400">Your service payment history</p>
+                      </div>
+                      <Button
+                        onClick={() => setShowPaymentHistory(!showPaymentHistory)}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        <span>{showPaymentHistory ? 'Hide History' : 'View History'}</span>
+                      </Button>
+                    </div>
+
+                    {/* Payment History */}
+                    {showPaymentHistory && (
+                      <div className="border-t border-white/10 pt-6">
+                        <h3 className="text-lg font-semibold text-white mb-4">Recent Payments</h3>
+                        
+                        {paymentLoading ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-3"></div>
+                            <p className="text-gray-400">Loading payment history...</p>
+                          </div>
+                        ) : paymentHistory.length > 0 ? (
+                          <>
+                            <div className="space-y-3">
+                              {paymentHistory.map((payment) => (
+                                <div key={payment.id} className="bg-black/40 backdrop-blur-sm rounded-lg p-4 border border-white/10 hover:border-white/20 transition-colors">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center space-x-3">
+                                        <div className={`w-3 h-3 rounded-full ${
+                                          payment.status === 'SUCCEEDED' ? 'bg-green-400' : 
+                                          payment.status === 'PENDING' ? 'bg-yellow-400' : 
+                                          payment.status === 'FAILED' ? 'bg-red-400' : 'bg-gray-400'
+                                        }`}></div>
+                                        <div>
+                                          <p className="text-white font-medium">
+                                            {payment.service?.title || 'Service Payment'}
+                                          </p>
+                                          <p className="text-sm text-gray-400">
+                                            {payment.provider?.user?.firstName && payment.provider?.user?.lastName 
+                                              ? `Provider: ${payment.provider.user.firstName} ${payment.provider.user.lastName}`
+                                              : 'Service Provider'
+                                            }
+                                          </p>
+                                          <p className="text-sm text-gray-400">
+                                            {new Date(payment.createdAt).toLocaleDateString('en-US', {
+                                              year: 'numeric',
+                                              month: 'short',
+                                              day: 'numeric',
+                                              hour: '2-digit',
+                                              minute: '2-digit'
+                                            })}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-bold text-white">
+                                        LKR {typeof payment.amount === 'number' ? payment.amount.toFixed(2) : parseFloat(payment.amount || '0').toFixed(2)}
+                                      </p>
+                                      <p className={`text-sm font-medium ${
+                                        payment.status === 'SUCCEEDED' ? 'text-green-400' : 
+                                        payment.status === 'PENDING' ? 'text-yellow-400' : 
+                                        payment.status === 'FAILED' ? 'text-red-400' : 'text-gray-400'
+                                      }`}>
+                                        {payment.status}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPaymentPages > 1 && (
+                              <div className="flex items-center justify-center space-x-4 mt-6">
+                                <Button
+                                  onClick={() => fetchPaymentHistory(paymentPage - 1)}
+                                  disabled={paymentPage <= 1}
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                  <span>Previous</span>
+                                </Button>
+                                
+                                <span className="text-sm text-gray-400">
+                                  Page {paymentPage} of {totalPaymentPages}
+                                </span>
+                                
+                                <Button
+                                  onClick={() => fetchPaymentHistory(paymentPage + 1)}
+                                  disabled={paymentPage >= totalPaymentPages}
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span>Next</span>
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-center py-8">
+                            <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                            <p className="text-gray-400 mb-2">No payment history yet</p>
+                            <p className="text-sm text-gray-500">Payments for services you book will appear here</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
