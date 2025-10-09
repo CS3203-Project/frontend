@@ -39,6 +39,9 @@ import EasySetup from "./Pages/EasySetup.tsx";
 import SecurePayments from "./Pages/SecurePayments.tsx";
 import CustomerManagement from "./Pages/CustomerManagement.tsx";
 import AnalyticsDashboard from "./Pages/AnalyticsDashboard.tsx";
+import PaymentHistory from "./Pages/PaymentHistory.tsx";
+import ProviderEarnings from "./Pages/ProviderEarnings.tsx";
+import CheckoutPage from "./Pages/CheckoutPage.tsx";
 
 function App() {
   return (
@@ -79,6 +82,11 @@ function App() {
             <Route path="/rate-service/:serviceId" element={<RateServicePage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin-login" element={<AdminLogin/>} />
+
+            {/* Payment Routes */}
+            <Route path="/checkout/:serviceId" element={<CheckoutPage />} />
+            <Route path="/payment-history" element={<PaymentHistory />} />
+            <Route path="/provider-earnings" element={<ProviderEarnings />} />
 
             <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
             <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />  

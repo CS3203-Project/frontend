@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar, 
   Shield, Award, ChevronLeft, ChevronRight, Send, Bookmark, Share2, Eye,
-  CheckCircle, Users, ThumbsUp, User, GraduationCap
+  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Breadcrumb from '../components/services/Breadcrumb';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { PaymentModal } from '../components/Payment';
 import toast, { Toaster } from 'react-hot-toast';
 import { cn } from '../utils/utils';
 import { confirmationApi } from '../api/confirmationApi';
@@ -100,6 +101,9 @@ const ServiceDetailPage: React.FC = () => {
   });
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState('all');
+  
+  // Payment modal state
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   // Auto-slide effect for images
   useEffect(() => {
@@ -431,6 +435,32 @@ const ServiceDetailPage: React.FC = () => {
   const toggleWishlist = () => {
     setIsWishlisted(!isWishlisted);
     toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+  };
+
+  // Payment handlers
+  const handlePayNow = () => {
+    if (!isLoggedIn || !user) {
+      toast.error('Please log in to make a payment');
+      navigate('/signin');
+      return;
+    }
+    
+    if (!service) {
+      toast.error('Service information not available');
+      return;
+    }
+    
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentSuccess = (paymentId: string) => {
+    console.log('Payment completed:', paymentId);
+    // The PaymentModal will handle showing the success popup and navigation to profile
+  };
+
+  const handlePaymentError = (error: string) => {
+    console.error('Payment error:', error);
+    // The PaymentModal will handle showing the error popup
   };
 
   const nextImage = () => {
@@ -803,6 +833,14 @@ const ServiceDetailPage: React.FC = () => {
 
                 {/* Enhanced Action Buttons */}
                 <div className="space-y-3">
+                  <button
+                    onClick={handlePayNow}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border border-blue-600 backdrop-blur-sm flex items-center justify-center"
+                  >
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Pay Now
+                  </button>
+                  
                   <button
                     onClick={handleBookNow}
                     disabled={bookingLoading}
@@ -1521,6 +1559,21 @@ const ServiceDetailPage: React.FC = () => {
 
       <Footer />
       <Toaster position="bottom-right" />
+      
+      {/* Payment Modal */}
+      {service && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          serviceId={service.id}
+          serviceName={service.title}
+          servicePrice={typeof service.price === 'string' ? parseFloat(service.price) : service.price}
+          serviceCurrency={service.currency}
+          serviceImage={service.images?.[0]}
+          onPaymentSuccess={handlePaymentSuccess}
+          onPaymentError={handlePaymentError}
+        />
+      )}
     </div>
   );
 };
