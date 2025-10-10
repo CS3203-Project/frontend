@@ -8,6 +8,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ConfirmationPanel from '../components/Messaging/ConfirmationPanel';
 import RatingModal from '../components/Messaging/RatingModal';
+import UserDetailsModal from '../components/Messaging/UserDetailsModal';
 
 const ConversationViewContent: React.FC<{ currentUser: UserProfile; conversationId: string }> = ({ currentUser, conversationId }) => {
   const [serviceProvider, setServiceProvider] = useState<any>(null);
@@ -17,13 +18,66 @@ const ConversationViewContent: React.FC<{ currentUser: UserProfile; conversation
     const fetchServiceProvider = async () => {
       try {
         const serviceRes = await serviceApi.getServiceByConversationId(conversationId);
+        console.log('=== SERVICE PROVIDER DATA ===');
+        console.log('Service Response:', JSON.stringify(serviceRes, null, 2));
+
+        if (serviceRes.success && serviceRes.data) {
+          console.log('=== SERVICE DETAILS ===');
+          console.log('Service ID:', serviceRes.data.id);
+          console.log('Service Title:', serviceRes.data.title);
+          console.log('Service Description:', serviceRes.data.description);
+          console.log('Service Price:', `${serviceRes.data.currency} ${serviceRes.data.price}`);
+          console.log('Service Tags:', serviceRes.data.tags);
+          console.log('Service Images:', serviceRes.data.images);
+          console.log('Service Working Time:', serviceRes.data.workingTime);
+          console.log('Service Location:', {
+            latitude: serviceRes.data.latitude,
+            longitude: serviceRes.data.longitude,
+            address: serviceRes.data.address,
+            city: serviceRes.data.city,
+            country: serviceRes.data.country
+          });
+          console.log('Service Is Active:', serviceRes.data.isActive);
+          console.log('Service Created:', serviceRes.data.createdAt);
+          console.log('Service Review Count:', serviceRes.data._count?.reviews || 0);
+        }
+
         if (serviceRes.success && serviceRes.data && serviceRes.data.provider) {
           setServiceProvider(serviceRes.data.provider);
           const provider = serviceRes.data.provider as any;
+          console.log('=== SERVICE PROVIDER PROFILE ===');
+          console.log('Provider Profile Data:', JSON.stringify(provider, null, 2));
+          console.log('Provider Profile ID:', provider.id);
+          console.log('Provider User ID:', provider.userId);
+          console.log('Provider Bio:', provider.bio);
+          console.log('Provider Skills:', provider.skills);
+          console.log('Provider Qualifications:', provider.qualifications);
+          console.log('Provider Logo:', provider.logoUrl);
+          console.log('Provider Average Rating:', provider.averageRating);
+          console.log('Provider Total Reviews:', provider.totalReviews);
+          console.log('Provider Is Verified:', provider.isVerified);
+
+          if (provider.user) {
+            console.log('=== PROVIDER USER DETAILS ===');
+            console.log('Provider User:', JSON.stringify(provider.user, null, 2));
+            console.log('Provider User ID:', provider.user.id);
+            console.log('Provider Email:', provider.user.email);
+            console.log('Provider Name:', `${provider.user.firstName} ${provider.user.lastName}`);
+            console.log('Provider Phone:', provider.user.phone);
+            console.log('Provider Image:', provider.user.imageUrl);
+          }
+
           const providerUserId = provider.userId;
           const isProvider = currentUser.id === providerUserId;
           const role = isProvider ? 'PROVIDER' : 'USER';
+          console.log('Current User Role:', role);
+          console.log('Is Current User the Provider?', isProvider);
           setCurrentUserRole(role);
+
+          console.log('=== FINAL SUMMARY ===');
+          console.log('Current User (Customer):', currentUser.id);
+          console.log('Service Provider:', providerUserId);
+          console.log('Service ID:', serviceRes.data.id);
         }
       } catch (err) {
         console.error('Failed to fetch service provider:', err);
@@ -61,6 +115,7 @@ const ConversationViewInner: React.FC<{
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
   const [ratingType, setRatingType] = useState<'customer' | 'service'>('customer');
   const [serviceData, setServiceData] = useState<any>(null);
+  const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
 
   // Auto-select conversation based on URL parameter
   useEffect(() => {
@@ -176,6 +231,14 @@ const ConversationViewInner: React.FC<{
     setServiceData(null);
   };
 
+  const handleViewUserDetails = () => {
+    setUserDetailsModalOpen(true);
+  };
+
+  const handleCloseUserDetailsModal = () => {
+    setUserDetailsModalOpen(false);
+  };
+
   if (conversationError) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
@@ -264,6 +327,7 @@ const ConversationViewInner: React.FC<{
                     conversationId={activeConversation.id}
                     currentUserRole={currentUserRole as 'USER' | 'PROVIDER'}
                     onReviewClick={handleReviewClick}
+                    onViewUserDetails={handleViewUserDetails}
                   />
                 </div>
                 
@@ -307,6 +371,15 @@ const ConversationViewInner: React.FC<{
         currentUserId={currentUserId}
         serviceData={serviceData}
       />
+
+      {/* User Details Modal */}
+      <UserDetailsModal
+        isOpen={userDetailsModalOpen}
+        onClose={handleCloseUserDetailsModal}
+        userRole={currentUserRole as 'USER' | 'PROVIDER'}
+        conversationId={conversationId}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 };
@@ -322,6 +395,18 @@ const ConversationView: React.FC = () => {
     const fetchCurrentUser = async () => {
       try {
         const user = await userApi.getProfile();
+        console.log('=== CURRENT USER PROFILE DATA ===');
+        console.log('Customer (Current User):', JSON.stringify(user, null, 2));
+        console.log('Customer ID:', user.id);
+        console.log('Customer Email:', user.email);
+        console.log('Customer Name:', `${user.firstName} ${user.lastName}`);
+        console.log('Customer Role:', user.role);
+        console.log('Customer Phone:', user.phone);
+        console.log('Customer Location:', user.location);
+        console.log('Customer Address:', user.address);
+        if (user.serviceProvider) {
+          console.log('Customer has Provider Profile:', user.serviceProvider);
+        }
         setCurrentUser(user);
       } catch (error) {
         console.error('Failed to fetch current user:', error);

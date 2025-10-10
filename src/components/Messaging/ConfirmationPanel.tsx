@@ -9,9 +9,10 @@ interface Props {
   conversationId: string;
   currentUserRole: 'USER' | 'PROVIDER';
   onReviewClick?: () => void;
+  onViewUserDetails?: () => void;
 }
 
-const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, onReviewClick }) => {
+const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, onReviewClick, onViewUserDetails }) => {
   const { user } = useAuth();
   const [record, setRecord] = useState<ConversationConfirmation | null>(null);
   const [saving, setSaving] = useState(false);
@@ -466,20 +467,36 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
         </div>
       </div>
 
-      {/* Rating Button at the bottom */}
-      {onReviewClick && (
-        <div className="p-4 border-t border-white/20 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm relative z-10">
-          <button
-            className="w-full px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-300 font-medium border border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm relative overflow-hidden group"
-            onClick={onReviewClick}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-            <span className="relative z-10">
-              {currentUserRole === 'USER'
-                ? '⭐ Rate Service & Provider'
-                : '⭐ Rate Customer'}
-            </span>
-          </button>
+      {/* User Details and Rating Buttons */}
+      {(onViewUserDetails || onReviewClick) && (
+        <div className="p-4 border-t border-white/20 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm relative z-10 space-y-3">
+          {onViewUserDetails && (
+            <button
+              className="w-full px-4 py-3 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-300 font-medium border border-purple-400/30 hover:border-purple-400/50 backdrop-blur-sm relative overflow-hidden group"
+              onClick={onViewUserDetails}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+              <span className="relative z-10">
+                {currentUserRole === 'USER'
+                  ? '👤 View Service Provider'
+                  : '👤 View Customer'}
+              </span>
+            </button>
+          )}
+
+          {onReviewClick && (
+            <button
+              className="w-full px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-300 font-medium border border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm relative overflow-hidden group"
+              onClick={onReviewClick}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+              <span className="relative z-10">
+                {currentUserRole === 'USER'
+                  ? '⭐ Rate Service & Provider'
+                  : '⭐ Rate Customer'}
+              </span>
+            </button>
+          )}
         </div>
       )}
     </div>
