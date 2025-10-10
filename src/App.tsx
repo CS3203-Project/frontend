@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { LoaderProvider } from './components/LoaderContext';
 import Layout from './components/Layout';
 import { Chatbot } from './components/Chatbot';
-import Homepage from './Pages/Homepage.js'
+// import Homepage from './Pages/Homepage.js'
 import HomepageEnhanced from './Pages/HomepageEnhanced';
 import Support from './Pages/Support.jsx'
 import Articles from './Pages/Articles.jsx'
@@ -51,7 +51,7 @@ function App() {
           <Layout>
             <Routes>
             <Route path="/" element={<HomepageEnhanced />} />
-            <Route path="/homepage-original" element={<Homepage />} />
+            {/* <Route path="/homepage-original" element={<Homepage />} /> */}
             <Route path="/support" element={<Support />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/stories" element={<SucessStories />} />
