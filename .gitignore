@@ -30,3 +30,7 @@ yarn.lock
 .env
 .env.local
 .env.*.local
+
+# Testing coverage reports
+coverage/
+*.lcov
