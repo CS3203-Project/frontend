@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Menu, ChevronDown, Shield, Users, Sparkles, ArrowRight, BarChart3, LogOut, User } from 'lucide-react';
+import { Menu, ChevronDown, Shield, Users, Sparkles, ArrowRight, BarChart3, LogOut, User, Bell } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { clearMessages } from '../utils/messageDB';
 import { Link, useLocation } from 'react-router-dom';
 import { categoriesData } from '../data/servicesData';
+import { useNotifications } from '../hooks/useNotifications';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -19,6 +20,9 @@ const Navbar = () => {
   // Use AuthContext and location hook
   const { user, isLoggedIn, logout } = useAuth();
   const location = useLocation();
+
+  // Use notifications hook for unread count
+  const { stats } = useNotifications();
 
   // Helper function to check if a route is active
   const isActiveRoute = (href: string) => {
@@ -362,7 +366,24 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center space-x-3">            
+          <div className="hidden lg:flex items-center space-x-3">
+            {isLoggedIn && user ? (
+              <>
+                {/* Notifications Bell */}
+                <Link
+                  to="/notifications"
+                  className="flex items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-all duration-300 group border border-transparent hover:border-white/20 relative"
+                >
+                  <Bell className="h-5 w-5 text-white/90 group-hover:text-white transition-colors duration-300" />
+                  {stats && stats.unread > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                      {stats.unread > 99 ? '99+' : stats.unread}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : null}
+
             {isLoggedIn && user ? (
               <div className="relative user-menu">
                 <button

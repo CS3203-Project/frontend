@@ -42,6 +42,7 @@ import AnalyticsDashboard from "./Pages/AnalyticsDashboard.tsx";
 import PaymentHistory from "./Pages/PaymentHistory.tsx";
 import ProviderEarnings from "./Pages/ProviderEarnings.tsx";
 import CheckoutPage from "./Pages/CheckoutPage.tsx";
+import NotificationsPage from "./Pages/NotificationsPage";
 
 function App() {
   return (
@@ -87,9 +88,10 @@ function App() {
             <Route path="/checkout/:serviceId" element={<CheckoutPage />} />
             <Route path="/payment-history" element={<PaymentHistory />} />
             <Route path="/provider-earnings" element={<ProviderEarnings />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
 
             <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
-            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />  
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
                     
           </Routes>
           
