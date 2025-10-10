@@ -13,7 +13,6 @@ import {
   ExternalLink,
   Clock,
   DollarSign,
-  Camera,
   MessageCircle,
   ChevronRight,
   Loader2
@@ -47,35 +46,7 @@ export default function Provider() {
   const [reviewPage, setReviewPage] = useState(1);
   const [hasMoreReviews, setHasMoreReviews] = useState(false);
 
-  // Mock data for demonstration - in real app this would come from API
-  const mockPortfolio = [
-    {
-      id: 'portfolio-1',
-      title: 'E-commerce Platform',
-      description: 'Complete e-commerce solution with inventory management, payment processing, and analytics dashboard.',
-      images: ['https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80'],
-      category: 'Web Development',
-      completedDate: '2024-12-15',
-      clientRating: 5,
-      technologies: ['React', 'Node.js', 'MongoDB', 'Stripe', 'AWS']
-    },
-    {
-      id: 'portfolio-2',
-      title: 'Mobile Banking App UI',
-      description: 'Modern and secure mobile banking application design with focus on user experience.',
-      images: ['https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80'],
-      category: 'Design',
-      completedDate: '2024-11-20',
-      clientRating: 5,
-      technologies: ['Figma', 'Adobe XD', 'Principle']
-    }
-  ];
 
-  // State for modal interactions (for future use)
-  const [selectedPortfolio, setSelectedPortfolio] = useState<typeof mockPortfolio[0] | null>(null);
-  
-  // Suppress unused variable warnings for now
-  void selectedPortfolio;
 
   // Fetch services for the current provider
   const fetchServices = async (providerId: string) => {
@@ -351,7 +322,6 @@ export default function Provider() {
                 {[
                   { id: 'overview', label: 'Overview', icon: <User className="w-4 h-4" /> },
                   { id: 'services', label: 'Services', icon: <DollarSign className="w-4 h-4" /> },
-                  { id: 'portfolio', label: 'Portfolio', icon: <Camera className="w-4 h-4" /> },
                   { id: 'reviews', label: 'Reviews', icon: <Star className="w-4 h-4" /> },
                   { id: 'about', label: 'About', icon: <MessageCircle className="w-4 h-4" /> }
                 ].map((tab) => (
@@ -690,7 +660,7 @@ export default function Provider() {
                                 ) : (
                                   <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                                     <div className="text-gray-500 text-center">
-                                      <Camera className="w-12 h-12 mx-auto mb-2" />
+                                      <Briefcase className="w-12 h-12 mx-auto mb-2" />
                                       <p className="text-sm">No image available</p>
                                     </div>
                                   </div>
@@ -754,62 +724,7 @@ export default function Provider() {
                     </>
                   )}
 
-                  {/* Portfolio Tab */}
-                  {activeTab === 'portfolio' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {mockPortfolio.map((item) => (
-                        <div 
-                          key={item.id}
-                          className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
-                          onClick={() => setSelectedPortfolio(item)}
-                        >
-                          <div className="relative">
-                            <img 
-                              src={item.images[0]} 
-                              alt={item.title}
-                              className="w-full h-48 object-cover"
-                            />
-                            <span className="absolute top-4 left-4 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                              {typeof item.category === 'object' && item.category && 'name' in item.category 
-                                ? (item.category as { name: string }).name 
-                                : item.category || 'Category'}
-                            </span>
-                          </div>
-                          <div className="p-6">
-                            <div className="flex items-center justify-between mb-3">
-                              <h3 className="text-lg font-semibold text-gray-900 truncate">{item.title}</h3>
-                              <div className="flex items-center">
-                                {[...Array(item.clientRating)].map((_, i) => (
-                                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                                ))}
-                              </div>
-                            </div>
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description}</p>
-                            {item.technologies && (
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {item.technologies.slice(0, 3).map((tech, index) => (
-                                  <span 
-                                    key={index}
-                                    className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded hover:bg-gray-200 transition-colors"
-                                  >
-                                    {tech}
-                                  </span>
-                                ))}
-                                {item.technologies.length > 3 && (
-                                  <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded hover:bg-gray-200 transition-colors">
-                                    +{item.technologies.length - 3}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                            <div className="text-xs text-gray-400">
-                              Completed: {item.completedDate}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+
 
                   {/* Reviews Tab */}
                   {activeTab === 'reviews' && (

@@ -861,7 +861,7 @@ const ServiceDetailPage: React.FC = () => {
                     className="w-full border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-semibold hover:bg-blue-50/50 dark:hover:bg-blue-900/30 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/30 dark:bg-black/30"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Contact Provider
+                    View Provider
                   </button>
                 </div>
 
@@ -1511,7 +1511,7 @@ const ServiceDetailPage: React.FC = () => {
                           className="w-full border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-bold hover:bg-blue-50/50 dark:hover:bg-blue-900/30 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/30 dark:bg-black/30"
                         >
                           <MessageCircle className="w-5 h-5 mr-2" />
-                          Contact Provider
+                          View Provider
                         </button>
                       </div>
                     </div>
