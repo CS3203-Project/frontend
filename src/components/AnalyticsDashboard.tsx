@@ -58,7 +58,6 @@ interface AnalyticsData {
   totalActiveServices: number;
   totalVerifiedProviders: number;
   totalActiveCustomers: number;
-  totalVerifiedCustomers: number;
   servicesByCategory: Array<{ category: string; count: number; percentage: number }>;
   providersByLocation: Array<{ location: string; count: number }>;
   customersByLocation: Array<{ location: string; count: number }>;
@@ -209,7 +208,6 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
           totalActiveServices: activeServices,
           totalVerifiedProviders: providers.filter(p => p.isVerified).length,
           totalActiveCustomers: activeCustomers,
-          totalVerifiedCustomers: verifiedCustomers,
           servicesByCategory,
           providersByLocation,
           customersByLocation,
@@ -494,10 +492,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isOpen, onClose
                 <div className="bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-xl p-6 border border-cyan-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-cyan-600">Verified Customers</p>
-                      <p className="text-3xl font-bold text-cyan-900">{data.totalVerifiedCustomers.toLocaleString()}</p>
+                      <p className="text-sm font-medium text-cyan-600">Verified Providers</p>
+                      <p className="text-3xl font-bold text-cyan-900">{data.totalVerifiedProviders.toLocaleString()}</p>
                       <p className="text-sm text-cyan-700 mt-1">
-                        {((data.totalVerifiedCustomers / data.totalUsers) * 100).toFixed(1)}% verified
+                        {((data.totalVerifiedProviders / data.totalProviders) * 100).toFixed(1)}% verified
                       </p>
                     </div>
                     <UserCheck className="w-10 h-10 text-cyan-500" />
