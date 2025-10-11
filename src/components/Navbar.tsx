@@ -123,7 +123,8 @@ const Navbar = () => {
     { name: "Pricing", href: "/pricing" },
     { name: "Success Stories", href: "/stories" },
     { name: "Support", href: "/support" },
-    { name: "Messages", href: "/conversation-hub" }
+    { name: "Messages", href: "/conversation-hub" },
+    { name: "Service Request", href: "/service-request" }
   ];
 
   return (

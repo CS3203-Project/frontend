@@ -43,6 +43,8 @@ import PaymentHistory from "./Pages/PaymentHistory.tsx";
 import ProviderEarnings from "./Pages/ProviderEarnings.tsx";
 import CheckoutPage from "./Pages/CheckoutPage.tsx";
 import NotificationsPage from "./Pages/NotificationsPage";
+import ServiceRequestPage from "./Pages/ServiceRequestPage";
+import ServiceRequestMatchesPage from "./Pages/ServiceRequestMatchesPage";
 
 function App() {
   return (
@@ -92,6 +94,8 @@ function App() {
 
             <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
             <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
+            <Route path="/service-request" element={<ServiceRequestPage />} />
+            <Route path="/service-request/:id/matches" element={<ServiceRequestMatchesPage />} />
                     
           </Routes>
           
