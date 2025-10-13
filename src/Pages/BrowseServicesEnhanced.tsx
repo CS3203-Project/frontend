@@ -259,39 +259,99 @@ const BrowseServicesEnhanced: React.FC = () => {
 
   if (state.loading) {
     return (
-      <div className="bg-white dark:bg-black min-h-screen relative overflow-hidden">
+      <div className="min-h-screen bg-white dark:bg-black relative overflow-hidden">
         {/* Square Grid Background */}
-        <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#e5e7eb_0.5px,transparent_0.5px),linear-gradient(to_bottom,#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[linear-gradient(to_right,#374151_0.5px,transparent_0.5px),linear-gradient(to_bottom,#374151_0.5px,transparent_0.5px)] bg-[size:4rem_4rem] opacity-30" />
-        
-        <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12 pt-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/70 dark:bg-black/30 backdrop-blur-lg rounded-full mb-4 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
-              <Loader2 className="w-8 h-8 text-black dark:text-white animate-spin" />
+        <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#e5e7eb_0.5px,transparent_0.5px),linear-gradient(to_bottom,#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[linear-gradient(to_right,#374151_0.5px,transparent_0.5px),linear-gradient(to_bottom,#374151_0.5px,transparent_0.5px)] bg-[size:4rem_4rem] opacity-30 [mask-image:linear-gradient(to_bottom,black_0%,black_50%,transparent_100%)]" />
+
+        {/* Content Overlay */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            {/* Header Section */}
+            <div className="text-center mb-12 pt-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/70 dark:bg-black/30 backdrop-blur-lg rounded-full mb-4 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
+                <Loader2 className="w-8 h-8 text-black dark:text-white animate-spin" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text text-transparent mb-4">
+                Loading Services
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Please wait while we fetch the latest categories...
+              </p>
             </div>
-            <h1 className="text-4xl font-extrabold bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text text-transparent mb-4">
-              Loading Services
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Please wait while we fetch the latest categories...
-            </p>
-          </div>
-          
-          {/* Loading skeleton */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
-                  <div className="flex items-start">
-                    <div className="w-14 h-14 bg-gray-300 dark:bg-gray-700 rounded-xl"></div>
-                    <div className="ml-4 flex-1">
-                      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+
+            {/* Enhanced Search Section Skeleton */}
+            <div className="max-w-4xl mx-auto mb-12">
+              <div className="bg-white/70 dark:bg-black/30 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)] border border-white/30 dark:border-white/10 p-6">
+                {/* Main Search Bar Skeleton */}
+                <div className="relative mb-4">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div className="w-5 h-5 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="block w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 rounded-xl">
+                    <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                  </div>
+                </div>
+
+                {/* Location and Filters Row Skeleton */}
+                <div className="flex flex-col sm:flex-row gap-4 items-end">
+                  {/* Location Filter Skeleton */}
+                  <div className="flex-1">
+                    <div className="w-full sm:w-auto px-4 py-2 rounded-xl border border-white/30 dark:border-white/20 bg-white/50 dark:bg-white/10">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-24"></div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons Skeleton */}
+                  <div className="flex gap-2">
+                    <div className="px-4 py-2 bg-white/50 dark:bg-white/10 rounded-xl">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-12"></div>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            {/* Controls Skeleton */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+              <div className="flex items-center gap-4">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-16"></div>
+                <div className="px-3 py-2 bg-white/50 dark:bg-black/30 backdrop-blur-sm border border-white/30 dark:border-white/20 rounded-xl">
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-12"></div>
+                <div className="flex items-center bg-white/50 dark:bg-black/30 backdrop-blur-sm rounded-xl p-1 border border-white/30 dark:border-white/20">
+                  <div className="p-2 rounded-lg">
+                    <div className="w-4 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="p-2 rounded-lg">
+                    <div className="w-4 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Categories Grid Skeleton */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
+                    <div className="flex items-start">
+                      <div className="w-14 h-14 bg-gray-300 dark:bg-gray-700 rounded-xl"></div>
+                      <div className="ml-4 flex-1">
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full mb-1"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -440,14 +500,31 @@ const BrowseServicesEnhanced: React.FC = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                {state.hybridSearchResults.slice(0, 6).map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    viewMode="grid"
-                    showDistance={state.locationFilter !== null}
-                  />
-                ))}
+                {state.isSearching ? (
+                  [...Array(6)].map((_, index) => (
+                    <div key={index} className="animate-pulse">
+                      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)] p-6">
+                        <div className="w-full h-48 bg-gray-300 dark:bg-gray-700 rounded-xl mb-4"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full mb-1"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3 mb-3"></div>
+                        <div className="flex items-center justify-between">
+                          <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/3"></div>
+                          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  state.hybridSearchResults.slice(0, 6).map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      viewMode="grid"
+                      showDistance={state.locationFilter !== null}
+                    />
+                  ))
+                )}
               </div>
 
               {state.hybridSearchResults.length > 6 && (
@@ -513,7 +590,32 @@ const BrowseServicesEnhanced: React.FC = () => {
               </div>
 
               {/* Categories Grid */}
-              {filteredAndSortedCategories.length === 0 ? (
+              {(state.isSearching || state.refreshing) ? (
+                <div className={state.viewMode === 'grid' 
+                  ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3' 
+                  : 'space-y-4'
+                }>
+                  {[...Array(state.viewMode === 'grid' ? 6 : 4)].map((_, index) => (
+                    <div key={index} className="animate-pulse">
+                      <div className={`bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)] ${state.viewMode === 'grid' ? 'p-6' : 'p-4'}`}>
+                        <div className={`flex items-start ${state.viewMode === 'list' ? 'space-x-4' : ''}`}>
+                          <div className={`flex-shrink-0 ${state.viewMode === 'list' ? 'w-16 h-16' : 'w-14 h-14'} bg-gray-300 dark:bg-gray-700 rounded-xl`}></div>
+                          <div className={`flex-1 ${state.viewMode === 'list' ? '' : 'ml-4'}`}>
+                            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
+                            {state.viewMode === 'grid' && (
+                              <>
+                                <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full mb-1"></div>
+                                <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredAndSortedCategories.length === 0 ? (
                 <div className="text-center py-12">
                   <Sparkles className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-black dark:text-white mb-2">No categories found</h3>

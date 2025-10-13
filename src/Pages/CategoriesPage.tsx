@@ -339,6 +339,7 @@ const CategoriesPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <Filter className="h-5 w-5 text-gray-300" />
               <select 
+                aria-label="Sort categories"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'services' | 'subcategories')}
                 className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white transition-all duration-300 hover:bg-white/15 focus:bg-white/15"
