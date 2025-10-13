@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Loader2, Search, Grid3X3, List, Sparkles, Users, RefreshCw, MapPin, Heart } from 'lucide-react';
+import { ArrowRight, Loader2, Search, Grid3X3, List, Sparkles, Users, RefreshCw, MapPin } from 'lucide-react';
 import { categoryApi, type Category } from '../api/categoryApi';
 import { getCategoryIcon, getCategoryGradient } from '../utils/categoryMapper';
 import { hybridSearchApi, type HybridSearchResult, type LocationParams } from '../api/hybridSearchApi';
@@ -675,7 +675,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
   const totalServices = getTotalServiceCount(category);
   const Icon = getCategoryIcon(category.slug || '');
   const gradient = getCategoryGradient(category.slug || '');
-  const [isLiked, setIsLiked] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   // Get category-specific background pattern
@@ -686,6 +685,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'writing': '✍️',
       'marketing': '📱',
       'business': '💼',
+      'business-services': '💼',
       'lifestyle': '🌟',
       'music': '🎵',
       'video': '🎬',
@@ -698,9 +698,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'legal': '⚖️',
       'finance': '💰',
       'real-estate': '🏠',
+      'creative-services': '�',
       'automotive': '🚗',
       'construction': '🏗️',
-      'home-services': '🔧'
+      'home-services': '🔧',
+      'personal-care': '💆',
+      'professional-services': '👔',
+      'general-services': '🎯'
     };
     return patterns[slug] || '🌐';
   };
@@ -713,6 +717,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'writing': 'https://cdn.pixabay.com/photo/2015/07/17/22/43/student-849825_640.jpg',
       'marketing': 'https://cdn.pixabay.com/photo/2015/02/05/08/06/macbook-624707_640.jpg',
       'business': 'https://cdn.pixabay.com/photo/2015/01/09/11/08/startup-594090_640.jpg',
+      'business-services': 'https://cdn.pixabay.com/photo/2015/01/09/11/08/startup-594090_640.jpg',
       'lifestyle': 'https://cdn.pixabay.com/photo/2016/11/29/03/53/athletes-1867185_640.jpg',
       'music': 'https://cdn.pixabay.com/photo/2015/05/07/11/02/guitar-756326_640.jpg',
       'video': 'https://cdn.pixabay.com/photo/2016/11/29/08/41/apple-1868496_640.jpg',
@@ -727,25 +732,22 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'real-estate': 'https://cdn.pixabay.com/photo/2016/11/18/17/20/living-room-1835923_640.jpg',
       'automotive': 'https://cdn.pixabay.com/photo/2016/11/19/11/16/automobile-1838744_640.jpg',
       'construction': 'https://cdn.pixabay.com/photo/2015/07/19/10/00/construction-site-850636_640.jpg',
-      'home-services': 'https://cdn.pixabay.com/photo/2016/11/19/12/43/architecture-1839594_640.jpg',
+      'home-services': 'https://cdn.pixabay.com/photo/2018/01/25/20/53/lifestyle-3107041_1280.jpg',
       'food': 'https://cdn.pixabay.com/photo/2017/08/06/06/43/breakfast-2589056_640.jpg',
       'travel': 'https://cdn.pixabay.com/photo/2015/07/11/23/02/plane-841441_640.jpg',
-      'art': 'https://cdn.pixabay.com/photo/2016/03/27/07/32/woman-1282330_640.jpg',
+      'creative-services': 'https://cdn.pixabay.com/photo/2017/05/19/06/22/desk-2325627_640.jpg',
       'beauty': 'https://cdn.pixabay.com/photo/2016/03/26/22/21/books-1281581_640.jpg',
       'fashion': 'https://cdn.pixabay.com/photo/2016/11/19/18/06/feet-1840619_640.jpg',
       'sports': 'https://cdn.pixabay.com/photo/2016/11/29/05/45/adventure-1867797_640.jpg',
       'entertainment': 'https://cdn.pixabay.com/photo/2015/11/24/11/09/audience-1056764_640.jpg',
       'pets': 'https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg',
       'gardening': 'https://cdn.pixabay.com/photo/2016/11/21/16/03/gardening-1846137_640.jpg',
-      'cleaning': 'https://cdn.pixabay.com/photo/2015/09/21/14/24/cleaning-949352_640.jpg'
+      'cleaning': 'https://cdn.pixabay.com/photo/2015/09/21/14/24/cleaning-949352_640.jpg',
+      'personal-care': 'https://cdn.pixabay.com/photo/2017/03/14/03/20/woman-2141808_1280.jpg',
+      'professional-services': 'https://cdn.pixabay.com/photo/2015/01/08/18/29/entrepreneur-593358_640.jpg',
+      'general-services': 'https://cdn.pixabay.com/photo/2015/01/09/11/08/startup-594090_640.jpg'
     };
-    return images[slug];
-  };
-
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsLiked(!isLiked);
+    return images[slug] || 'https://cdn.pixabay.com/photo/2015/05/28/14/53/ux-788002_1280.jpg';
   };
 
   const categoryImage = getCategoryImage(category.slug || '');
@@ -776,10 +778,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
           </div>
         )}
 
-        {/* Background Pattern/Emoji - Fallback when no image or in list view */}
+        {/* Background Pattern/Emoji - Fallback when no image or in list view - MORE VISIBLE */}
         {(!categoryImage || imageError || viewMode === 'list') && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-            <div className="text-[12rem] opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.06] dark:group-hover:opacity-[0.08] transition-opacity duration-300 group-hover:scale-110 transform">
+            <div className="text-[12rem] opacity-[0.15] dark:opacity-[0.20] group-hover:opacity-[0.25] dark:group-hover:opacity-[0.30] transition-opacity duration-300 group-hover:scale-110 transform">
               {getCategoryPattern(category.slug || '')}
             </div>
           </div>
@@ -787,25 +789,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
 
         {/* Background Gradient */}
         <div className={`absolute inset-0 opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-300 ${gradient}`}></div>
-        
-        {/* Like Button - Enhanced with better animations */}
-        <button
-          onClick={handleLikeClick}
-          className={`absolute top-3 right-3 z-20 p-2.5 backdrop-blur-md rounded-full border transition-all duration-300 shadow-lg hover:shadow-2xl group/like ${
-            isLiked
-              ? 'bg-red-500/90 border-red-400 hover:bg-red-600 scale-110'
-              : 'bg-white/90 dark:bg-black/70 border-white/40 dark:border-white/20 hover:bg-white dark:hover:bg-black/90 hover:scale-110'
-          }`}
-          title={isLiked ? 'Unlike this category' : 'Like this category'}
-        >
-          <Heart
-            className={`w-5 h-5 transition-all duration-300 ${
-              isLiked
-                ? 'fill-white text-white animate-pulse'
-                : 'text-gray-700 dark:text-gray-300 group-hover/like:text-red-500 group-hover/like:scale-110'
-            }`}
-          />
-        </button>
 
         <div className={`relative z-10 h-full flex ${viewMode === 'list' ? 'flex-row items-center space-x-4 px-4' : 'flex-col p-6'}`}>
           {/* Icon */}
