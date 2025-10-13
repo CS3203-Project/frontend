@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, ChevronDown, Shield, Users, Sparkles, ArrowRight, BarChart3, LogOut, User, Bell } from 'lucide-react';
+import { Menu, ChevronDown, Shield, Users, Sparkles, ArrowRight, BarChart3, LogOut, User, Bell, DollarSign, Trophy, Lightbulb, MessageCircle } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,9 +12,11 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [forProvidersOpen, setForProvidersOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [servicesTimeout, setServicesTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [providersTimeout, setProvidersTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [helpTimeout, setHelpTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Use AuthContext and location hook
@@ -35,6 +37,17 @@ const Navbar = () => {
   const isProviderRouteActive = () => {
     const providerRoutes = ['/easy-setup', '/secure-payments', '/customer-management', '/analytics-dashboard'];
     return providerRoutes.some(route => location.pathname.startsWith(route));
+  };
+
+  // Helper function to check if help-related routes are active
+  const isHelpRouteActive = () => {
+    const helpRoutes = ['/howWorks', '/pricing', '/stories', '/support'];
+    return helpRoutes.some(route => location.pathname.startsWith(route));
+  };
+
+  // Helper function to check if services-related routes are active
+  const isServicesRouteActive = () => {
+    return location.pathname.startsWith('/services');
   };
 
   useEffect(() => {
@@ -87,6 +100,16 @@ const Navbar = () => {
     setProvidersTimeout(timeout);
   };
 
+  const handleHelpEnter = () => {
+    if (helpTimeout) clearTimeout(helpTimeout);
+    setHelpOpen(true);
+  };
+
+  const handleHelpLeave = () => {
+    const timeout = setTimeout(() => setHelpOpen(false), 150);
+    setHelpTimeout(timeout);
+  };
+
   const providerFeatures = [
     {
       title: "Easy Setup",
@@ -118,11 +141,38 @@ const Navbar = () => {
     },
   ];
 
+  const helpResources = [
+    {
+      title: "How It Works",
+      description: "Learn how our platform works",
+      href: "/howWorks",
+      icon: Lightbulb,
+      gradient: "from-blue-400 to-cyan-500"
+    },
+    {
+      title: "Pricing",
+      description: "View our pricing plans",
+      href: "/pricing",
+      icon: DollarSign,
+      gradient: "from-green-400 to-emerald-500"
+    },
+    {
+      title: "Success Stories",
+      description: "Read customer testimonials",
+      href: "/stories",
+      icon: Trophy,
+      gradient: "from-yellow-400 to-orange-500"
+    },
+    {
+      title: "Support",
+      description: "Get help when you need it",
+      href: "/support",
+      icon: MessageCircle,
+      gradient: "from-purple-400 to-pink-500"
+    },
+  ];
+
   const navLinks = [
-    { name: "How It Works", href: "/howWorks" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "Success Stories", href: "/stories" },
-    { name: "Support", href: "/support" },
     { name: "Messages", href: "/conversation-hub" },
     { name: "Service Request", href: "/service-request" }
   ];
@@ -141,18 +191,10 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className={cn(
-              "flex items-center space-x-3 group cursor-pointer py-2 px-3 rounded-xl transition-all duration-300",
-              isActiveRoute("/") ? "bg-white/10 shadow-lg border border-white/20" : ""
-            )}>
+            <Link to="/" className="flex items-center space-x-3 group cursor-pointer py-2 px-3 rounded-xl transition-all duration-300 hover:bg-white/5">
               <div className="relative w-10 h-10 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
                 {/* Glittering background effect */}
-                <div className={cn(
-                  "absolute inset-0 rounded-xl transition-all duration-300",
-                  isActiveRoute("/") 
-                    ? "bg-gradient-to-r from-white/20 to-white/15" 
-                    : "bg-gradient-to-r from-white/10 to-white/5 group-hover:from-white/20 group-hover:to-white/10"
-                )}></div>
+                <div className="absolute inset-0 rounded-xl transition-all duration-300 bg-gradient-to-r from-white/10 to-white/5 group-hover:from-white/20 group-hover:to-white/10"></div>
                 <div className="absolute inset-0 rounded-xl animate-pulse bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
                 
                 <img 
@@ -183,30 +225,23 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-8 flex-nowrap">
             {/* Services Dropdown */}
             <div className="relative">
-               <Link
-                to="/services"
+               <button
                 className={cn(
                   "flex items-center space-x-1 font-medium transition-all duration-300 py-2 px-3 rounded-lg group",
-                  isActiveRoute("/services") 
+                  isServicesRouteActive() 
                     ? "text-white bg-white/10 shadow-lg border border-white/20" 
                     : "text-white/90 hover:text-white hover:bg-white/5"
                 )}
                 onMouseEnter={handleServicesEnter}
                 onMouseLeave={handleServicesLeave}
               >
-                <span className="relative">
-                  Browse Services
-                  <div className={cn(
-                    "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
-                    isActiveRoute("/services") ? "w-full" : "w-0 group-hover:w-full"
-                  )}></div>
-                </span>
+                <span>Browse Services</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   servicesOpen && "rotate-180 text-white",
-                  isActiveRoute("/services") ? "text-white" : "group-hover:text-white"
+                  isServicesRouteActive() ? "text-white" : "group-hover:text-white"
                 )} />
-              </Link>
+              </button>
               
               {/* Services Mega Menu */}
               <div 
@@ -272,13 +307,7 @@ const Navbar = () => {
                 onMouseEnter={handleProvidersEnter}
                 onMouseLeave={handleProvidersLeave}
               >
-                <span className="relative">
-                  For Providers
-                  <div className={cn(
-                    "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
-                    isProviderRouteActive() ? "w-full" : "w-0 group-hover:w-full"
-                  )}></div>
-                </span>
+                <span>For Providers</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   forProvidersOpen && "rotate-180 text-white",
@@ -341,6 +370,81 @@ const Navbar = () => {
               </div>
             </div>
 
+            {/* Help Dropdown */}
+            <div className="relative">
+              <button 
+                className={cn(
+                  "flex items-center space-x-1 font-medium transition-all duration-300 py-2 px-3 rounded-lg group",
+                  isHelpRouteActive() 
+                    ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                    : "text-white/90 hover:text-white hover:bg-white/5"
+                )}
+                onMouseEnter={handleHelpEnter}
+                onMouseLeave={handleHelpLeave}
+              >
+                <span>Help</span>
+                <ChevronDown className={cn(
+                  "h-4 w-4 transition-all duration-300",
+                  helpOpen && "rotate-180 text-white",
+                  isHelpRouteActive() ? "text-white" : "group-hover:text-white"
+                )} />
+              </button>
+              
+              {/* Help Resources Menu */}
+              <div 
+                className={cn(
+                  "absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[500px] bg-black/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-6 transition-all duration-300 origin-top",
+                  helpOpen 
+                    ? "opacity-100 visible scale-100" 
+                    : "opacity-0 invisible scale-95 pointer-events-none"
+                )}
+                onMouseEnter={handleHelpEnter}
+                onMouseLeave={handleHelpLeave}
+              >
+                {/* Glittering border effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse"></div>
+                
+                <div className="grid grid-cols-2 gap-4 relative z-10">
+                  {helpResources.map((resource, index) => {
+                    const IconComponent = resource.icon;
+                    return (
+                      <Link
+                        key={index}
+                        to={resource.href}
+                        className="group p-3 rounded-xl hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20 relative overflow-hidden"
+                        onClick={() => {
+                          setHelpOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {/* Shimmer effect on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                        
+                        <div className="flex items-start space-x-3 relative z-10">
+                          <div className={cn(
+                            "w-8 h-8 rounded-lg bg-gradient-to-r flex items-center justify-center group-hover:scale-110 transition-all duration-300 relative",
+                            "from-white/20 to-white/10 group-hover:from-white/30 group-hover:to-white/20"
+                          )}>
+                            {/* Glitter effect */}
+                            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+                            <IconComponent className="h-4 w-4 text-white relative z-10" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-white text-sm group-hover:text-gray-100 transition-colors duration-300">
+                              {resource.title}
+                            </h3>
+                            <p className="text-xs text-gray-400 mt-1 group-hover:text-gray-300 transition-colors duration-300">
+                              {resource.description}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
             {navLinks.map((link, index) => {
               const isActive = isActiveRoute(link.href);
               return (
@@ -354,13 +458,7 @@ const Navbar = () => {
                       : "text-white/90 hover:text-white hover:bg-white/5"
                   )}
                 >
-                  <span className="relative">
-                    {link.name}
-                    <div className={cn(
-                      "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
-                      isActive ? "w-full" : "w-0 group-hover:w-full"
-                    )}></div>
-                  </span>
+                  {link.name}
                 </Link>
               );
             })}
@@ -493,12 +591,14 @@ const Navbar = () => {
             <div>
               <button
                 onClick={() => setServicesOpen(!servicesOpen)}
-                className="flex items-center justify-between w-full text-left font-medium text-white py-2 px-3 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+                className={cn(
+                  "flex items-center justify-between w-full text-left font-medium py-2 px-3 rounded-lg transition-all duration-300 group",
+                  isServicesRouteActive() 
+                    ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                    : "text-white hover:bg-white/10"
+                )}
               >
-                <span className="relative">
-                  Browse Services
-                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
-                </span>
+                <span>Browse Services</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300 text-white/70 group-hover:text-white",
                   servicesOpen && "rotate-180"
@@ -544,12 +644,14 @@ const Navbar = () => {
             <div>
               <button
                 onClick={() => setForProvidersOpen(!forProvidersOpen)}
-                className="flex items-center justify-between w-full text-left font-medium text-white py-2 px-3 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+                className={cn(
+                  "flex items-center justify-between w-full text-left font-medium py-2 px-3 rounded-lg transition-all duration-300 group",
+                  isProviderRouteActive() 
+                    ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                    : "text-white hover:bg-white/10"
+                )}
               >
-                <span className="relative">
-                  For Service Providers
-                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-white to-gray-300 group-hover:w-full transition-all duration-300"></div>
-                </span>
+                <span>For Service Providers</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300 text-white/70 group-hover:text-white",
                   forProvidersOpen && "rotate-180"
@@ -591,6 +693,59 @@ const Navbar = () => {
               </div>
             </div>
 
+            {/* Mobile Help */}
+            <div>
+              <button
+                onClick={() => setHelpOpen(!helpOpen)}
+                className={cn(
+                  "flex items-center justify-between w-full text-left font-medium py-2 px-3 rounded-lg transition-all duration-300 group",
+                  isHelpRouteActive() 
+                    ? "text-white bg-white/10 shadow-lg border border-white/20" 
+                    : "text-white hover:bg-white/10"
+                )}
+              >
+                <span>Help</span>
+                <ChevronDown className={cn(
+                  "h-4 w-4 transition-all duration-300 text-white/70 group-hover:text-white",
+                  helpOpen && "rotate-180"
+                )} />
+              </button>
+              <div className={cn(
+                "mt-2 overflow-hidden transition-all duration-300",
+                helpOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+              )}>
+                <div className="space-y-2 pl-4">
+                  {helpResources.map((resource, index) => {
+                    const IconComponent = resource.icon;
+                    return (
+                      <Link
+                        key={index}
+                        to={resource.href}
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20 relative overflow-hidden group"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {/* Shimmer effect on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                        
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg bg-gradient-to-r flex items-center justify-center relative group-hover:scale-110 transition-all duration-300",
+                          "from-white/20 to-white/10 group-hover:from-white/30 group-hover:to-white/20"
+                        )}>
+                          {/* Glitter effect */}
+                          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+                          <IconComponent className="h-4 w-4 text-white relative z-10" />
+                        </div>
+                        <div className="relative z-10">
+                          <div className="font-medium text-white group-hover:text-gray-100 transition-colors duration-300">{resource.title}</div>
+                          <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">{resource.description}</div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
             {/* Mobile Navigation Links */}
             <div className="space-y-2">
               {navLinks.map((link, index) => {
@@ -607,13 +762,7 @@ const Navbar = () => {
                     )}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <span className="relative">
-                      {link.name}
-                      <div className={cn(
-                        "absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-white to-gray-300 transition-all duration-300",
-                        isActive ? "w-full" : "w-0 group-hover:w-full"
-                      )}></div>
-                    </span>
+                    {link.name}
                   </Link>
                 );
               })}
