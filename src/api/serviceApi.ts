@@ -49,6 +49,9 @@ export interface ServiceResponse {
   locationLastUpdated?: string;
   // Distance (calculated on the client side or returned from location search)
   distance?: number;
+  // Rating fields
+  averageRating?: number;
+  reviewCount?: number;
   createdAt: string;
   updatedAt?: string;
   provider?: {
