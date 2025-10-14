@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Loader2, Search, Grid3X3, List, Sparkles, Users, RefreshCw, MapPin, Heart } from 'lucide-react';
+import { ArrowRight, Loader2, Search, Grid3X3, List, Sparkles, Users, RefreshCw, MapPin } from 'lucide-react';
 import { categoryApi, type Category } from '../api/categoryApi';
 import { getCategoryIcon, getCategoryGradient } from '../utils/categoryMapper';
 import { hybridSearchApi, type HybridSearchResult, type LocationParams } from '../api/hybridSearchApi';
@@ -265,39 +265,99 @@ const BrowseServicesEnhanced: React.FC = () => {
 
   if (state.loading) {
     return (
-      <div className="bg-white dark:bg-black min-h-screen relative overflow-hidden">
+      <div className="min-h-screen bg-white dark:bg-black relative overflow-hidden">
         {/* Square Grid Background */}
-        <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#e5e7eb_0.5px,transparent_0.5px),linear-gradient(to_bottom,#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[linear-gradient(to_right,#374151_0.5px,transparent_0.5px),linear-gradient(to_bottom,#374151_0.5px,transparent_0.5px)] bg-[size:4rem_4rem] opacity-30" />
-        
-        <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12 pt-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/70 dark:bg-black/30 backdrop-blur-lg rounded-full mb-4 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
-              <Loader2 className="w-8 h-8 text-black dark:text-white animate-spin" />
+        <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#e5e7eb_0.5px,transparent_0.5px),linear-gradient(to_bottom,#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[linear-gradient(to_right,#374151_0.5px,transparent_0.5px),linear-gradient(to_bottom,#374151_0.5px,transparent_0.5px)] bg-[size:4rem_4rem] opacity-30 [mask-image:linear-gradient(to_bottom,black_0%,black_50%,transparent_100%)]" />
+
+        {/* Content Overlay */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            {/* Header Section */}
+            <div className="text-center mb-12 pt-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/70 dark:bg-black/30 backdrop-blur-lg rounded-full mb-4 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
+                <Loader2 className="w-8 h-8 text-black dark:text-white animate-spin" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text text-transparent mb-4">
+                Loading Services
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Please wait while we fetch the latest categories...
+              </p>
             </div>
-            <h1 className="text-4xl font-extrabold bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text text-transparent mb-4">
-              Loading Services
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Please wait while we fetch the latest categories...
-            </p>
-          </div>
-          
-          {/* Loading skeleton */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
-                  <div className="flex items-start">
-                    <div className="w-14 h-14 bg-gray-300 dark:bg-gray-700 rounded-xl"></div>
-                    <div className="ml-4 flex-1">
-                      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+
+            {/* Enhanced Search Section Skeleton */}
+            <div className="max-w-4xl mx-auto mb-12">
+              <div className="bg-white/70 dark:bg-black/30 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)] border border-white/30 dark:border-white/10 p-6">
+                {/* Main Search Bar Skeleton */}
+                <div className="relative mb-4">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div className="w-5 h-5 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="block w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 rounded-xl">
+                    <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                  </div>
+                </div>
+
+                {/* Location and Filters Row Skeleton */}
+                <div className="flex flex-col sm:flex-row gap-4 items-end">
+                  {/* Location Filter Skeleton */}
+                  <div className="flex-1">
+                    <div className="w-full sm:w-auto px-4 py-2 rounded-xl border border-white/30 dark:border-white/20 bg-white/50 dark:bg-white/10">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-24"></div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons Skeleton */}
+                  <div className="flex gap-2">
+                    <div className="px-4 py-2 bg-white/50 dark:bg-white/10 rounded-xl">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-12"></div>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            {/* Controls Skeleton */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+              <div className="flex items-center gap-4">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-16"></div>
+                <div className="px-3 py-2 bg-white/50 dark:bg-black/30 backdrop-blur-sm border border-white/30 dark:border-white/20 rounded-xl">
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-12"></div>
+                <div className="flex items-center bg-white/50 dark:bg-black/30 backdrop-blur-sm rounded-xl p-1 border border-white/30 dark:border-white/20">
+                  <div className="p-2 rounded-lg">
+                    <div className="w-4 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="p-2 rounded-lg">
+                    <div className="w-4 h-4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Categories Grid Skeleton */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)]">
+                    <div className="flex items-start">
+                      <div className="w-14 h-14 bg-gray-300 dark:bg-gray-700 rounded-xl"></div>
+                      <div className="ml-4 flex-1">
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full mb-1"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -455,14 +515,31 @@ const BrowseServicesEnhanced: React.FC = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                {state.hybridSearchResults.slice(0, 6).map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    viewMode="grid"
-                    showDistance={state.locationFilter !== null}
-                  />
-                ))}
+                {state.isSearching ? (
+                  [...Array(6)].map((_, index) => (
+                    <div key={index} className="animate-pulse">
+                      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)] p-6">
+                        <div className="w-full h-48 bg-gray-300 dark:bg-gray-700 rounded-xl mb-4"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full mb-1"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3 mb-3"></div>
+                        <div className="flex items-center justify-between">
+                          <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/3"></div>
+                          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  state.hybridSearchResults.slice(0, 6).map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      viewMode="grid"
+                      showDistance={state.locationFilter !== null}
+                    />
+                  ))
+                )}
               </div>
 
               {state.hybridSearchResults.length > 6 && (
@@ -528,7 +605,32 @@ const BrowseServicesEnhanced: React.FC = () => {
               </div>
 
               {/* Categories Grid */}
-              {filteredAndSortedCategories.length === 0 ? (
+              {(state.isSearching || state.refreshing) ? (
+                <div className={state.viewMode === 'grid' 
+                  ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3' 
+                  : 'space-y-4'
+                }>
+                  {[...Array(state.viewMode === 'grid' ? 6 : 4)].map((_, index) => (
+                    <div key={index} className="animate-pulse">
+                      <div className={`bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-700 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_0_rgba(255,255,255,0.08)] ${state.viewMode === 'grid' ? 'p-6' : 'p-4'}`}>
+                        <div className={`flex items-start ${state.viewMode === 'list' ? 'space-x-4' : ''}`}>
+                          <div className={`flex-shrink-0 ${state.viewMode === 'list' ? 'w-16 h-16' : 'w-14 h-14'} bg-gray-300 dark:bg-gray-700 rounded-xl`}></div>
+                          <div className={`flex-1 ${state.viewMode === 'list' ? '' : 'ml-4'}`}>
+                            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
+                            {state.viewMode === 'grid' && (
+                              <>
+                                <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full mb-1"></div>
+                                <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredAndSortedCategories.length === 0 ? (
                 <div className="text-center py-12">
                   <Sparkles className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-black dark:text-white mb-2">No categories found</h3>
@@ -690,7 +792,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
   const totalServices = getTotalServiceCount(category);
   const Icon = getCategoryIcon(category.slug || '');
   const gradient = getCategoryGradient(category.slug || '');
-  const [isLiked, setIsLiked] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   // Get category-specific background pattern
@@ -701,6 +802,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'writing': '✍️',
       'marketing': '📱',
       'business': '💼',
+      'business-services': '💼',
       'lifestyle': '🌟',
       'music': '🎵',
       'video': '🎬',
@@ -713,9 +815,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'legal': '⚖️',
       'finance': '💰',
       'real-estate': '🏠',
+      'creative-services': '�',
       'automotive': '🚗',
       'construction': '🏗️',
-      'home-services': '🔧'
+      'home-services': '🔧',
+      'personal-care': '💆',
+      'professional-services': '👔',
+      'general-services': '🎯'
     };
     return patterns[slug] || '🌐';
   };
@@ -728,6 +834,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'writing': 'https://cdn.pixabay.com/photo/2015/07/17/22/43/student-849825_640.jpg',
       'marketing': 'https://cdn.pixabay.com/photo/2015/02/05/08/06/macbook-624707_640.jpg',
       'business': 'https://cdn.pixabay.com/photo/2015/01/09/11/08/startup-594090_640.jpg',
+      'business-services': 'https://cdn.pixabay.com/photo/2015/01/09/11/08/startup-594090_640.jpg',
       'lifestyle': 'https://cdn.pixabay.com/photo/2016/11/29/03/53/athletes-1867185_640.jpg',
       'music': 'https://cdn.pixabay.com/photo/2015/05/07/11/02/guitar-756326_640.jpg',
       'video': 'https://cdn.pixabay.com/photo/2016/11/29/08/41/apple-1868496_640.jpg',
@@ -742,25 +849,22 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
       'real-estate': 'https://cdn.pixabay.com/photo/2016/11/18/17/20/living-room-1835923_640.jpg',
       'automotive': 'https://cdn.pixabay.com/photo/2016/11/19/11/16/automobile-1838744_640.jpg',
       'construction': 'https://cdn.pixabay.com/photo/2015/07/19/10/00/construction-site-850636_640.jpg',
-      'home-services': 'https://cdn.pixabay.com/photo/2016/11/19/12/43/architecture-1839594_640.jpg',
+      'home-services': 'https://cdn.pixabay.com/photo/2018/01/25/20/53/lifestyle-3107041_1280.jpg',
       'food': 'https://cdn.pixabay.com/photo/2017/08/06/06/43/breakfast-2589056_640.jpg',
       'travel': 'https://cdn.pixabay.com/photo/2015/07/11/23/02/plane-841441_640.jpg',
-      'art': 'https://cdn.pixabay.com/photo/2016/03/27/07/32/woman-1282330_640.jpg',
+      'creative-services': 'https://cdn.pixabay.com/photo/2017/05/19/06/22/desk-2325627_640.jpg',
       'beauty': 'https://cdn.pixabay.com/photo/2016/03/26/22/21/books-1281581_640.jpg',
       'fashion': 'https://cdn.pixabay.com/photo/2016/11/19/18/06/feet-1840619_640.jpg',
       'sports': 'https://cdn.pixabay.com/photo/2016/11/29/05/45/adventure-1867797_640.jpg',
       'entertainment': 'https://cdn.pixabay.com/photo/2015/11/24/11/09/audience-1056764_640.jpg',
       'pets': 'https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg',
       'gardening': 'https://cdn.pixabay.com/photo/2016/11/21/16/03/gardening-1846137_640.jpg',
-      'cleaning': 'https://cdn.pixabay.com/photo/2015/09/21/14/24/cleaning-949352_640.jpg'
+      'cleaning': 'https://cdn.pixabay.com/photo/2015/09/21/14/24/cleaning-949352_640.jpg',
+      'personal-care': 'https://cdn.pixabay.com/photo/2017/03/14/03/20/woman-2141808_1280.jpg',
+      'professional-services': 'https://cdn.pixabay.com/photo/2015/01/08/18/29/entrepreneur-593358_640.jpg',
+      'general-services': 'https://cdn.pixabay.com/photo/2015/01/09/11/08/startup-594090_640.jpg'
     };
-    return images[slug];
-  };
-
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsLiked(!isLiked);
+    return images[slug] || 'https://cdn.pixabay.com/photo/2015/05/28/14/53/ux-788002_1280.jpg';
   };
 
   const categoryImage = getCategoryImage(category.slug || '');
@@ -791,10 +895,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
           </div>
         )}
 
-        {/* Background Pattern/Emoji - Fallback when no image or in list view */}
+        {/* Background Pattern/Emoji - Fallback when no image or in list view - MORE VISIBLE */}
         {(!categoryImage || imageError || viewMode === 'list') && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-            <div className="text-[12rem] opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.06] dark:group-hover:opacity-[0.08] transition-opacity duration-300 group-hover:scale-110 transform">
+            <div className="text-[12rem] opacity-[0.15] dark:opacity-[0.20] group-hover:opacity-[0.25] dark:group-hover:opacity-[0.30] transition-opacity duration-300 group-hover:scale-110 transform">
               {getCategoryPattern(category.slug || '')}
             </div>
           </div>
@@ -802,25 +906,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, viewMode, getTota
 
         {/* Background Gradient */}
         <div className={`absolute inset-0 opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-300 ${gradient}`}></div>
-        
-        {/* Like Button - Enhanced with better animations */}
-        <button
-          onClick={handleLikeClick}
-          className={`absolute top-3 right-3 z-20 p-2.5 backdrop-blur-md rounded-full border transition-all duration-300 shadow-lg hover:shadow-2xl group/like ${
-            isLiked
-              ? 'bg-red-500/90 border-red-400 hover:bg-red-600 scale-110'
-              : 'bg-white/90 dark:bg-black/70 border-white/40 dark:border-white/20 hover:bg-white dark:hover:bg-black/90 hover:scale-110'
-          }`}
-          title={isLiked ? 'Unlike this category' : 'Like this category'}
-        >
-          <Heart
-            className={`w-5 h-5 transition-all duration-300 ${
-              isLiked
-                ? 'fill-white text-white animate-pulse'
-                : 'text-gray-700 dark:text-gray-300 group-hover/like:text-red-500 group-hover/like:scale-110'
-            }`}
-          />
-        </button>
 
         <div className={`relative z-10 h-full flex ${viewMode === 'list' ? 'flex-row items-center space-x-4 px-4' : 'flex-col p-6'}`}>
           {/* Icon */}
