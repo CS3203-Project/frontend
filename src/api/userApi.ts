@@ -166,6 +166,8 @@ export interface ProviderProfile {
     isActive: boolean;
     tags: string[];
     createdAt: string;
+    averageRating?: number;
+    reviewCount?: number;
   }>;
   reviews: Array<{
     id: string;

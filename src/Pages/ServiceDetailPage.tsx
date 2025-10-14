@@ -64,7 +64,7 @@ interface ChatMessage {
   read: boolean;
 }
 
-type TabType = 'overview' | 'reviews' | 'chat';
+type TabType = 'overview';
 
 const ServiceDetailPage: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -79,6 +79,8 @@ const ServiceDetailPage: React.FC = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [autoSlide, setAutoSlide] = useState(true);
+  const [showVideo, setShowVideo] = useState(true); // Track if we're showing video or images
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false); // Track if video is currently playing
   
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -105,16 +107,42 @@ const ServiceDetailPage: React.FC = () => {
   // Payment modal state
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
-  // Auto-slide effect for images
+  // Calculate total media items (video + images)
+  const totalMediaItems = service ? (service.videoUrl ? 1 : 0) + service.images.length : 0;
+  const currentMediaIndex = showVideo && service?.videoUrl ? 0 : selectedImage + (service?.videoUrl ? 1 : 0);
+
+  // Auto-slide effect for images (but not video - let video play completely)
   useEffect(() => {
-    if (autoSlide && service && service.images.length > 1) {
+    if (autoSlide && service && totalMediaItems > 1) {
+      // Don't auto-slide if video is currently playing
+      if (showVideo && service.videoUrl && isVideoPlaying) {
+        return;
+      }
+      
       const interval = setInterval(() => {
-        setSelectedImage((prev) => (prev + 1) % service.images.length);
-      }, 4000); // Change image every 4 seconds
+        // If currently showing video but it's not playing (ended), switch to first image
+        if (showVideo && service.videoUrl && !isVideoPlaying) {
+          setShowVideo(false);
+          setSelectedImage(0);
+        } else if (!showVideo) {
+          // Navigate through images only (not video)
+          const nextImageIndex = selectedImage + 1;
+          if (nextImageIndex >= service.images.length && service.videoUrl) {
+            // Loop back to video
+            setShowVideo(true);
+            setSelectedImage(0);
+          } else if (nextImageIndex >= service.images.length) {
+            // Loop back to first image
+            setSelectedImage(0);
+          } else {
+            setSelectedImage(nextImageIndex);
+          }
+        }
+      }, 4000); // Change images every 4 seconds
       
       return () => clearInterval(interval);
     }
-  }, [autoSlide, service]);
+  }, [autoSlide, service, showVideo, selectedImage, totalMediaItems, isVideoPlaying]);
 
   // Transform ServiceResponse (API data) to DetailedService format
   const transformApiService = (apiService: ServiceResponse): DetailedService => {
@@ -464,16 +492,43 @@ const ServiceDetailPage: React.FC = () => {
   };
 
   const nextImage = () => {
-    if (service && service.images.length > 1) {
-      setSelectedImage((prev) => (prev + 1) % service.images.length);
+    if (service && totalMediaItems > 1) {
+      // If currently showing video, go to first image
+      if (showVideo && service.videoUrl) {
+        setShowVideo(false);
+        setSelectedImage(0);
+      } else {
+        // Navigate to next image
+        const nextIndex = selectedImage + 1;
+        if (nextIndex >= service.images.length && service.videoUrl) {
+          // Loop back to video
+          setShowVideo(true);
+          setSelectedImage(0);
+        } else if (nextIndex >= service.images.length) {
+          // Loop back to first image
+          setSelectedImage(0);
+        } else {
+          setSelectedImage(nextIndex);
+        }
+      }
       setAutoSlide(false); // Stop auto-slide when user manually navigates
       setTimeout(() => setAutoSlide(true), 10000); // Resume auto-slide after 10 seconds
     }
   };
 
   const prevImage = () => {
-    if (service && service.images.length > 1) {
-      setSelectedImage((prev) => (prev - 1 + service.images.length) % service.images.length);
+    if (service && totalMediaItems > 1) {
+      // If currently showing first image and video exists, go to video
+      if (!showVideo && selectedImage === 0 && service.videoUrl) {
+        setShowVideo(true);
+      } else if (!showVideo && selectedImage > 0) {
+        // Go to previous image
+        setSelectedImage(selectedImage - 1);
+      } else if (showVideo && service.videoUrl) {
+        // If on video, go to last image
+        setShowVideo(false);
+        setSelectedImage(service.images.length - 1);
+      }
       setAutoSlide(false); // Stop auto-slide when user manually navigates
       setTimeout(() => setAutoSlide(true), 10000); // Resume auto-slide after 10 seconds
     }
@@ -592,84 +647,58 @@ const ServiceDetailPage: React.FC = () => {
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
-          {/* Enhanced Responsive Full Width Video Section */}
-          {service.videoUrl && (
-            <div className="mb-6 relative h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] w-full rounded-2xl sm:rounded-3xl overflow-hidden mx-auto max-w-7xl">
-              {/* Full Width Video Background */}
-              <div className="absolute inset-0 z-0">
-                {service.videoUrl ? (
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover"
-                  >
-                    <source src={service.videoUrl} type="video/mp4" />
-                    <source src={service.videoUrl} type="video/webm" />
-                  </video>
-                ) : (
-                  // Default video (using HeroSection video as fallback)
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover"
-                  >
-                    <source src="https://sg.fiverrcdn.com/packages_lp/cover_video.mp4" type="video/mp4" />
-                  </video>
-                )}
-                {/* Dark overlay for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70"></div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-pink-900/30"></div>
-              </div>
-
-              {/* Responsive Title Overlay */}
-              <div className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                <div className="text-center max-w-xs sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl font-bold text-white mb-2 sm:mb-4 leading-tight drop-shadow-2xl">
-                    {service.title}
-                  </h1>
-                  {/* Optional subtle service indicator */}
-                  <div className="inline-flex items-center bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 sm:px-6 sm:py-2 border border-white/20">
-                    <span className="text-white/90 text-xs sm:text-sm font-medium">Premium Service</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Responsive floating indicators */}
-              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 lg:top-6 lg:left-6 bg-black/20 backdrop-blur-md rounded-full px-2 py-1 sm:px-3 sm:py-1 border border-white/10">
-                <div className="flex items-center text-white text-xs sm:text-sm">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full mr-1 sm:mr-2 animate-pulse"></div>
-                  Live
-                </div>
-              </div>
-              
-              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 bg-black/20 backdrop-blur-md rounded-full px-2 py-1 sm:px-3 sm:py-1 border border-white/10">
-                <div className="flex items-center text-white text-xs sm:text-sm">
-                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-                  HD
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Main Content Layout - Grid System */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Images and Service Info */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Enhanced Compact Image Gallery */}
+              {/* Enhanced Compact Media Gallery (Video + Images) */}
               <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 dark:border-gray-700/50 group">
                 <div className="aspect-[16/9] relative bg-gradient-to-br from-gray-50/50 to-blue-50/50 dark:from-black/40 dark:to-blue-950/40">
-                  <img
-                    src={service.images[selectedImage]}
-                    alt={service.title}
-                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.03]"
-                  />
-                  
-                  {/* Enhanced Glass Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
+                  {/* Show video if showVideo is true and videoUrl exists */}
+                  {showVideo && service.videoUrl ? (
+                    <>
+                      <video
+                        autoPlay
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                        onPlay={() => setIsVideoPlaying(true)}
+                        onEnded={() => {
+                          setIsVideoPlaying(false);
+                          // Auto-advance to first image after video ends (if autoSlide is on)
+                          if (autoSlide && service.images.length > 0) {
+                            setTimeout(() => {
+                              setShowVideo(false);
+                              setSelectedImage(0);
+                            }, 1000); // Wait 1 second before transitioning
+                          }
+                        }}
+                        onPause={() => setIsVideoPlaying(false)}
+                      >
+                        <source src={service.videoUrl} type="video/mp4" />
+                        <source src={service.videoUrl} type="video/webm" />
+                      </video>
+                      {/* Dark overlay for video */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/40"></div>
+                      {/* Video indicator badge */}
+                      <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20">
+                        <div className="flex items-center text-white text-sm font-medium">
+                          <Eye className="w-4 h-4 mr-2" />
+                          {isVideoPlaying ? 'Playing' : 'Video'}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        src={service.images[selectedImage]}
+                        alt={service.title}
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.03]"
+                      />
+                      {/* Enhanced Glass Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
+                    </>
+                  )}
                   
                   {/* Floating Action Buttons with Glass Morphism */}
                   <div className="absolute top-4 right-4 flex space-x-2">
@@ -703,7 +732,9 @@ const ServiceDetailPage: React.FC = () => {
                   <div className="absolute top-4 left-4">
                     <div className="flex items-center space-x-2 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl px-4 py-2 border border-white/30 dark:border-gray-600/30 shadow-xl">
                       <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{selectedImage + 1}/{service.images.length}</span>
+                      <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                        {currentMediaIndex + 1}/{totalMediaItems}
+                      </span>
                       {autoSlide && (
                         <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse" />
                       )}
@@ -711,19 +742,19 @@ const ServiceDetailPage: React.FC = () => {
                   </div>
                   
                   {/* Modern Glass Navigation Arrows */}
-                  {service.images.length > 1 && (
+                  {totalMediaItems > 1 && (
                     <>
                       <button
                         onClick={prevImage}
                         className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-black/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-xl border border-white/30 dark:border-gray-600/30"
-                        title="Previous image"
+                        title="Previous media"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={nextImage}
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-black/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-xl border border-white/30 dark:border-gray-600/30"
-                        title="Next image"
+                        title="Next media"
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -731,45 +762,96 @@ const ServiceDetailPage: React.FC = () => {
                   )}
 
                   {/* Modern Glass Progress Indicators */}
-                  {service.images.length > 1 && (
+                  {totalMediaItems > 1 && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                      {/* Video indicator dot (if video exists) */}
+                      {service.videoUrl && (
+                        <button
+                          onClick={() => {
+                            setShowVideo(true);
+                            setSelectedImage(0);
+                            setIsVideoPlaying(false); // Reset video state
+                            setAutoSlide(true); // Enable auto-slide
+                          }}
+                          className={cn(
+                            "h-2 rounded-full transition-all duration-300 hover:scale-110",
+                            showVideo 
+                              ? 'w-8 bg-gradient-to-r from-purple-500 to-pink-600 shadow-lg' 
+                              : 'w-2 bg-white/70 hover:bg-white/90'
+                          )}
+                          title="Video"
+                        />
+                      )}
+                      {/* Image indicator dots */}
                       {service.images.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => {
+                            setShowVideo(false);
                             setSelectedImage(index);
                             setAutoSlide(false);
                             setTimeout(() => setAutoSlide(true), 10000);
                           }}
                           className={cn(
                             "h-2 rounded-full transition-all duration-300 hover:scale-110",
-                            selectedImage === index 
+                            !showVideo && selectedImage === index 
                               ? 'w-8 bg-gradient-to-r from-blue-500 to-cyan-600 shadow-lg' 
                               : 'w-2 bg-white/70 hover:bg-white/90'
                           )}
+                          title={`Image ${index + 1}`}
                         />
                       ))}
                     </div>
                   )}
                 </div>
                 
-                {/* Compact Glass Thumbnails */}
-                {service.images.length > 1 && (
+                {/* Compact Glass Thumbnails (Video + Images) */}
+                {totalMediaItems > 1 && (
                   <div className="flex space-x-2 p-4 overflow-x-auto scrollbar-hide bg-gradient-to-r from-gray-50/80 to-blue-50/80 dark:from-black/40 dark:to-blue-950/40 backdrop-blur-sm">
+                    {/* Video thumbnail (if video exists) */}
+                    {service.videoUrl && (
+                      <button
+                        onClick={() => {
+                          setShowVideo(true);
+                          setSelectedImage(0);
+                          setIsVideoPlaying(false); // Reset video state
+                          setAutoSlide(true); // Enable auto-slide
+                        }}
+                        className={cn(
+                          "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110 relative",
+                          showVideo
+                            ? 'border-purple-500/80 dark:border-purple-400/80 ring-2 ring-purple-200/50 dark:ring-purple-600/30 shadow-lg transform scale-105' 
+                            : 'border-gray-200/50 dark:border-gray-600/50 hover:border-purple-300/70 dark:hover:border-purple-500/70 shadow-sm'
+                        )}
+                        title="Video"
+                      >
+                        <video
+                          src={service.videoUrl}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <Eye className="w-5 h-5 text-white" />
+                        </div>
+                      </button>
+                    )}
+                    {/* Image thumbnails */}
                     {service.images.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => {
+                          setShowVideo(false);
                           setSelectedImage(index);
                           setAutoSlide(false);
                           setTimeout(() => setAutoSlide(true), 10000);
                         }}
                         className={cn(
                           "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110",
-                          selectedImage === index 
+                          !showVideo && selectedImage === index 
                             ? 'border-blue-500/80 dark:border-blue-400/80 ring-2 ring-blue-200/50 dark:ring-blue-600/30 shadow-lg transform scale-105' 
                             : 'border-gray-200/50 dark:border-gray-600/50 hover:border-blue-300/70 dark:hover:border-blue-500/70 shadow-sm'
                         )}
+                        title={`Image ${index + 1}`}
                       >
                         <img src={image} alt={`${service.title} ${index + 1}`} className="w-full h-full object-cover" />
                       </button>
@@ -915,9 +997,7 @@ const ServiceDetailPage: React.FC = () => {
             <div className="border-b border-gray-100/50 dark:border-gray-700/50 bg-gradient-to-r from-gray-50/60 to-blue-50/40 dark:from-black/40 dark:to-blue-950/40 backdrop-blur-sm">
               <nav className="flex space-x-1 px-6">
                 {[
-                  { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' },
-                  { id: 'reviews', label: `Reviews (${reviewStats.totalReviews})`, icon: Star, color: 'yellow' },
-                  { id: 'chat', label: 'Chat with Provider', icon: MessageCircle, color: 'green' }
+                  { id: 'overview', label: 'Overview', icon: Shield, color: 'blue' }
                 ].map((tab) => {
                   const IconComponent = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -1096,8 +1176,8 @@ const ServiceDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Reviews Tab */}
-              {activeTab === 'reviews' && (
+              {/* Reviews Tab - REMOVED (see line 67 for TabType update) */}
+              {false && activeTab === 'reviews' && (
                 <div className="space-y-6">
                   {/* Review Summary */}
                   <div className="bg-gradient-to-br from-blue-50/80 to-purple-50/80 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm rounded-3xl p-6 border border-blue-100/50 dark:border-blue-800/50 shadow-lg">
@@ -1237,8 +1317,8 @@ const ServiceDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Chat Tab */}
-              {activeTab === 'chat' && (
+              {/* Chat Tab - REMOVED (see line 67 for TabType update) */}
+              {false && activeTab === 'chat' && (
                 <div className="space-y-4">
                   {/* Enhanced Chat Header */}
                   <div className="flex items-center justify-between pb-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50/60 to-purple-50/60 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm -m-6 p-6 rounded-t-3xl">

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Mail, Lock, User, Phone, MapPin, Home, Check, Eye, EyeOff, Loader, ArrowRight, Shield, Star, Zap } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import Orb from '../components/Orb';
+import { ShootingStars } from '../components/ui/shooting-stars';
 import { userApi, type RegisterUserData } from '../api/userApi';
 
 interface FormData {
@@ -170,7 +170,7 @@ export default function SignupForm() {
         address: formData.address || undefined,
       };
       await userApi.register(payload);
-      toast.success('🎉 Account created successfully! Welcome aboard!');
+      toast.success('Account created successfully!');
       setTimeout(() => {
         window.location.href = '/signin';
       }, 1000);
@@ -195,8 +195,8 @@ export default function SignupForm() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateFormData('email', e.target.value)}
-                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                    errors.email ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
+                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
+                    errors.email ? 'border-white/50 focus:ring-white/50' : 'border-white/20 hover:border-white/30'
                   }`}
                   placeholder="name@email.com"
                 />
@@ -204,15 +204,15 @@ export default function SignupForm() {
                   {emailCheckLoading ? (
                     <Loader className="h-4 w-4 animate-spin text-gray-400" />
                   ) : emailExists === false ? (
-                    <Check className="h-4 w-4 text-green-400" />
+                    <Check className="h-4 w-4 text-white" />
                   ) : emailExists === true ? (
-                    <span className="h-2 w-2 bg-red-400 rounded-full" />
+                    <span className="h-2 w-2 bg-white rounded-full" />
                   ) : null}
                 </div>
               </div>
               {errors.email && (
-                <div className="mt-2 p-3 bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-xl">
-                  <p className="text-red-400 text-sm">{errors.email}</p>
+                <div className="mt-2 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl">
+                  <p className="text-white text-sm">{errors.email}</p>
                 </div>
               )}
             </div>
@@ -225,8 +225,8 @@ export default function SignupForm() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => updateFormData('password', e.target.value)}
-                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                    errors.password ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
+                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
+                    errors.password ? 'border-white/50 focus:ring-white/50' : 'border-white/20 hover:border-white/30'
                   }`}
                   placeholder="Create a strong password"
                 />
@@ -247,13 +247,13 @@ export default function SignupForm() {
               {errors.password && (
                 <div className={`mt-2 p-3 border-l-4 rounded-lg backdrop-blur-sm ${
                   formData.password && formData.password.length < 6 
-                    ? 'bg-red-500/20 border-red-500' 
-                    : 'bg-red-500/10 border-red-400'
+                    ? 'bg-white/20 border-white' 
+                    : 'bg-white/10 border-white/50'
                 }`}>
                   <p className={`text-sm font-semibold flex items-center ${
                     formData.password && formData.password.length < 6 
-                      ? 'text-red-300' 
-                      : 'text-red-400'
+                      ? 'text-white' 
+                      : 'text-gray-300'
                   }`}>
                     <span className="mr-2 text-lg">
                       {formData.password && formData.password.length < 6 ? '🚨' : '⚠️'}
@@ -263,9 +263,9 @@ export default function SignupForm() {
                 </div>
               )}
               {!errors.password && formData.password && formData.password.length > 6 && (
-                <div className="mt-2 p-3 bg-green-500/10 backdrop-blur-sm border border-green-500/20 rounded-xl">
-                  <p className="text-green-400 text-sm font-medium flex items-center">
-                    <span className="mr-2">✅</span>
+                <div className="mt-2 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl">
+                  <p className="text-white text-sm font-medium flex items-center">
+                    <span className="mr-2"></span>
                     Password is strong enough
                   </p>
                 </div>
@@ -280,8 +280,8 @@ export default function SignupForm() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => updateFormData('confirmPassword', e.target.value)}
-                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                    errors.confirmPassword ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
+                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
+                    errors.confirmPassword ? 'border-white/50 focus:ring-white/50' : 'border-white/20 hover:border-white/30'
                   }`}
                   placeholder="Confirm your password"
                 />
@@ -294,13 +294,13 @@ export default function SignupForm() {
                 </button>
                 {formData.confirmPassword && formData.password === formData.confirmPassword && (
                   <div className="absolute right-12 top-4">
-                    <Check className="h-5 w-5 text-green-400" />
+                    <Check className="h-5 w-5 text-white" />
                   </div>
                 )}
               </div>
               {errors.confirmPassword && (
-                <div className="mt-2 p-3 bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-xl">
-                  <p className="text-red-400 text-sm">{errors.confirmPassword}</p>
+                <div className="mt-2 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl">
+                  <p className="text-white text-sm">{errors.confirmPassword}</p>
                 </div>
               )}
             </div>
@@ -319,7 +319,7 @@ export default function SignupForm() {
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => updateFormData('firstName', e.target.value)}
-                    className={`w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                    className={`w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
                       errors.firstName ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
                     }`}
                     placeholder="John"
@@ -337,7 +337,7 @@ export default function SignupForm() {
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => updateFormData('lastName', e.target.value)}
-                  className={`w-full px-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                  className={`w-full px-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
                     errors.lastName ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
                   }`}
                   placeholder="Doe"
@@ -364,14 +364,14 @@ export default function SignupForm() {
                     if (value.length > 2) value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4');
                     updateFormData('phone', value);
                   }}
-                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                  className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
                     errors.phone ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
                   }`}
                   placeholder="94 712 345 678"
                 />
                 {formData.phone && formData.phone.replace(/\D/g, '').length === 11 && formData.phone.replace(/\D/g, '').startsWith('94') && (
                   <div className="absolute right-4 top-4">
-                    <Check className="h-5 w-5 text-green-400" />
+                    <Check className="h-5 w-5 text-white" />
                   </div>
                 )}
               </div>
@@ -400,7 +400,7 @@ export default function SignupForm() {
                   }}
                   onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 180)}
                   onFocus={() => setShowLocationSuggestions(!!formData.location)}
-                  className={`w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                  className={`w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200 ${
                     errors.location ? 'border-red-500/50 focus:ring-red-500' : 'border-white/20 hover:border-white/30'
                   }`}
                   placeholder="City, District (e.g., Colombo, Western)"
@@ -448,7 +448,7 @@ export default function SignupForm() {
                   type="text"
                   value={formData.address}
                   onChange={(e) => updateFormData('address', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border border-white/20 hover:border-white/30 rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border border-white/20 hover:border-white/30 rounded-xl text-white placeholder-gray-400 focus:bg-white/10 focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
                   placeholder="Street address (optional)"
                 />
               </div>
@@ -459,14 +459,14 @@ export default function SignupForm() {
       case 4:
         return (
           <div className="space-y-6">
-            <div className="rounded-xl p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-500/30">
+            <div className="rounded-xl p-6 bg-gradient-to-r from-white/20 to-white/20 backdrop-blur-sm border border-white/30">
               <div className="flex items-center">
-                <div className="p-2 bg-green-500 rounded-full mr-3">
+                <div className="p-2 bg-white rounded-full mr-3">
                   <Check className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-medium text-green-300">Almost done!</h3>
+                <h3 className="font-medium text-white">Almost done!</h3>
               </div>
-              <p className="text-sm text-green-200 mt-2">
+              <p className="text-sm text-gray-300 mt-2">
                 Review your information and use the button on the right panel to create your account.
               </p>
             </div>
@@ -489,24 +489,61 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-hidden relative">
-      {/* Animated Orb Background */}
+    <div className="h-screen bg-black overflow-hidden relative">
+      {/* Background with stars */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/6 w-96 h-96 opacity-40">
-          <Orb hue={280} hoverIntensity={0.4} rotateOnHover={true} />
-        </div>
-        <div className="absolute top-1/3 right-1/6 w-80 h-80 opacity-30">
-          <Orb hue={200} hoverIntensity={0.3} rotateOnHover={true} />
-        </div>
-        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 opacity-25">
-          <Orb hue={320} hoverIntensity={0.3} rotateOnHover={true} />
-        </div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(0,0,0,0)_80%)]" />
+        <div className="stars-background absolute inset-0" />
       </div>
 
-      {/* Floating Elements */}
-      <div className="absolute top-20 right-20 w-32 h-32 rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-sm animate-pulse border border-white/10" />
-      <div className="absolute bottom-20 left-20 w-24 h-24 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 backdrop-blur-sm animate-pulse delay-1000 border border-white/10" />
-      <div className="absolute top-1/2 right-10 w-16 h-16 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-sm animate-pulse delay-500 border border-white/10" />
+      {/* Multiple shooting star layers with black and white theme */}
+      <ShootingStars
+        starColor="#FFFFFF"
+        trailColor="#888888"
+        minSpeed={15}
+        maxSpeed={35}
+        minDelay={1000}
+        maxDelay={3000}
+      />
+      <ShootingStars
+        starColor="#CCCCCC"
+        trailColor="#666666"
+        minSpeed={10}
+        maxSpeed={25}
+        minDelay={2000}
+        maxDelay={4000}
+      />
+      <ShootingStars
+        starColor="#EEEEEE"
+        trailColor="#999999"
+        minSpeed={20}
+        maxSpeed={40}
+        minDelay={1500}
+        maxDelay={3500}
+      />
+
+      {/* CSS for twinkling stars background */}
+      <style>{`
+        .stars-background {
+          background-image: 
+            radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+          background-repeat: repeat;
+          background-size: 200px 200px;
+          animation: twinkle 5s ease-in-out infinite;
+          opacity: 0.5;
+        }
+
+        @keyframes twinkle {
+          0% { opacity: 0.5; }
+          50% { opacity: 0.8; }
+          100% { opacity: 0.5; }
+        }
+      `}</style>
 
       <Toaster 
         toastOptions={{
@@ -519,26 +556,26 @@ export default function SignupForm() {
         }}
       />
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="relative z-10 h-full flex items-center justify-center p-4 overflow-hidden">
+        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 h-full lg:h-auto">
           
           {/* Left Side - Form */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center overflow-y-auto lg:overflow-visible max-h-screen lg:max-h-none">
             <div className="w-full max-w-md">
               {/* Glass Card Container */}
-              <div className="bg-black/20 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden">
+              <div className="bg-black/20 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-2xl border border-white/10 relative overflow-hidden my-4 lg:my-0">
                 {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-purple-500/5 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 pointer-events-none" />
                 
                 {/* Logo */}
-                <div className="relative z-10 text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r  rounded-2xl mb-4 shadow-lg">
-                    <img src="/logo_svg_only_light.svg" alt="Logo" className="h-20 w-20" />
+                <div className="relative z-10 text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r rounded-2xl mb-3 shadow-lg">
+                    <img src="/logo_svg_only_light.svg" alt="Logo" className="h-16 w-16" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-xl font-bold text-white mb-1">
                     {['Create Account', 'Personal Info', 'Set Location', 'Review & Finish'][currentStep - 1]}
                   </h2>
-                  <p className="text-gray-400">
+                  <p className="text-sm text-gray-400">
                     {['Join our community today', 'Tell us about yourself', 'Where are you located?', 'Almost done!'][currentStep - 1]}
                   </p>
                 </div>
@@ -548,10 +585,10 @@ export default function SignupForm() {
                 </div>
 
                 {/* Footer link */}
-                <div className="relative z-10 pt-6 text-center">
-                  <p className="text-gray-400">
+                <div className="relative z-10 pt-4 text-center">
+                  <p className="text-sm text-gray-400">
                     Already have an account?{' '}
-                    <a href="/signin" className="text-purple-400 hover:text-purple-300 font-semibold hover:underline transition-colors">
+                    <a href="/signin" className="text-white hover:text-gray-300 font-semibold hover:underline transition-colors">
                       Sign in
                     </a>
                   </p>
@@ -561,96 +598,72 @@ export default function SignupForm() {
           </div>
 
           {/* Right Side - Interactive Welcome Panel */}
-          <div className="hidden lg:flex flex-col justify-center items-center text-center p-8">
-            <div className="w-full max-w-lg space-y-8">
+          <div className="hidden lg:flex flex-col justify-center items-center text-center p-4">
+            <div className="w-full max-w-lg space-y-6">
               
               {/* Welcome Header */}
               <div className="relative">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-600/20 backdrop-blur-sm border border-purple-500/30 text-purple-300 text-sm font-medium mb-6">
-                  <span className="relative flex h-2 w-2 mr-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                  </span>
-                  Join Our Community
-                </div>
-
-                <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
+                <h1 className="text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight">
                   Welcome to
-                  <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                    Your Platform
+                  <span className="block text-white">
+                    ZIA
                   </span>
                 </h1>
 
-                <p className="text-lg text-gray-300 mb-8 max-w-md mx-auto leading-relaxed">
+                <p className="text-base text-gray-300 mb-4 max-w-md mx-auto leading-relaxed">
                   Connect with trusted professionals and discover exceptional services in your area
                 </p>
               </div>
 
               {/* Interactive Feature Cards */}
-              <div className="grid grid-cols-1 gap-4">
-                <div className="group p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition-colors">
-                      <Shield className="h-6 w-6 text-purple-400" />
+              <div className="grid grid-cols-1 gap-3">
+                <div className="group p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-start space-x-3">
+                    <div className="p-2 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                      <Shield className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-left flex-1">
-                      <h3 className="text-white font-semibold mb-1">Verified Professionals</h3>
-                      <p className="text-gray-400 text-sm">All service providers are thoroughly vetted and verified</p>
+                      <h3 className="text-white font-semibold text-sm mb-0.5">Verified Professionals</h3>
+                      <p className="text-gray-400 text-xs">All service providers are thoroughly vetted and verified</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="group p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 hover:border-blue-500/30 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-blue-500/20 rounded-xl group-hover:bg-blue-500/30 transition-colors">
-                      <Star className="h-6 w-6 text-blue-400" />
+                <div className="group p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-start space-x-3">
+                    <div className="p-2 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                      <Star className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-left flex-1">
-                      <h3 className="text-white font-semibold mb-1">Quality Guarantee</h3>
-                      <p className="text-gray-400 text-sm">Rated and reviewed by our community members</p>
+                      <h3 className="text-white font-semibold text-sm mb-0.5">Quality Guarantee</h3>
+                      <p className="text-gray-400 text-xs">Rated and reviewed by our community members</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="group p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 hover:border-green-500/30 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-green-500/20 rounded-xl group-hover:bg-green-500/30 transition-colors">
-                      <Zap className="h-6 w-6 text-green-400" />
+                <div className="group p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-start space-x-3">
+                    <div className="p-2 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                      <Zap className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-left flex-1">
-                      <h3 className="text-white font-semibold mb-1">Instant Booking</h3>
-                      <p className="text-gray-400 text-sm">Book services instantly with real-time availability</p>
+                      <h3 className="text-white font-semibold text-sm mb-0.5">Instant Booking</h3>
+                      <p className="text-gray-400 text-xs">Book services instantly with real-time availability</p>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                  <div className="text-2xl font-bold text-white mb-1">1K+</div>
-                  <div className="text-xs text-gray-400">Verified Pros</div>
-                </div>
-                <div className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                  <div className="text-2xl font-bold text-white mb-1">5K+</div>
-                  <div className="text-xs text-gray-400">Happy Clients</div>
-                </div>
-                <div className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                  <div className="text-2xl font-bold text-white mb-1">4.9</div>
-                  <div className="text-xs text-gray-400">Avg Rating</div>
                 </div>
               </div>
 
               {/* Step Navigation */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-sm text-gray-400">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-gray-400">
                   <span>Step {currentStep} of {totalSteps}</span>
                   <span>{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
                 </div>
                 
-                <div className="w-full bg-white/10 rounded-full h-2">
+                <div className="w-full bg-white/10 rounded-full h-1.5">
                   <div 
-                    className={`bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out ${
+                    className={`bg-gradient-to-r from-white/80 to-white h-1.5 rounded-full transition-all duration-500 ease-out ${
                       currentStep === 1 ? 'w-1/4' :
                       currentStep === 2 ? 'w-2/4' :
                       currentStep === 3 ? 'w-3/4' : 'w-full'
@@ -662,13 +675,13 @@ export default function SignupForm() {
                   <button
                     onClick={prevStep}
                     disabled={currentStep === 1 || isLoading}
-                    className={`flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
                       currentStep === 1 || isLoading
                         ? 'text-gray-500 cursor-not-allowed'
-                        : 'text-white hover:bg-white/10 hover:text-purple-300'
+                        : 'text-white hover:bg-white/10 hover:text-gray-300'
                     }`}
                   >
-                    <ArrowRight className="h-4 w-4 mr-1 rotate-180" />
+                    <ArrowRight className="h-3 w-3 mr-1 rotate-180" />
                     Back
                   </button>
 
@@ -676,22 +689,22 @@ export default function SignupForm() {
                     <button
                       onClick={nextStep}
                       disabled={!canProceed || isLoading}
-                      className={`group relative overflow-hidden flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                      className={`group relative overflow-hidden flex items-center px-4 py-2 rounded-xl font-semibold text-xs transition-all duration-300 ${
                         !canProceed || isLoading
                           ? 'bg-white/20 text-white/60 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-105 shadow-lg hover:shadow-purple-500/25'
+                          : 'bg-gradient-to-r from-white to-white/80 text-black hover:scale-105 shadow-lg hover:shadow-white/25'
                       }`}
                     >
                       {!canProceed || isLoading ? (
                         <>
                           Next
-                          <ArrowRight className="h-4 w-4 ml-1" />
+                          <ArrowRight className="h-3 w-3 ml-1" />
                         </>
                       ) : (
                         <>
                           Next
-                          <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                          <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white to-white/80 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
                         </>
                       )}
                     </button>
@@ -699,27 +712,27 @@ export default function SignupForm() {
                     <button
                       onClick={handleSubmit}
                       disabled={!canProceed || isLoading}
-                      className={`group relative overflow-hidden flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                      className={`group relative overflow-hidden flex items-center px-4 py-2 rounded-xl font-semibold text-xs transition-all duration-300 ${
                         !canProceed || isLoading
                           ? 'bg-white/20 text-white/60 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-105 shadow-lg hover:shadow-purple-500/25'
+                          : 'bg-gradient-to-r from-white to-white/80 text-black hover:scale-105 shadow-lg hover:shadow-white/25'
                       }`}
                     >
                       {isLoading ? (
                         <>
-                          <Loader className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader className="h-3 w-3 mr-1 animate-spin" />
                           Creating...
                         </>
                       ) : !canProceed ? (
                         <>
                           Create Account
-                          <Check className="h-4 w-4 ml-1" />
+                          <Check className="h-3 w-3 ml-1" />
                         </>
                       ) : (
                         <>
                           Create Account
-                          <Check className="h-4 w-4 ml-1 group-hover:scale-110 transition-transform" />
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                          <Check className="h-3 w-3 ml-1 group-hover:scale-110 transition-transform" />
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white to-white/80 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
                         </>
                       )}
                     </button>
@@ -737,3 +750,6 @@ export default function SignupForm() {
     </div>
   );
 }
+
+
+
