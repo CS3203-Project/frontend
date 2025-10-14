@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar, 
   Shield, Award, ChevronLeft, ChevronRight, Send, Bookmark, Share2, Eye,
-  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard
+  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard, Github, Linkedin, Twitter
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
@@ -18,6 +18,7 @@ import { PaymentModal } from '../components/Payment';
 import toast, { Toaster } from 'react-hot-toast';
 import { cn } from '../utils/utils';
 import { confirmationApi } from '../api/confirmationApi';
+import GlassmorphismProfileCard from '../components/ui/ProfileCard';
 
 interface DetailedService {
   id: string;
@@ -621,12 +622,15 @@ const ServiceDetailPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 dark:from-black dark:via-gray-900/70 dark:to-blue-950/40 flex flex-col relative overflow-hidden">
-      {/* Ambient Background Effects */}
+    <div className="min-h-screen bg-white dark:bg-black flex flex-col relative overflow-hidden">
+      {/* Homepage-style Background with Grid Pattern */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-300/20 to-purple-300/20 dark:from-blue-800/30 dark:to-purple-800/30 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-300/20 to-blue-300/20 dark:from-cyan-800/30 dark:to-blue-800/30 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-purple-300/10 to-pink-300/10 dark:from-purple-800/20 dark:to-pink-800/20 rounded-full blur-2xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        
+        {/* Subtle gradient orbs */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 dark:bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-black/5 dark:bg-white/5 rounded-full blur-3xl"></div>
       </div>
       
       <Navbar />
@@ -636,14 +640,14 @@ const ServiceDetailPage: React.FC = () => {
           {/* Enhanced Back Button with Glass Morphism */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400 mb-6 transition-all duration-300 group bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-lg border border-white/30 dark:border-gray-700/50 hover:shadow-xl hover:border-blue-300/50 dark:hover:border-blue-600/50 hover:scale-105"
+            className="flex items-center text-black hover:text-gray-700 dark:text-white dark:hover:text-gray-300 mb-6 transition-all duration-300 group bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-6 py-3 shadow-lg border border-white/40 dark:border-white/10 hover:shadow-xl hover:scale-105"
           >
             <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
             <span className="font-semibold">Back</span>
           </button>
 
           {/* Enhanced Glass Morphism Breadcrumb */}
-          <div className="mb-8 bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+          <div className="mb-8 bg-white/50 dark:bg-black/50 backdrop-blur-lg rounded-3xl p-6 shadow-lg border border-white/30 dark:border-white/20">
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
@@ -652,8 +656,8 @@ const ServiceDetailPage: React.FC = () => {
             {/* Left Column - Images and Service Info */}
             <div className="lg:col-span-2 space-y-6">
               {/* Enhanced Compact Media Gallery (Video + Images) */}
-              <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 dark:border-gray-700/50 group">
-                <div className="aspect-[16/9] relative bg-gradient-to-br from-gray-50/50 to-blue-50/50 dark:from-black/40 dark:to-blue-950/40">
+              <div className="bg-white/50 dark:bg-black/50 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/30 dark:border-white/20 group">
+                <div className="aspect-[16/9] relative bg-white dark:bg-black">
                   {/* Show video if showVideo is true and videoUrl exists */}
                   {showVideo && service.videoUrl ? (
                     <>
@@ -705,23 +709,23 @@ const ServiceDetailPage: React.FC = () => {
                     <button
                       onClick={toggleWishlist}
                       className={cn(
-                        "p-3 rounded-2xl backdrop-blur-xl border transition-all duration-300 hover:scale-110 shadow-xl",
+                        "p-3 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 shadow-lg",
                         isWishlisted 
-                          ? 'bg-gradient-to-r from-red-500/90 to-pink-500/90 text-white border-red-400/50 shadow-red-200/50' 
-                          : 'bg-white/20 dark:bg-black/30 text-gray-700 dark:text-gray-300 border-white/30 dark:border-gray-600/30 hover:bg-red-50/30 dark:hover:bg-red-900/30 hover:text-red-500 hover:border-red-200/50 dark:hover:border-red-600/50'
+                          ? 'bg-black dark:bg-white text-white dark:text-black border-black/40 dark:border-white/40' 
+                          : 'bg-white/70 dark:bg-black/30 text-black dark:text-white border-white/40 dark:border-white/20 hover:bg-white dark:hover:bg-black/50'
                       )}
                       title="Add to wishlist"
                     >
                       <Heart className={cn("w-4 h-4", isWishlisted && "fill-current")} />
                     </button>
                     <button 
-                      className="p-3 rounded-2xl bg-white/20 dark:bg-black/30 backdrop-blur-xl border border-white/30 dark:border-gray-600/30 text-gray-700 dark:text-gray-300 hover:bg-blue-50/30 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200/50 dark:hover:border-blue-600/50 transition-all duration-300 hover:scale-110 shadow-xl"
+                      className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
                       title="Share service"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
                     <button 
-                      className="p-3 rounded-2xl bg-white/20 dark:bg-black/30 backdrop-blur-xl border border-white/30 dark:border-gray-600/30 text-gray-700 dark:text-gray-300 hover:bg-yellow-50/30 dark:hover:bg-yellow-900/30 hover:text-yellow-600 dark:hover:text-yellow-400 hover:border-yellow-200/50 dark:hover:border-yellow-600/50 transition-all duration-300 hover:scale-110 shadow-xl"
+                      className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
                       title="Bookmark service"
                     >
                       <Bookmark className="w-4 h-4" />
@@ -730,13 +734,13 @@ const ServiceDetailPage: React.FC = () => {
 
                   {/* Glass Morphism Slide Indicator */}
                   <div className="absolute top-4 left-4">
-                    <div className="flex items-center space-x-2 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl px-4 py-2 border border-white/30 dark:border-gray-600/30 shadow-xl">
-                      <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                    <div className="flex items-center space-x-2 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/40 dark:border-white/20 shadow-lg">
+                      <Eye className="w-4 h-4 text-black dark:text-white" />
+                      <span className="text-black dark:text-white text-sm font-medium">
                         {currentMediaIndex + 1}/{totalMediaItems}
                       </span>
                       {autoSlide && (
-                        <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse" />
                       )}
                     </div>
                   </div>
@@ -746,14 +750,14 @@ const ServiceDetailPage: React.FC = () => {
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-black/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-xl border border-white/30 dark:border-gray-600/30"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg border border-white/40 dark:border-white/20"
                         title="Previous media"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/20 dark:bg-black/30 backdrop-blur-xl rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-black/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 shadow-xl border border-white/30 dark:border-gray-600/30"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg border border-white/40 dark:border-white/20"
                         title="Next media"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -776,8 +780,8 @@ const ServiceDetailPage: React.FC = () => {
                           className={cn(
                             "h-2 rounded-full transition-all duration-300 hover:scale-110",
                             showVideo 
-                              ? 'w-8 bg-gradient-to-r from-purple-500 to-pink-600 shadow-lg' 
-                              : 'w-2 bg-white/70 hover:bg-white/90'
+                              ? 'w-8 bg-black dark:bg-white shadow-lg' 
+                              : 'w-2 bg-white/70 dark:bg-black/70 hover:bg-white dark:hover:bg-black'
                           )}
                           title="Video"
                         />
@@ -795,8 +799,8 @@ const ServiceDetailPage: React.FC = () => {
                           className={cn(
                             "h-2 rounded-full transition-all duration-300 hover:scale-110",
                             !showVideo && selectedImage === index 
-                              ? 'w-8 bg-gradient-to-r from-blue-500 to-cyan-600 shadow-lg' 
-                              : 'w-2 bg-white/70 hover:bg-white/90'
+                              ? 'w-8 bg-black dark:bg-white shadow-lg' 
+                              : 'w-2 bg-white/70 dark:bg-black/70 hover:bg-white dark:hover:bg-black'
                           )}
                           title={`Image ${index + 1}`}
                         />
@@ -807,7 +811,7 @@ const ServiceDetailPage: React.FC = () => {
                 
                 {/* Compact Glass Thumbnails (Video + Images) */}
                 {totalMediaItems > 1 && (
-                  <div className="flex space-x-2 p-4 overflow-x-auto scrollbar-hide bg-gradient-to-r from-gray-50/80 to-blue-50/80 dark:from-black/40 dark:to-blue-950/40 backdrop-blur-sm">
+                  <div className="flex space-x-2 p-4 overflow-x-auto scrollbar-hide bg-white/30 dark:bg-black/30 backdrop-blur-sm">
                     {/* Video thumbnail (if video exists) */}
                     {service.videoUrl && (
                       <button
@@ -820,8 +824,8 @@ const ServiceDetailPage: React.FC = () => {
                         className={cn(
                           "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110 relative",
                           showVideo
-                            ? 'border-purple-500/80 dark:border-purple-400/80 ring-2 ring-purple-200/50 dark:ring-purple-600/30 shadow-lg transform scale-105' 
-                            : 'border-gray-200/50 dark:border-gray-600/50 hover:border-purple-300/70 dark:hover:border-purple-500/70 shadow-sm'
+                            ? 'border-black dark:border-white ring-2 ring-black/20 dark:ring-white/20 shadow-lg transform scale-105' 
+                            : 'border-white/40 dark:border-white/20 hover:border-black dark:hover:border-white shadow-sm'
                         )}
                         title="Video"
                       >
@@ -848,8 +852,8 @@ const ServiceDetailPage: React.FC = () => {
                         className={cn(
                           "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110",
                           !showVideo && selectedImage === index 
-                            ? 'border-blue-500/80 dark:border-blue-400/80 ring-2 ring-blue-200/50 dark:ring-blue-600/30 shadow-lg transform scale-105' 
-                            : 'border-gray-200/50 dark:border-gray-600/50 hover:border-blue-300/70 dark:hover:border-blue-500/70 shadow-sm'
+                            ? 'border-black dark:border-white ring-2 ring-black/20 dark:ring-white/20 shadow-lg transform scale-105' 
+                            : 'border-white/40 dark:border-white/20 hover:border-black dark:hover:border-white shadow-sm'
                         )}
                         title={`Image ${index + 1}`}
                       >
@@ -901,94 +905,97 @@ const ServiceDetailPage: React.FC = () => {
             {/* Right Column - Provider Details and Actions */}
             <div className="lg:col-span-1 space-y-6">
               {/* Glass Morphism Price Card */}
-              <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 dark:border-gray-700/50 sticky top-24">
-                <div className="text-center mb-6">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-                    {service.currency} {service.price.toLocaleString()}
+              <div className="relative">
+                <div 
+                  className="bg-white/50 dark:bg-black/50 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 dark:border-white/20 sticky top-24"
+                  style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)' }}
+                >
+                  <div className="text-center mb-6">
+                    <div className="text-4xl font-bold text-black dark:text-white mb-2">
+                      {service.currency} {service.price.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Starting price</div>
+                    <div className="flex items-center justify-center text-black dark:text-white bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/40 dark:border-white/20 shadow-lg">
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      <span className="text-sm font-medium">Available now</span>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Starting price</div>
-                  <div className="flex items-center justify-center text-green-600 dark:text-green-400 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm rounded-2xl px-4 py-2 border border-green-200/50 dark:border-green-700/50 shadow-lg">
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    <span className="text-sm font-medium">Available now</span>
-                  </div>
-                </div>
 
-                {/* Enhanced Action Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={handlePayNow}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border border-blue-600 backdrop-blur-sm flex items-center justify-center"
-                  >
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Pay Now
-                  </button>
-                  
-                  <button
-                    onClick={handleBookNow}
-                    disabled={bookingLoading}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none backdrop-blur-sm"
-                  >
-                    {bookingLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Creating conversation...
-                      </div>
-                    ) : (
-                      'Book Now'
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={handleContactProvider}
-                    className="w-full border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-semibold hover:bg-blue-50/50 dark:hover:bg-blue-900/30 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/30 dark:bg-black/30"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    View Provider
-                  </button>
-                </div>
-
-                {/* Quick Provider Info */}
-                <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-700/50">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="relative">
-                      <img
-                        src={provider?.logoUrl || provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider') + '&background=6366f1&color=fff&size=48'}
-                        alt="Provider"
-                        className="w-12 h-12 rounded-2xl object-cover border-2 border-white/50 dark:border-gray-600/50 shadow-lg"
-                      />
-                      {provider?.isVerified && (
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-4 h-4 text-white" />
+                  {/* Enhanced Action Buttons */}
+                  <div className="space-y-3">
+                    <button
+                      onClick={handlePayNow}
+                      className="w-full bg-black dark:bg-white text-white dark:text-black py-4 px-6 rounded-full font-bold hover:scale-105 transition-all duration-300 shadow-lg border border-black/40 dark:border-white/40 backdrop-blur-sm flex items-center justify-center"
+                      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+                    >
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Pay Now
+                    </button>
+                    
+                    <button
+                      onClick={handleBookNow}
+                      disabled={bookingLoading}
+                      className="w-full bg-white/70 dark:bg-black/30 text-black dark:text-white py-4 px-6 rounded-full font-bold hover:bg-white dark:hover:bg-black/50 transition-all duration-300 shadow-lg border border-white/40 dark:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-md"
+                    >
+                      {bookingLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black dark:border-white mr-2"></div>
+                          Creating conversation...
                         </div>
+                      ) : (
+                        'Book Now'
                       )}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100">
-                        {provider?.user ? 
-                          `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' :
-                          'Provider'
-                        }
-                      </h4>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                          {provider?.averageRating ? provider.averageRating.toFixed(1) : 'New'}
-                        </span>
-                        <span className="text-gray-500 dark:text-gray-400 ml-1 text-sm">
-                          ({provider?.totalReviews || 0})
-                        </span>
-                      </div>
-                    </div>
+                    </button>
+                    
                   </div>
-                  
-                  {provider?.isVerified && (
-                    <div className="flex items-center text-green-600 dark:text-green-400 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm rounded-xl px-3 py-2 text-sm font-medium border border-green-200/50 dark:border-green-700/50 shadow-sm">
-                      <Shield className="w-4 h-4 mr-1" />
-                      Verified Provider
+
+                  {/* Working Hours Section */}
+                  {service.workingTime && service.workingTime.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-white/30 dark:border-white/20">
+                      <h4 className="text-sm font-semibold text-black dark:text-white mb-3 flex items-center">
+                        <Clock className="w-4 h-4 mr-2" />
+                        Working Hours
+                      </h4>
+                      <div className="space-y-2">
+                        {service.workingTime.map((time, index) => (
+                          <div 
+                            key={index}
+                            className="flex items-center bg-white/40 dark:bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/30 dark:border-white/10"
+                          >
+                            <Calendar className="w-3.5 h-3.5 text-black/60 dark:text-white/60 mr-2" />
+                            <span className="text-sm text-black dark:text-white font-medium">{time}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
+                
+                {/* Glassmorphism glow effect */}
+                <div className="absolute inset-0 rounded-3xl -z-10 transition-all duration-500 ease-out blur-2xl opacity-20 bg-gradient-to-r from-black/30 to-black/30 dark:from-white/20 dark:to-white/20" />
               </div>
+
+              {/* Provider Profile Card */}
+              {provider && (
+                <GlassmorphismProfileCard
+                  avatarUrl={provider?.logoUrl || provider?.user?.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider')}&background=000000&color=ffffff&size=96`}
+                  name={provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' : 'Provider'}
+                  title={provider?.isVerified ? 'Verified Provider' : 'Service Provider'}
+                  bio={provider?.bio || 'Professional service provider delivering quality services to clients.'}
+                  isVerified={provider?.isVerified}
+                  rating={provider?.averageRating}
+                  reviews={provider?.totalReviews}
+                  socialLinks={[
+                    { id: 'github', icon: Github, label: 'GitHub', href: '#' },
+                    { id: 'linkedin', icon: Linkedin, label: 'LinkedIn', href: '#' },
+                    { id: 'twitter', icon: Twitter, label: 'Twitter', href: '#' },
+                  ]}
+                  actionButton={{
+                    text: 'View Full Profile',
+                    onClick: () => navigate(`/provider/${provider.id}`)
+                  }}
+                />
+              )}
             </div>
           </div>
 
@@ -1417,220 +1424,6 @@ const ServiceDetailPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Enhanced Provider Section with Glass Morphism */}
-          <div className="mt-8">
-            <div className="bg-gradient-to-br from-white/90 to-gray-50/60 dark:from-black/80 dark:to-gray-900/60 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/50 max-w-6xl mx-auto">
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8 flex items-center">
-                <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
-                Service Provider
-              </h3>
-              
-              {providerLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                  <span className="ml-3 text-gray-600 dark:text-gray-400">Loading provider details...</span>
-                </div>
-              ) : (
-                <>
-                  {console.log('🎨 Rendering provider in UI. Current provider state:', provider)}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    {/* Provider Info Card */}
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
-                      <div className="flex items-center mb-6">
-                        <div className="relative">
-                          <img
-                            src={provider?.logoUrl || provider?.user?.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider') + '&background=6366f1&color=fff&size=120'}
-                            alt="Provider"
-                            className="w-20 h-20 rounded-3xl object-cover border-3 border-white/50 dark:border-gray-600/50 shadow-xl ring-4 ring-gray-100/50 dark:ring-gray-700/50"
-                          />
-                          {provider?.isVerified && (
-                            <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                              <CheckCircle className="w-6 h-6 text-white" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-6">
-                          <h4 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                            {provider?.user ? 
-                              `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' :
-                              'Provider'
-                            }
-                          </h4>
-                          {provider?.isVerified && (
-                            <div className="flex items-center text-green-600 dark:text-green-400 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm rounded-xl px-4 py-2 text-sm font-medium mb-3 border border-green-200/50 dark:border-green-700/50 shadow-sm">
-                              <Shield className="w-5 h-5 mr-2" />
-                              Verified Provider
-                            </div>
-                          )}
-                          <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-                            <Star className="w-5 h-5 text-yellow-400 fill-current mr-2" />
-                            <span className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                              {provider?.averageRating ? provider.averageRating.toFixed(1) : 'New'}
-                            </span>
-                            <span className="text-gray-500 dark:text-gray-400 ml-2">
-                              ({provider?.totalReviews || 0} reviews)
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Provider Stats */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="text-center bg-gradient-to-br from-blue-50/60 to-cyan-50/60 dark:from-blue-900/30 dark:to-cyan-900/30 backdrop-blur-sm rounded-2xl p-4 border border-blue-100/50 dark:border-blue-800/50 shadow-sm">
-                          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                            {provider?.services?.length || 0}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Services</div>
-                        </div>
-                        <div className="text-center bg-gradient-to-br from-purple-50/60 to-pink-50/60 dark:from-purple-900/30 dark:to-pink-900/30 backdrop-blur-sm rounded-2xl p-4 border border-purple-100/50 dark:border-purple-800/50 shadow-sm">
-                          <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                            {provider?.totalReviews || 0}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Reviews</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Contact Information Card */}
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
-                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                        <Phone className="w-6 h-6 mr-3 text-blue-500 dark:text-blue-400" />
-                        Contact Information
-                      </h4>
-                      <div className="space-y-4">
-                        {provider?.user?.email && (
-                          <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100/50 dark:border-gray-700/50">
-                            <div className="p-3 bg-blue-100/80 dark:bg-blue-900/60 backdrop-blur-sm rounded-xl mr-4">
-                              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Email</div>
-                              <div className="font-medium text-gray-800 dark:text-gray-200">{provider.user.email}</div>
-                            </div>
-                          </div>
-                        )}
-                        {provider?.user?.phone && (
-                          <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100/50 dark:border-gray-700/50">
-                            <div className="p-3 bg-green-100/80 dark:bg-green-900/60 backdrop-blur-sm rounded-xl mr-4">
-                              <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Phone</div>
-                              <div className="font-medium text-gray-800 dark:text-gray-200">{provider.user.phone}</div>
-                            </div>
-                          </div>
-                        )}
-                        {provider?.user?.location && (
-                          <div className="flex items-center text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100/50 dark:border-gray-700/50">
-                            <div className="p-3 bg-red-100/80 dark:bg-red-900/60 backdrop-blur-sm rounded-xl mr-4">
-                              <MapPin className="w-5 h-5 text-red-600 dark:text-red-400" />
-                            </div>
-                            <div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Location</div>
-                              <div className="font-medium text-gray-800 dark:text-gray-200">{provider.user.location}</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Skills and About Section */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    {/* Skills */}
-                    {provider?.skills && provider.skills.length > 0 && (
-                      <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
-                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                          <Award className="w-6 h-6 mr-3 text-orange-500 dark:text-orange-400" />
-                          Skills & Expertise
-                        </h4>
-                        <div className="flex flex-wrap gap-3">
-                          {provider.skills.map((skill: string, index: number) => (
-                            <span 
-                              key={index}
-                              className="bg-gradient-to-r from-blue-100/80 to-cyan-100/80 dark:from-blue-900/60 dark:to-cyan-900/60 backdrop-blur-sm text-blue-800 dark:text-blue-200 text-sm px-4 py-2 rounded-full font-medium border border-blue-200/50 dark:border-blue-700/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quick Actions */}
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
-                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                        <Users className="w-6 h-6 mr-3 text-purple-500 dark:text-purple-400" />
-                        Quick Actions
-                      </h4>
-                      <div className="space-y-4">
-                        <button
-                          onClick={handleBookNow}
-                          disabled={bookingLoading}
-                          className="w-full bg-gradient-to-r from-green-600/90 to-emerald-600/90 text-white py-4 px-6 rounded-2xl font-bold hover:from-green-700/90 hover:to-emerald-700/90 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border border-green-600/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none backdrop-blur-sm"
-                        >
-                          {bookingLoading ? (
-                            <div className="flex items-center justify-center">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                              Creating conversation...
-                            </div>
-                          ) : (
-                            <>
-                              <Calendar className="w-5 h-5 mr-2 inline" />
-                              Book Now
-                            </>
-                          )}
-                        </button>
-                        
-                        <button
-                          onClick={handleContactProvider}
-                          className="w-full border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 py-4 px-6 rounded-2xl font-bold hover:bg-blue-50/50 dark:hover:bg-blue-900/30 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl backdrop-blur-sm bg-white/30 dark:bg-black/30"
-                        >
-                          <MessageCircle className="w-5 h-5 mr-2" />
-                          View Provider
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* About Section */}
-                  {provider?.bio && (
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50 mb-8">
-                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                        <User className="w-6 h-6 mr-3 text-purple-500 dark:text-purple-400" />
-                        About the Provider
-                      </h4>
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-line">
-                        {provider.bio}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Qualifications */}
-                  {provider?.qualifications && provider.qualifications.length > 0 && (
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
-                      <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                        <GraduationCap className="w-6 h-6 mr-3 text-indigo-500 dark:text-indigo-400" />
-                        Qualifications & Certifications
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {provider.qualifications.map((qualification: string, index: number) => (
-                          <div 
-                            key={index}
-                            className="flex items-center bg-gradient-to-r from-gray-50/60 to-blue-50/60 dark:from-black/30 dark:to-blue-950/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:shadow-lg transition-all duration-300 hover:scale-105"
-                          >
-                            <CheckCircle className="w-6 h-6 text-green-500 dark:text-green-400 mr-4 flex-shrink-0" />
-                            <span className="text-gray-700 dark:text-gray-300 font-medium">{qualification}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
               )}
             </div>
           </div>
