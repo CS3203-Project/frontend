@@ -20,7 +20,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       default: "bg-gradient-to-r from-gray-600 to-black text-white hover:from-black hover:to-gray-700 hover:text-white shadow-lg hover:shadow-xl",
       outline: "border-2 border-gray-300 bg-transparent hover:bg-gray-50 hover:border-gray-400 text-gray-700 hover:text-gray-900",
       ghost: "hover:bg-gray-100 text-gray-600 hover:text-gray-900",
-      white: "bg-white text-black hover:bg-white/90 shadow-lg hover:shadow-xl"
+      white: "bg-white text-black hover:bg-gray-100 border border-gray-300 shadow-lg hover:shadow-xl"
     };
     
     const sizes: Record<ButtonSize, string> = {
