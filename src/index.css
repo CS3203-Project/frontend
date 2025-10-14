@@ -429,3 +429,17 @@ body {
   border: 1px solid rgba(59, 130, 246, 0.3);
   color: #3b82f6;
 }
+
+/* Shimmer animation for skeleton loaders */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

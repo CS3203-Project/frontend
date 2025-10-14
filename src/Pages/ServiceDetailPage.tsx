@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar, 
   Shield, Award, ChevronLeft, ChevronRight, Send, Bookmark, Share2, Eye,
-  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard, Github, Linkedin, Twitter
+  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard, Github, Linkedin, Twitter, ArrowUpRight
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
@@ -105,6 +105,10 @@ const ServiceDetailPage: React.FC = () => {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState('all');
   
+  // Reviews carousel state
+  const reviewsScrollRef = React.useRef<HTMLDivElement>(null);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  
   // Payment modal state
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
@@ -144,6 +148,30 @@ const ServiceDetailPage: React.FC = () => {
       return () => clearInterval(interval);
     }
   }, [autoSlide, service, showVideo, selectedImage, totalMediaItems, isVideoPlaying]);
+
+  // Auto-scroll reviews carousel
+  useEffect(() => {
+    if (reviews.length > 1 && reviewsScrollRef.current) {
+      const interval = setInterval(() => {
+        setCurrentReviewIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 1) % reviews.length;
+          
+          // Smooth scroll to next review
+          if (reviewsScrollRef.current) {
+            const cardWidth = reviewsScrollRef.current.scrollWidth / reviews.length;
+            reviewsScrollRef.current.scrollTo({
+              left: cardWidth * nextIndex,
+              behavior: 'smooth'
+            });
+          }
+          
+          return nextIndex;
+        });
+      }, 5000); // Change review every 5 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [reviews.length]);
 
   // Transform ServiceResponse (API data) to DetailedService format
   const transformApiService = (apiService: ServiceResponse): DetailedService => {
@@ -579,14 +607,212 @@ const ServiceDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100/30 to-blue-50/20 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-black dark:via-gray-950 dark:to-black flex flex-col relative overflow-hidden">
+        {/* Background */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-white/10 via-white/5 to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-black/10 via-black/5 to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent rounded-full blur-3xl"></div>
+        </div>
+        
         <Navbar />
-        <div className="flex-1 flex items-center justify-center mt-16">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+        
+        <main className="flex-1 mt-16 relative z-10">
+          <div className="container mx-auto px-4 py-8">
+            {/* Skeleton Breadcrumb */}
+            <div className="mb-8 bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/20 dark:border-white/20 animate-pulse">
+              <div className="h-4 bg-gradient-to-r from-black/20 via-gray-400/30 to-black/20 dark:from-white/20 dark:via-gray-500/30 dark:to-white/20 rounded w-1/3 animate-shimmer"></div>
             </div>
 
-        </div>
+            {/* Main Content Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column Skeleton */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Media Gallery Skeleton */}
+                <div className="bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 dark:border-white/10">
+                  <div className="aspect-[16/9] bg-gradient-to-br from-black/10 via-gray-300/20 to-black/10 dark:from-white/10 dark:via-gray-600/20 dark:to-white/10 animate-pulse relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                  </div>
+                  <div className="p-4 flex gap-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="w-14 h-14 bg-gradient-to-br from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded-xl animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Service Info Skeleton */}
+                <div className="py-8 px-6 space-y-4">
+                  <div className="h-10 bg-gradient-to-r from-black/20 via-gray-400/30 to-black/20 dark:from-white/20 dark:via-gray-500/30 dark:to-white/20 rounded w-2/3 animate-pulse relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-8 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded-full w-20 animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gradient-to-r from-black/15 via-gray-400/25 to-black/15 dark:from-white/15 dark:via-gray-500/25 dark:to-white/15 rounded w-full animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-4 bg-gradient-to-r from-black/15 via-gray-400/25 to-black/15 dark:from-white/15 dark:via-gray-500/25 dark:to-white/15 rounded w-5/6 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-4 bg-gradient-to-r from-black/15 via-gray-400/25 to-black/15 dark:from-white/15 dark:via-gray-500/25 dark:to-white/15 rounded w-4/6 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                  </div>
+                  <div className="h-6 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-1/4 mt-4 animate-pulse relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                  </div>
+                  
+                  {/* Location Card Skeleton */}
+                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl p-6 border border-white/20 dark:border-white/15 shadow-lg mt-6">
+                    <div className="h-6 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-1/3 mb-4 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-full animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                      <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-3/4 animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column Skeleton */}
+              <div className="lg:col-span-1">
+                <div className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-white/15 sticky top-24">
+                  {/* Avatar Skeleton */}
+                  <div className="flex flex-col items-center mb-8 pb-8 border-b border-white/20">
+                    <div className="w-20 h-20 bg-gradient-to-br from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded-full mb-4 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-6 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-32 mb-2 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-24 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    
+                    {/* Contact Info Skeleton */}
+                    <div className="mt-4 w-full space-y-2">
+                      <div className="h-10 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded-xl animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                      <div className="h-10 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded-xl animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-4 mt-4">
+                      <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-16 animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                      <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-16 animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Skeleton */}
+                  <div className="text-center mb-6 space-y-3">
+                    <div className="h-10 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-32 mx-auto animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-24 mx-auto animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-8 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded-full w-32 mx-auto animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                  </div>
+
+                  {/* Buttons Skeleton */}
+                  <div className="space-y-3 mb-6">
+                    <div className="h-14 bg-gradient-to-r from-black/30 to-gray-500/40 dark:from-white/30 dark:to-gray-400/40 rounded-full animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/10 to-transparent animate-shimmer"></div>
+                    </div>
+                    <div className="h-14 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded-full animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                  </div>
+
+                  {/* Working Hours Skeleton */}
+                  <div className="pt-6 border-t border-white/20 space-y-3">
+                    <div className="h-5 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-32 animate-pulse relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                    </div>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-12 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded-xl animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reviews Skeleton */}
+            <div className="mb-6 mt-6">
+              <div className="flex items-center justify-between mb-8">
+                <div className="h-8 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-48 animate-pulse relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                </div>
+                <div className="h-10 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded-full w-32 animate-pulse relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                </div>
+              </div>
+              
+              <div className="flex gap-6 overflow-hidden pb-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-[90%] sm:w-[45%] lg:w-[32%]">
+                    <div className="bg-white/70 dark:bg-black/50 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 dark:border-white/15 shadow-xl">
+                      <div className="flex items-start gap-4 mb-6">
+                        <div className="w-16 h-16 bg-gradient-to-br from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded-full animate-pulse relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-5 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-3/4 animate-pulse relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                          </div>
+                          <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-1/2 animate-pulse relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-1 mb-4">
+                        {[1, 2, 3, 4, 5].map((j) => (
+                          <div key={j} className="w-5 h-5 bg-gradient-to-br from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded animate-pulse relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-full animate-pulse relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                        </div>
+                        <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-5/6 animate-pulse relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                        </div>
+                        <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-4/6 animate-pulse relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+        
         <Footer />
       </div>
     );
@@ -622,32 +848,24 @@ const ServiceDetailPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-black dark:via-gray-950 dark:to-black flex flex-col relative overflow-hidden">
       {/* Homepage-style Background with Grid Pattern */}
       <div className="fixed inset-0 pointer-events-none">
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        {/* Enhanced grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] bg-[size:32px_32px]"></div>
         
-        {/* Subtle gradient orbs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 dark:bg-white/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-black/5 dark:bg-white/5 rounded-full blur-3xl"></div>
+        {/* Enhanced gradient orbs with glass effect */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-white/10 via-white/5 to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-black/10 via-black/5 to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-full blur-3xl"></div>
       </div>
       
       <Navbar />
       
       <main className="flex-1 mt-16 relative z-10">
         <div className="container mx-auto px-4 py-8">
-          {/* Enhanced Back Button with Glass Morphism */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-black hover:text-gray-700 dark:text-white dark:hover:text-gray-300 mb-6 transition-all duration-300 group bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-6 py-3 shadow-lg border border-white/40 dark:border-white/10 hover:shadow-xl hover:scale-105"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-semibold">Back</span>
-          </button>
-
           {/* Enhanced Glass Morphism Breadcrumb */}
-          <div className="mb-8 bg-white/50 dark:bg-black/50 backdrop-blur-lg rounded-3xl p-6 shadow-lg border border-white/30 dark:border-white/20">
+          <div className="mb-8 bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/20 dark:border-white/20">
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
@@ -656,8 +874,8 @@ const ServiceDetailPage: React.FC = () => {
             {/* Left Column - Images and Service Info */}
             <div className="lg:col-span-2 space-y-6">
               {/* Enhanced Compact Media Gallery (Video + Images) */}
-              <div className="bg-white/50 dark:bg-black/50 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/30 dark:border-white/20 group">
-                <div className="aspect-[16/9] relative bg-white dark:bg-black">
+              <div className="bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 dark:border-white/10 group">
+                <div className="aspect-[16/9] relative bg-gradient-to-br from-white via-gray-50 to-white dark:from-black dark:via-gray-950 dark:to-black">
                   {/* Show video if showVideo is true and videoUrl exists */}
                   {showVideo && service.videoUrl ? (
                     <>
@@ -711,21 +929,21 @@ const ServiceDetailPage: React.FC = () => {
                       className={cn(
                         "p-3 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 shadow-lg",
                         isWishlisted 
-                          ? 'bg-black dark:bg-white text-white dark:text-black border-black/40 dark:border-white/40' 
-                          : 'bg-white/70 dark:bg-black/30 text-black dark:text-white border-white/40 dark:border-white/20 hover:bg-white dark:hover:bg-black/50'
+                          ? 'bg-black dark:bg-white text-white dark:text-black border-black/10 dark:border-white/20' 
+                          : 'bg-white/70 dark:bg-black/30 text-black dark:text-white border-white/5 dark:border-white/5 hover:bg-white dark:hover:bg-black/50'
                       )}
                       title="Add to wishlist"
                     >
                       <Heart className={cn("w-4 h-4", isWishlisted && "fill-current")} />
                     </button>
                     <button 
-                      className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
+                      className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/5 dark:border-white/5 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
                       title="Share service"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
                     <button 
-                      className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/40 dark:border-white/20 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
+                      className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/5 dark:border-white/5 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
                       title="Bookmark service"
                     >
                       <Bookmark className="w-4 h-4" />
@@ -734,7 +952,7 @@ const ServiceDetailPage: React.FC = () => {
 
                   {/* Glass Morphism Slide Indicator */}
                   <div className="absolute top-4 left-4">
-                    <div className="flex items-center space-x-2 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/40 dark:border-white/20 shadow-lg">
+                    <div className="flex items-center space-x-2 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/5 dark:border-white/5 shadow-lg">
                       <Eye className="w-4 h-4 text-black dark:text-white" />
                       <span className="text-black dark:text-white text-sm font-medium">
                         {currentMediaIndex + 1}/{totalMediaItems}
@@ -750,14 +968,14 @@ const ServiceDetailPage: React.FC = () => {
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg border border-white/40 dark:border-white/20"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg border border-white/5 dark:border-white/20"
                         title="Previous media"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg border border-white/40 dark:border-white/20"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg border border-white/5 dark:border-white/20"
                         title="Next media"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -825,7 +1043,7 @@ const ServiceDetailPage: React.FC = () => {
                           "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110 relative",
                           showVideo
                             ? 'border-black dark:border-white ring-2 ring-black/20 dark:ring-white/20 shadow-lg transform scale-105' 
-                            : 'border-white/40 dark:border-white/20 hover:border-black dark:hover:border-white shadow-sm'
+                            : 'border-white/5 dark:border-white/5 hover:border-black dark:hover:border-white shadow-sm'
                         )}
                         title="Video"
                       >
@@ -853,7 +1071,7 @@ const ServiceDetailPage: React.FC = () => {
                           "flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-110",
                           !showVideo && selectedImage === index 
                             ? 'border-black dark:border-white ring-2 ring-black/20 dark:ring-white/20 shadow-lg transform scale-105' 
-                            : 'border-white/40 dark:border-white/20 hover:border-black dark:hover:border-white shadow-sm'
+                            : 'border-white/5 dark:border-white/5 hover:border-black dark:hover:border-white shadow-sm'
                         )}
                         title={`Image ${index + 1}`}
                       >
@@ -864,69 +1082,227 @@ const ServiceDetailPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Enhanced Service Header with Glass Morphism */}
-              <div className="bg-gradient-to-br from-white/90 to-gray-50/50 dark:from-black/70 dark:to-gray-900/50 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20 dark:border-gray-700/50">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 dark:from-gray-100 dark:to-blue-100 bg-clip-text text-transparent mb-3">
-                      {service.title}
-                    </h1>
-                    <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400 mb-4 flex-wrap gap-2">
-                      <span className="bg-gradient-to-r from-blue-100/80 to-cyan-100/80 dark:from-blue-900/60 dark:to-cyan-900/60 backdrop-blur-sm text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full font-medium shadow-lg border border-blue-200/50 dark:border-blue-700/50">
-                        {service.category?.name}
-                      </span>
-                      <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                        <span className="font-medium text-gray-800 dark:text-gray-200">{averageRating.toFixed(1)}</span>
-                        <span className="text-gray-500 dark:text-gray-400 ml-1">({reviewStats.totalReviews} reviews)</span>
-                      </div>
-                      <div className="flex items-center bg-white/60 dark:bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                        <Eye className="w-4 h-4 mr-1 text-blue-500 dark:text-blue-400" />
-                        <span className="text-gray-700 dark:text-gray-300">1.2k views</span>
+              {/* Service Header - Minimal Glass Theme */}
+              <div className="py-8 px-6">
+                <div className="max-w-4xl">
+                  {/* Title */}
+                  <h1 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
+                    {service.title}
+                  </h1>
+                  
+                  {/* Tags */}
+                  {service.tags && service.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {service.tags.map((tag, index) => (
+                        <span 
+                          key={index} 
+                          className="text-sm px-4 py-1.5 rounded-full text-gray-600 dark:text-gray-300 bg-white/50 dark:bg-black/30 backdrop-blur-sm border border-white/15 dark:border-white/5 hover:border-black/15 dark:hover:border-white/15 transition-all duration-300"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  {service.description && (
+                    <p className="text-base text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+                      {service.description}
+                    </p>
+                  )}
+
+                  {/* Rating with White Stars */}
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, index) => (
+                        <Star 
+                          key={index}
+                          className={cn(
+                            "w-5 h-5",
+                            index < Math.floor(averageRating)
+                              ? "fill-white text-white dark:fill-white dark:text-white"
+                              : "fill-none text-gray-300 dark:text-gray-600"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-semibold text-black dark:text-white ml-1">
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      ({reviewStats.totalReviews} reviews)
+                    </span>
+                  </div>
+
+                  {/* Service Location Card */}
+                  {(service.address || (service.latitude && service.longitude)) && (
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl p-6 border border-white/20 dark:border-white/15 shadow-lg">
+                      <h3 className="text-lg font-semibold text-black dark:text-white mb-4 flex items-center">
+                        <MapPin className="w-5 h-5 mr-2 text-black dark:text-white" />
+                        Service Location
+                      </h3>
+                      
+                      <div className="space-y-3">
+                        {/* Address */}
+                        {service.address && (
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-black dark:bg-white mt-2 mr-3" />
+                            <div>
+                              <p className="text-base text-black dark:text-white font-medium">
+                                {service.address}
+                              </p>
+                              {(service.city || service.state || service.country) && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  {[service.city, service.state, service.country].filter(Boolean).join(', ')}
+                                  {service.postalCode && ` ${service.postalCode}`}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Coordinates */}
+                        {service.latitude && service.longitude && (
+                          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 mr-3" />
+                            <span>
+                              {service.latitude.toFixed(6)}, {service.longitude.toFixed(6)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Service Radius */}
+                        {service.serviceRadiusKm && (
+                          <div className="flex items-start mt-4 pt-4 border-t border-white/5 dark:border-white/10">
+                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-black dark:bg-white mt-2 mr-3" />
+                            <div>
+                              <p className="text-sm text-black dark:text-white font-medium">
+                                Service Area: {service.serviceRadiusKm} km radius
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                Provider can travel up to {service.serviceRadiusKm} km from the service location
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    {service.tags && service.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {service.tags.map((tag, index) => (
-                          <span 
-                            key={index} 
-                            className="bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-black/40 dark:to-gray-900/60 backdrop-blur-sm text-gray-700 dark:text-gray-300 text-xs px-3 py-1.5 rounded-full hover:from-blue-50/80 hover:to-cyan-50/80 dark:hover:from-blue-950/40 dark:hover:to-cyan-950/40 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 cursor-default border border-gray-200/50 dark:border-gray-600/50 shadow-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Provider Details and Actions */}
+            {/* Right Column - Unified Booking & Provider Card */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Glass Morphism Price Card */}
+              {/* Unified Glass Morphism Card */}
               <div className="relative">
                 <div 
-                  className="bg-white/50 dark:bg-black/50 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/30 dark:border-white/20 sticky top-24"
-                  style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)' }}
+                  className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-white/15 sticky top-24"
+                  style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)' }}
                 >
+                  {/* Provider Profile Section */}
+                  {provider && (
+                    <div className="mb-8 pb-8 border-b border-white/20 dark:border-white/20">
+                      <div className="flex flex-col items-center">
+                        {/* Avatar */}
+                        <div className="w-20 h-20 mb-4 rounded-full p-1 border-2 border-white/10 dark:border-white/10 relative">
+                          <img 
+                            src={provider?.logoUrl || provider?.user?.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider')}&background=000000&color=ffffff&size=96`}
+                            alt="Provider"
+                            className="w-full h-full rounded-full object-cover"
+                            onError={(e) => { 
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null; 
+                              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent('P')}&background=000000&color=ffffff&size=96`;
+                            }}
+                          />
+                          {provider?.isVerified && (
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-black dark:bg-white rounded-full flex items-center justify-center border-2 border-white dark:border-black">
+                              <svg className="w-3.5 h-3.5 text-white dark:text-black" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Name and Title */}
+                        <h3 className="text-xl font-bold text-black dark:text-white text-center">
+                          {provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' : 'Provider'}
+                        </h3>
+                        <p className="mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {provider?.isVerified ? 'Verified Provider' : 'Service Provider'}
+                        </p>
+
+                        {/* Contact Information */}
+                        {(provider?.user?.email || provider?.user?.phone) && (
+                          <div className="mt-4 w-full space-y-2">
+                            {provider?.user?.email && (
+                              <div className="flex items-center justify-center gap-2 text-sm bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20 dark:border-white/15">
+                                <Mail className="w-4 h-4 text-black dark:text-white" />
+                                <span className="text-gray-700 dark:text-gray-300 truncate">{provider.user.email}</span>
+                              </div>
+                            )}
+                            {provider?.user?.phone && (
+                              <div className="flex items-center justify-center gap-2 text-sm bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20 dark:border-white/15">
+                                <Phone className="w-4 h-4 text-black dark:text-white" />
+                                <span className="text-gray-700 dark:text-gray-300">{provider.user.phone}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Stats */}
+                        {((provider?.averageRating !== undefined && provider?.averageRating !== null) || (provider?.services?.length !== undefined && provider?.services?.length !== null)) && (
+                          <div className="flex items-center gap-4 mt-4">
+                            {provider?.averageRating !== undefined && provider?.averageRating !== null && (
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-sm font-semibold text-black dark:text-white">{provider.averageRating.toFixed(1)}</span>
+                                {provider?.totalReviews !== undefined && provider?.totalReviews !== null && (
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">({provider.totalReviews})</span>
+                                )}
+                              </div>
+                            )}
+                            
+                            {provider?.services?.length !== undefined && provider?.services?.length !== null && (
+                              <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+                                <span className="font-semibold text-black dark:text-white">{provider.services.length}</span>
+                                <span className="text-xs">Service{provider.services.length !== 1 ? 's' : ''}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* View Profile Button */}
+                        <button
+                          onClick={() => navigate(`/provider/${provider.id}`)}
+                          className="mt-4 text-sm text-black dark:text-white hover:underline flex items-center gap-1"
+                        >
+                          View Full Profile
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Price Section */}
                   <div className="text-center mb-6">
                     <div className="text-4xl font-bold text-black dark:text-white mb-2">
                       {service.currency} {service.price.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Starting price</div>
-                    <div className="flex items-center justify-center text-black dark:text-white bg-white/70 dark:bg-black/30 backdrop-blur-md rounded-full px-4 py-2 border border-white/40 dark:border-white/20 shadow-lg">
+                    <div className="flex items-center justify-center text-black dark:text-white bg-white/80 dark:bg-black/40 backdrop-blur-xl rounded-full px-4 py-2 border border-white/20 dark:border-white/15 shadow-lg">
                       <CheckCircle className="w-4 h-4 mr-1" />
                       <span className="text-sm font-medium">Available now</span>
                     </div>
                   </div>
 
-                  {/* Enhanced Action Buttons */}
-                  <div className="space-y-3">
+                  {/* Action Buttons */}
+                  <div className="space-y-3 mb-6">
                     <button
                       onClick={handlePayNow}
-                      className="w-full bg-black dark:bg-white text-white dark:text-black py-4 px-6 rounded-full font-bold hover:scale-105 transition-all duration-300 shadow-lg border border-black/40 dark:border-white/40 backdrop-blur-sm flex items-center justify-center"
-                      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+                      className="w-full bg-black dark:bg-white text-white dark:text-black py-4 px-6 rounded-full font-bold hover:scale-105 transition-all duration-300 shadow-xl border border-black/20 dark:border-white/20 backdrop-blur-sm flex items-center justify-center"
+                      style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2)' }}
                     >
                       <CreditCard className="w-5 h-5 mr-2" />
                       Pay Now
@@ -935,23 +1311,26 @@ const ServiceDetailPage: React.FC = () => {
                     <button
                       onClick={handleBookNow}
                       disabled={bookingLoading}
-                      className="w-full bg-white/70 dark:bg-black/30 text-black dark:text-white py-4 px-6 rounded-full font-bold hover:bg-white dark:hover:bg-black/50 transition-all duration-300 shadow-lg border border-white/40 dark:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-md"
+                      className="w-full bg-white/80 dark:bg-black/50 text-black dark:text-white py-4 px-6 rounded-full font-bold hover:bg-white dark:hover:bg-black/70 transition-all duration-300 shadow-xl border border-white/20 dark:border-white/15 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-xl"
                     >
                       {bookingLoading ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black dark:border-white mr-2"></div>
-                          Creating conversation...
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                          </div>
+                          <span>Creating conversation</span>
                         </div>
                       ) : (
                         'Book Now'
                       )}
                     </button>
-                    
                   </div>
 
                   {/* Working Hours Section */}
                   {service.workingTime && service.workingTime.length > 0 && (
-                    <div className="mt-6 pt-6 border-t border-white/30 dark:border-white/20">
+                    <div className="pt-6 border-t border-white/20 dark:border-white/20">
                       <h4 className="text-sm font-semibold text-black dark:text-white mb-3 flex items-center">
                         <Clock className="w-4 h-4 mr-2" />
                         Working Hours
@@ -960,7 +1339,7 @@ const ServiceDetailPage: React.FC = () => {
                         {service.workingTime.map((time, index) => (
                           <div 
                             key={index}
-                            className="flex items-center bg-white/40 dark:bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/30 dark:border-white/10"
+                            className="flex items-center bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-xl p-3 border border-white/20 dark:border-white/15 shadow-sm"
                           >
                             <Calendar className="w-3.5 h-3.5 text-black/60 dark:text-white/60 mr-2" />
                             <span className="text-sm text-black dark:text-white font-medium">{time}</span>
@@ -971,36 +1350,177 @@ const ServiceDetailPage: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Glassmorphism glow effect */}
-                <div className="absolute inset-0 rounded-3xl -z-10 transition-all duration-500 ease-out blur-2xl opacity-20 bg-gradient-to-r from-black/30 to-black/30 dark:from-white/20 dark:to-white/20" />
+                {/* Enhanced Glassmorphism glow effect */}
+                <div className="absolute inset-0 rounded-3xl -z-10 transition-all duration-500 ease-out blur-3xl opacity-30 bg-gradient-to-br from-black/40 via-black/20 to-black/40 dark:from-white/30 dark:via-white/15 dark:to-white/30" />
               </div>
-
-              {/* Provider Profile Card */}
-              {provider && (
-                <GlassmorphismProfileCard
-                  avatarUrl={provider?.logoUrl || provider?.user?.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'User' : 'Provider')}&background=000000&color=ffffff&size=96`}
-                  name={provider?.user ? `${provider.user.firstName || ''} ${provider.user.lastName || ''}`.trim() || provider.user.email || 'Provider' : 'Provider'}
-                  title={provider?.isVerified ? 'Verified Provider' : 'Service Provider'}
-                  bio={provider?.bio || 'Professional service provider delivering quality services to clients.'}
-                  isVerified={provider?.isVerified}
-                  rating={provider?.averageRating}
-                  reviews={provider?.totalReviews}
-                  socialLinks={[
-                    { id: 'github', icon: Github, label: 'GitHub', href: '#' },
-                    { id: 'linkedin', icon: Linkedin, label: 'LinkedIn', href: '#' },
-                    { id: 'twitter', icon: Twitter, label: 'Twitter', href: '#' },
-                  ]}
-                  actionButton={{
-                    text: 'View Full Profile',
-                    onClick: () => navigate(`/provider/${provider.id}`)
-                  }}
-                />
-              )}
             </div>
           </div>
 
-          {/* Modern Glass Morphism Tabs Navigation */}
-          <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden mb-6 border border-white/20 dark:border-gray-700/50">
+          {/* Reviews Carousel Section */}
+          {reviews.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl font-bold text-black dark:text-white">
+                  Customer Reviews
+                </h2>
+                <div className="flex items-center gap-2 bg-white/70 dark:bg-black/50 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 dark:border-white/15 shadow-lg">
+                  <Star className="w-5 h-5 fill-white text-white" />
+                  <span className="text-lg font-semibold text-black dark:text-white">
+                    {averageRating.toFixed(1)}
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    ({reviewStats.totalReviews})
+                  </span>
+                </div>
+              </div>
+
+              {/* Enhanced Reviews Slider */}
+              <div className="relative">
+                <div 
+                  ref={reviewsScrollRef}
+                  className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 scroll-smooth"
+                  onScroll={(e) => {
+                    const scrollLeft = e.currentTarget.scrollLeft;
+                    const cardWidth = e.currentTarget.scrollWidth / reviews.length;
+                    const newIndex = Math.round(scrollLeft / cardWidth);
+                    setCurrentReviewIndex(newIndex);
+                  }}
+                >
+                  {reviews.map((review, index) => (
+                    <div 
+                      key={review.id}
+                      className="flex-shrink-0 w-[90%] sm:w-[45%] lg:w-[32%] snap-start"
+                    >
+                      <div className={cn(
+                        "bg-white/70 dark:bg-black/50 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 dark:border-white/15 h-full transition-all duration-500",
+                        index === currentReviewIndex 
+                          ? "shadow-2xl scale-105 border-white/30 dark:border-white/20" 
+                          : "shadow-xl hover:shadow-2xl"
+                      )}>
+                        {/* Review Header */}
+                        <div className="flex items-start gap-4 mb-6">
+                          <div className="relative flex-shrink-0">
+                            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 dark:border-white/10 shadow-lg">
+                              {review.clientAvatar ? (
+                                <img 
+                                  src={review.clientAvatar} 
+                                  alt={review.clientName}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-black/10 to-black/5 dark:from-white/10 dark:to-white/5 flex items-center justify-center">
+                                  <span className="text-2xl text-black dark:text-white font-bold">
+                                    {review.clientName?.[0]?.toUpperCase() || 'U'}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            {/* Verified badge */}
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-black dark:bg-white rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-lg">
+                              <svg className="w-3.5 h-3.5 text-white dark:text-black" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-bold text-black dark:text-white mb-1">
+                              {review.clientName || 'Anonymous'}
+                            </h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(review.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Rating Stars - White */}
+                        <div className="flex items-center gap-1 mb-4">
+                          {[...Array(5)].map((_, starIndex) => (
+                            <Star
+                              key={starIndex}
+                              className={cn(
+                                "w-5 h-5 transition-all",
+                                starIndex < review.rating
+                                  ? "fill-white text-white drop-shadow-lg"
+                                  : "fill-none text-gray-300 dark:text-gray-600"
+                              )}
+                            />
+                          ))}
+                          <span className="ml-2 text-sm font-semibold text-black dark:text-white">
+                            {review.rating}.0
+                          </span>
+                        </div>
+
+                        {/* Review Comment */}
+                        {review.comment && (
+                          <div className="relative">
+                            <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-5 italic">
+                              "{review.comment}"
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Helpful indicator */}
+                        {review.helpful > 0 && (
+                          <div className="mt-4 pt-4 border-t border-white/5 dark:border-white/10">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                              <ThumbsUp className="w-4 h-4" />
+                              {review.helpful} found this helpful
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Navigation Dots */}
+                {reviews.length > 1 && (
+                  <div className="flex justify-center gap-2 mt-6">
+                    {reviews.map((_, index) => (
+                      <button
+                        key={index}
+                        aria-label={`Go to review ${index + 1}`}
+                        onClick={() => {
+                          setCurrentReviewIndex(index);
+                          if (reviewsScrollRef.current) {
+                            const cardWidth = reviewsScrollRef.current.scrollWidth / reviews.length;
+                            reviewsScrollRef.current.scrollTo({
+                              left: cardWidth * index,
+                              behavior: 'smooth'
+                            });
+                          }
+                        }}
+                        className={cn(
+                          "transition-all duration-300 rounded-full",
+                          index === currentReviewIndex
+                            ? "w-8 h-2 bg-black dark:bg-white"
+                            : "w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* No Reviews Message */}
+          {reviews.length === 0 && !reviewsLoading && (
+            <div className="mb-6 text-center py-12 bg-white/70 dark:bg-black/50 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-white/15 shadow-lg">
+              <Star className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                No reviews yet. Be the first to review this service!
+              </p>
+            </div>
+          )}
+
+          {/* Disabled tabs - keeping for reference */}
+          {false && (
+          <div className="bg-white/80 dark:bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden mb-6 border border-white/5 dark:border-gray-700/50">
             <div className="border-b border-gray-100/50 dark:border-gray-700/50 bg-gradient-to-r from-gray-50/60 to-blue-50/40 dark:from-black/40 dark:to-blue-950/40 backdrop-blur-sm">
               <nav className="flex space-x-1 px-6">
                 {[
@@ -1043,7 +1563,7 @@ const ServiceDetailPage: React.FC = () => {
               {activeTab === 'overview' && (
                 <div className="space-y-6">
                   {/* Description */}
-                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/15 dark:border-gray-700/50">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
                       <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full mr-3"></div>
                       About this service
@@ -1055,7 +1575,7 @@ const ServiceDetailPage: React.FC = () => {
 
                   {/* Service Location */}
                   {(service.address || (service.latitude && service.longitude)) && (
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/15 dark:border-gray-700/50">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                         <div className="p-2 bg-gradient-to-r from-red-100/80 to-pink-100/80 dark:from-red-900/40 dark:to-pink-900/40 backdrop-blur-sm rounded-lg mr-3">
                           <MapPin className="w-5 h-5 text-red-600 dark:text-red-400" />
@@ -1125,7 +1645,7 @@ const ServiceDetailPage: React.FC = () => {
 
                   {/* Working Hours */}
                   {service.workingTime && service.workingTime.length > 0 && (
-                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                    <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/15 dark:border-gray-700/50">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                         <div className="p-2 bg-gradient-to-r from-green-100/80 to-emerald-100/80 dark:from-green-900/40 dark:to-emerald-900/40 backdrop-blur-sm rounded-lg mr-3">
                           <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -1148,7 +1668,7 @@ const ServiceDetailPage: React.FC = () => {
                   )}
 
                   {/* Service Features */}
-                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/30 dark:border-gray-700/50">
+                  <div className="bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/15 dark:border-gray-700/50">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                       <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full mr-3"></div>
                       What's included
@@ -1230,7 +1750,7 @@ const ServiceDetailPage: React.FC = () => {
                   </div>
 
                   {/* Review Filters */}
-                  <div className="flex flex-wrap items-center gap-3 bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/30 dark:border-gray-700/50">
+                  <div className="flex flex-wrap items-center gap-3 bg-white/60 dark:bg-black/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/15 dark:border-gray-700/50">
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                       Filter by rating:
@@ -1254,9 +1774,44 @@ const ServiceDetailPage: React.FC = () => {
                   {/* Reviews List */}
                   <div className="space-y-4">
                     {reviewsLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        <span className="ml-2 text-gray-600">Loading reviews...</span>
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="bg-white/60 dark:bg-black/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-3xl p-6">
+                            <div className="flex items-start space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-br from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded-full animate-pulse relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                              </div>
+                              <div className="flex-1 space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="h-5 bg-gradient-to-r from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded w-32 animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    {[1, 2, 3, 4, 5].map((j) => (
+                                      <div key={j} className="w-4 h-4 bg-gradient-to-br from-black/20 to-gray-400/30 dark:from-white/20 dark:to-gray-500/30 rounded animate-pulse relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-24 animate-pulse relative overflow-hidden">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                                </div>
+                                <div className="space-y-2 mt-3">
+                                  <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-full animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                                  </div>
+                                  <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-5/6 animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                                  </div>
+                                  <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-4/6 animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : filteredReviews.length === 0 ? (
                       <div className="text-center py-8 bg-gray-50/60 backdrop-blur-sm rounded-2xl border border-gray-100/50">
@@ -1427,6 +1982,9 @@ const ServiceDetailPage: React.FC = () => {
               )}
             </div>
           </div>
+          )}
+          {/* End of disabled tabs */}
+
         </div>
       </main>
 
