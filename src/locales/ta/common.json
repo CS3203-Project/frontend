@@ -1,0 +1,34 @@
+{
+  "navbar": {
+    "browseServices": "சேவைகளை உலாவுக",
+    "forProviders": "சேவை வழங்குவோருக்கு",
+    "help": "உதவி",
+    "messages": "செய்திகள்",
+    "serviceRequest": "சேவை கோரிக்கை",
+    "signIn": "உள்நுழைய",
+    "getStarted": "தொடங்குக",
+    "myProfile": "எனது சுயவிவரம்",
+    "logOut": "வெளியேறு"
+  },
+  "language": {
+    "english": "ஆங்கிலம்",
+    "sinhala": "சிங்களம்",
+    "tamil": "தமிழ்",
+    "selectLanguage": "மொழியைத் தேர்ந்தெடுக்கவும்"
+  },
+  "common": {
+    "loading": "ஏற்றுகிறது...",
+    "error": "பிழை",
+    "cancel": "ரத்துசெய்",
+    "confirm": "உறுதிப்படுத்து",
+    "save": "சேமி",
+    "delete": "நீக்கு",
+    "edit": "திருத்து",
+    "back": "பின்னால்",
+    "next": "அடுத்தது",
+    "previous": "முந்தையது",
+    "search": "தேடு",
+    "sort": "வரிசைப்படுத்து",
+    "filter": "வடிகட்டு"
+  }
+}

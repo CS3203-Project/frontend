@@ -1,0 +1,34 @@
+{
+  "navbar": {
+    "browseServices": "සේවා වර්ග",
+    "forProviders": "සේවා සපයීමේ සඳහා",
+    "help": "උදව්",
+    "messages": "පණිවුඩ",
+    "serviceRequest": "සේවා ඉල්ලීම",
+    "signIn": "පිවිසීම",
+    "getStarted": "ආරම්භ කරන්න",
+    "myProfile": "මගේ පැතිකඩ",
+    "logOut": "ඊමුතු වන්න"
+  },
+  "language": {
+    "english": "ඉංග්‍රීසි",
+    "sinhala": "සිංහල",
+    "tamil": "දෙමළ",
+    "selectLanguage": "භාෂාව තෝරන්න"
+  },
+  "common": {
+    "loading": "ලෝඩ් වෙමින්...",
+    "error": "දෝෂයක්",
+    "cancel": "අවලංගු කරන්න",
+    "confirm": "තහවුරු කරන්න",
+    "save": "සුරක්ෂිත කරන්න",
+    "delete": "මකන්න",
+    "edit": "සංස්කරණය කරන්න",
+    "back": "ආපසු",
+    "next": "ඊළඟට",
+    "previous": "පෙරසන්න",
+    "search": "සොයන්න",
+    "sort": "වින්‍යාස කරන්න",
+    "filter": "පෙරා තුළු කරන්න"
+  }
+}

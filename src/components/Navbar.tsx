@@ -7,6 +7,8 @@ import { clearMessages } from '../utils/messageDB';
 import { Link, useLocation } from 'react-router-dom';
 import { categoriesData } from '../data/servicesData';
 import { useNotifications } from '../hooks/useNotifications';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +27,9 @@ const Navbar = () => {
 
   // Use notifications hook for unread count
   const { stats } = useNotifications();
+
+  // Use translation hook
+  const { t } = useTranslation('common');
 
   // Helper function to check if a route is active
   const isActiveRoute = (href: string) => {
@@ -173,8 +178,8 @@ const Navbar = () => {
   ];
 
   const navLinks = [
-    { name: "Messages", href: "/conversation-hub" },
-    { name: "Service Request", href: "/service-request" }
+    { name: t('navbar.messages'), href: "/conversation-hub" },
+    { name: t('navbar.serviceRequest'), href: "/service-request" }
   ];
 
   return (
@@ -235,7 +240,7 @@ const Navbar = () => {
                 onMouseEnter={handleServicesEnter}
                 onMouseLeave={handleServicesLeave}
               >
-                <span>Browse Services</span>
+                <span>{t('navbar.browseServices')}</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   servicesOpen && "rotate-180 text-white",
@@ -307,7 +312,7 @@ const Navbar = () => {
                 onMouseEnter={handleProvidersEnter}
                 onMouseLeave={handleProvidersLeave}
               >
-                <span>For Providers</span>
+                <span>{t('navbar.forProviders')}</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   forProvidersOpen && "rotate-180 text-white",
@@ -382,7 +387,7 @@ const Navbar = () => {
                 onMouseEnter={handleHelpEnter}
                 onMouseLeave={handleHelpLeave}
               >
-                <span>Help</span>
+                <span>{t('navbar.help')}</span>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   helpOpen && "rotate-180 text-white",
@@ -466,6 +471,7 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-3">
+            <LanguageSwitcher />
             {isLoggedIn && user ? (
               <>
                 {/* Notifications Bell */}
@@ -529,14 +535,14 @@ const Navbar = () => {
                     onClick={() => setUserMenuOpen(false)}
                   >
                     <User className="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-300" />
-                    My Profile
+                    {t('navbar.myProfile')}
                   </a>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-300 relative z-10 group"
                   >
                     <LogOut className="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-300" />
-                    Logout
+                    {t('navbar.logOut')}
                   </button>
                 </div>
               </div>
@@ -546,7 +552,7 @@ const Navbar = () => {
                   <Button variant="ghost" className="font-medium text-white/90 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20 transition-all duration-300 relative overflow-hidden group">
                     {/* Button glitter effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-                    <span className="relative z-10">Sign In</span>
+                    <span className="relative z-10">{t('navbar.signIn')}</span>
                   </Button>
                 </a>
                 <a href="/signup">

@@ -1,0 +1,34 @@
+{
+  "navbar": {
+    "browseServices": "Browse Services",
+    "forProviders": "For Providers",
+    "help": "Help",
+    "messages": "Messages",
+    "serviceRequest": "Service Request",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "myProfile": "My Profile",
+    "logOut": "Logout"
+  },
+  "language": {
+    "english": "English",
+    "sinhala": "සිංහල",
+    "tamil": "தமிழ்",
+    "selectLanguage": "Select Language"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "sort": "Sort",
+    "filter": "Filter"
+  }
+}
