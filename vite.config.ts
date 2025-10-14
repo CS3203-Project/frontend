@@ -11,6 +11,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  optimizeDeps: {
+    include: ['@googlemaps/react-wrapper', '@googlemaps/js-api-loader']
+  },
   server: {
     proxy: {
       '/api': {
