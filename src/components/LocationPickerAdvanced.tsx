@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MapPin, Target, Search, Loader2, Navigation, X } from 'lucide-react';
+//locationPickerAdvanced
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { MapPin, Target, Search, Loader2, Navigation, X, Map } from 'lucide-react';
 import { hybridSearchApi } from '../api/hybridSearchApi';
 import type { LocationParams } from '../api/hybridSearchApi';
+import LocationPickerMap from './LocationPickerMap';
 
 interface LocationPickerProps {
   value?: LocationParams;
@@ -13,6 +16,8 @@ interface LocationPickerProps {
   maxRadius?: number;
   autoDetect?: boolean;
   disabled?: boolean;
+  allowManualRadius?: boolean; // Allow manual radius input instead of slider
+  showMap?: boolean; // New prop to show/hide map integration
 }
 
 interface LocationSuggestion {
@@ -30,7 +35,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   defaultRadius = 10,
   maxRadius = 50,
   autoDetect = false,
-  disabled = false
+  disabled = false,
+  allowManualRadius = true,
+  showMap = true
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -38,7 +45,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [radius, setRadius] = useState(value?.radius ?? defaultRadius);
+  const [showRadiusInput, setShowRadiusInput] = useState(false);
+  const [manualRadius, setManualRadius] = useState<string>('');
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -51,10 +59,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   }, [autoDetect, value]);
 
-  // Update radius when value changes
+  // Update manual radius input when value changes externally
   useEffect(() => {
-    if (value?.radius !== undefined && value.radius !== radius) {
-      setRadius(value.radius);
+    if (value?.radius !== undefined && value.radius !== parseFloat(manualRadius)) {
+      setManualRadius(value.radius.toString());
     }
   }, [value?.radius]);
 
@@ -67,49 +75,46 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   }, [value]);
 
-  // Debounced search for location suggestions
-  const debouncedSearch = useMemo(() => {
-    return (query: string) => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+  // Declare google maps types for autocomplete
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  // Initialize Google Places Autocomplete for the main input field
+  const initializeAutocomplete = useCallback(() => {
+    if (!inputRef.current || !window.google) return;
+
+    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+      types: ['geocode'],
+      fields: ['place_id', 'geometry', 'formatted_address', 'name']
+    });
+
+    autocompleteRef.current.addListener('place_changed', () => {
+      const place = autocompleteRef.current?.getPlace();
+      if (place?.geometry?.location) {
+        const location: LocationParams = {
+          latitude: place.geometry.location.lat(),
+          longitude: place.geometry.location.lng(),
+          address: place.formatted_address || place.name,
+          radius: undefined
+        };
+        onChange(location);
+        setIsOpen(false);
+        setSuggestions([]);
       }
+    });
+  }, [onChange]);
 
-      searchTimeoutRef.current = setTimeout(async () => {
-        if (query.length < 3) {
-          setSuggestions([]);
-          return;
-        }
-
-        setIsLoading(true);
-        try {
-          // Simple mock suggestions - in a real app, you'd use Google Places API
-          const mockSuggestions: LocationSuggestion[] = [
-            {
-              description: `${query} - Colombo, Sri Lanka`,
-              placeId: `place_${query}_colombo`,
-              types: ['locality']
-            },
-            {
-              description: `${query} - Kandy, Sri Lanka`,
-              placeId: `place_${query}_kandy`,
-              types: ['locality']
-            },
-            {
-              description: `${query} - Galle, Sri Lanka`,
-              placeId: `place_${query}_galle`,
-              types: ['locality']
-            }
-          ];
-          setSuggestions(mockSuggestions);
-        } catch (err) {
-          console.error('Failed to get location suggestions:', err);
-          setSuggestions([]);
-        } finally {
-          setIsLoading(false);
-        }
-      }, 300);
+  // Initialize autocomplete when component mounts (wait for Google Maps to load)
+  useEffect(() => {
+    const checkGoogleMaps = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        initializeAutocomplete();
+      } else {
+        // Retry after a short delay if Google Maps not yet loaded
+        setTimeout(checkGoogleMaps, 100);
+      }
     };
-  }, []);
+    checkGoogleMaps();
+  }, [initializeAutocomplete]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -117,8 +122,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     setError(null);
 
     if (newValue.trim()) {
-      debouncedSearch(newValue);
-      setIsOpen(true);
+      // Google Places Autocomplete will handle suggestions automatically
+      setIsOpen(false);
     } else {
       setSuggestions([]);
       setIsOpen(false);
@@ -140,7 +145,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           latitude: response.data.latitude,
           longitude: response.data.longitude,
           address: response.data.address || suggestion.description,
-          radius: showRadius ? radius : undefined
+          radius: undefined // Start without radius, let user add it if needed
         };
         onChange(location);
       } else {
@@ -170,7 +175,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         latitude,
         longitude,
         address: response.data?.address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-        radius: showRadius ? radius : undefined
+        radius: undefined // Start without radius, let user add it if needed
       };
 
       setInputValue(location.address || 'Current location');
@@ -184,7 +189,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
             latitude: response.data.latitude,
             longitude: response.data.longitude,
             address: response.data.address || 'Current location (approximate)',
-            radius: showRadius ? radius : undefined
+            radius: showRadius ? undefined : undefined // Start without radius, let user add it if needed
           };
           setInputValue(location.address || 'Current location');
           onChange(location);
@@ -199,15 +204,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   };
 
-  const handleRadiusChange = (newRadius: number) => {
-    setRadius(newRadius);
-    if (value) {
-      onChange({
-        ...value,
-        radius: newRadius
-      });
-    }
-  };
+  // Remove the old handleRadiusChange function that references undefined setRadius
 
   const handleClear = () => {
     setInputValue('');
@@ -323,27 +320,86 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         </div>
       )}
 
-      {/* Radius Selector */}
-      {showRadius && value && (
-        <div className="mt-3 space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Search Radius: {radius} km
-          </label>
-          <input
-            type="range"
-            min="1"
-            max={maxRadius}
-            step="1"
-            value={radius}
-            onChange={(e) => handleRadiusChange(Number(e.target.value))}
-            disabled={disabled}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+      {/* Add Service Radius Button and Input */}
+      {showRadius && value && allowManualRadius && (
+        <div className="mt-3 space-y-3">
+          {!showRadiusInput ? (
+            <button
+              onClick={() => setShowRadiusInput(true)}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Add Service Radius
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Search Radius (km)
+                </label>
+                <button
+                  onClick={() => {
+                    setShowRadiusInput(false);
+                    setManualRadius('');
+                    if (value) {
+                      onChange({
+                        ...value,
+                        radius: undefined
+                      });
+                    }
+                  }}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                >
+                  Remove
+                </button>
+              </div>
+              <input
+                type="number"
+                min="1"
+                max={maxRadius}
+                value={manualRadius}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setManualRadius(newValue);
+                  const numValue = newValue ? parseFloat(newValue) : undefined;
+                  if (value && numValue && numValue > 0) {
+                    onChange({
+                      ...value,
+                      radius: numValue
+                    });
+                  } else if (value) {
+                    onChange({
+                      ...value,
+                      radius: undefined
+                    });
+                  }
+                }}
+                placeholder="Enter radius in km (leave empty for unlimited)"
+                disabled={disabled}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              />
+              {manualRadius && (
+                <p className="text-xs text-gray-600">
+                  Searching within {manualRadius} km of selected location
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Map Visualizer - Show when map is enabled and there's a location */}
+      {showMap && value && value.latitude && value.longitude && (
+        <div className="mt-4">
+          <LocationPickerMap
+            value={value}
+            onChange={onChange}
+            googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+            allowManualRadius={allowManualRadius}
+            className="w-full"
           />
-          <div className="flex justify-between text-xs text-gray-500">
-            <span>1 km</span>
-            <span>{Math.floor(maxRadius / 2)} km</span>
-            <span>{maxRadius} km</span>
-          </div>
         </div>
       )}
 

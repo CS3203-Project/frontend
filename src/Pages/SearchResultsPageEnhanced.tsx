@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Grid3X3, List, MapPin, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, Sparkles, Grid3X3, List, MapPin, SlidersHorizontal, Navigation2 } from 'lucide-react';
 import type { HybridSearchResult } from '../api/hybridSearchApi';
 import { hybridSearchApi } from '../api/hybridSearchApi';
 import LocationPickerAdvanced from '../components/LocationPickerAdvanced';
+import SearchResultsMap from '../components/SearchResultsMap';
 import type { LocationParams } from '../api/hybridSearchApi';
 
 interface LocationState {
@@ -15,6 +16,8 @@ interface LocationState {
     radius?: number;
   };
   searchType: 'hybrid' | 'semantic' | 'location' | 'general';
+  hasServicesWithinRadius?: boolean;
+  message?: string;
 }
 
 const SearchResultsPageEnhanced: React.FC = () => {
@@ -105,12 +108,14 @@ const SearchResultsPageEnhanced: React.FC = () => {
       });
 
       if (response.success) {
-        navigate('/search-results', {
+        navigate('/search-results-enhanced', {
           state: {
             results: response.data.results,
             query: response.data.query,
             location: response.data.location,
-            searchType: response.data.searchType
+            searchType: response.data.searchType,
+            hasServicesWithinRadius: response.data.hasServicesWithinRadius,
+            message: response.data.message
           },
           replace: true
         });
@@ -177,6 +182,14 @@ const SearchResultsPageEnhanced: React.FC = () => {
                     Found {sortedResults.length} matching services
                     {hasLocationResults && ` • Showing distances from your location`}
                   </p>
+                  {/* Add search message notification if radius expansion occurred */}
+                  {state.message && (
+                    <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 mt-2">
+                      <p className="text-sm text-blue-200">
+                        {state.message}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Controls */}
@@ -315,19 +328,32 @@ const SearchResultsPageEnhanced: React.FC = () => {
             </Link>
           </div>
         ) : (
-          <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
-            : 'space-y-4'
-          }>
-            {sortedResults.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                viewMode={viewMode}
-                showDistance={hasLocationResults}
-              />
-            ))}
-          </div>
+          <>
+            {/* Interactive Search Results Map */}
+            <SearchResultsMap
+              services={sortedResults}
+              userLocation={locationFilter && locationFilter.latitude && locationFilter.longitude ? {
+                latitude: locationFilter.latitude,
+                longitude: locationFilter.longitude
+              } : undefined}
+              className="mb-8"
+            />
+
+            {/* Service List */}
+            <div className={viewMode === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+              : 'space-y-4'
+            }>
+              {sortedResults.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  viewMode={viewMode}
+                  showDistance={hasLocationResults}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
