@@ -5,7 +5,7 @@ export interface LocationParams {
   latitude?: number;
   longitude?: number;
   address?: string;
-  radius?: number; // in kilometers
+  radius?: number; // in kilometers (optional - if not provided, no location filtering)
 }
 
 export interface HybridSearchParams {
@@ -46,6 +46,9 @@ export interface HybridSearchResponse {
     searchType: 'hybrid' | 'semantic' | 'location' | 'general';
     results: HybridSearchResult[];
     count: number;
+    // Additional fields for hybrid searches
+    hasServicesWithinRadius?: boolean;
+    message?: string; // User message about radius expansion
   };
 }
 

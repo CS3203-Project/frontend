@@ -20,6 +20,8 @@ interface BrowseServicesState {
   locationFilter: LocationParams | null;
   showLocationFilter: boolean;
   searchType: 'hybrid' | 'semantic' | 'location' | 'general';
+  hasServicesWithinRadius?: boolean;
+  searchMessage?: string;
 }
 
 const BrowseServicesEnhanced: React.FC = () => {
@@ -192,12 +194,14 @@ const BrowseServicesEnhanced: React.FC = () => {
       });
 
       if (response.success) {
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           hybridSearchResults: response.data.results,
           isHybridSearchActive: true,
           isSearching: false,
-          searchType: response.data.searchType
+          searchType: response.data.searchType,
+          hasServicesWithinRadius: response.data.hasServicesWithinRadius,
+          searchMessage: response.data.message
         }));
       }
     } catch (error) {
@@ -233,7 +237,9 @@ const BrowseServicesEnhanced: React.FC = () => {
             longitude: state.locationFilter.longitude,
             radius: state.locationFilter.radius
           } : undefined,
-          searchType: state.searchType
+          searchType: state.searchType,
+          hasServicesWithinRadius: state.hasServicesWithinRadius,
+          message: state.searchMessage
         }
       });
     }
@@ -341,11 +347,19 @@ const BrowseServicesEnhanced: React.FC = () => {
               {getSearchTypeLabel()}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              {state.isHybridSearchActive 
+              {state.isHybridSearchActive
                 ? `Found ${state.hybridSearchResults.length} matching services`
                 : 'Discover amazing services from verified providers'
               }
             </p>
+            {/* Add search message notification */}
+            {state.searchMessage && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  {state.searchMessage}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Enhanced Search Section */}
@@ -388,15 +402,16 @@ const BrowseServicesEnhanced: React.FC = () => {
                   
                   {state.showLocationFilter && (
                     <div className="mt-4">
-                      <LocationPickerAdvanced
-                        value={state.locationFilter || undefined}
-                        onChange={handleLocationChange}
-                        placeholder="Search by location..."
-                        showRadius={true}
-                        defaultRadius={10}
-                        maxRadius={50}
-                        autoDetect={false}
-                      />
+          <LocationPickerAdvanced
+            value={state.locationFilter || undefined}
+            onChange={handleLocationChange}
+            placeholder="Search by location (radius optional)..."
+            showRadius={true}
+            defaultRadius={10}
+            maxRadius={50}
+            autoDetect={false}
+            allowManualRadius={true}
+          />
                     </div>
                   )}
                 </div>

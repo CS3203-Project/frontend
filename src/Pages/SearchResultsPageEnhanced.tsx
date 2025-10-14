@@ -15,6 +15,8 @@ interface LocationState {
     radius?: number;
   };
   searchType: 'hybrid' | 'semantic' | 'location' | 'general';
+  hasServicesWithinRadius?: boolean;
+  message?: string;
 }
 
 const SearchResultsPageEnhanced: React.FC = () => {
@@ -105,12 +107,14 @@ const SearchResultsPageEnhanced: React.FC = () => {
       });
 
       if (response.success) {
-        navigate('/search-results', {
+        navigate('/search-results-enhanced', {
           state: {
             results: response.data.results,
             query: response.data.query,
             location: response.data.location,
-            searchType: response.data.searchType
+            searchType: response.data.searchType,
+            hasServicesWithinRadius: response.data.hasServicesWithinRadius,
+            message: response.data.message
           },
           replace: true
         });
@@ -177,6 +181,14 @@ const SearchResultsPageEnhanced: React.FC = () => {
                     Found {sortedResults.length} matching services
                     {hasLocationResults && ` • Showing distances from your location`}
                   </p>
+                  {/* Add search message notification if radius expansion occurred */}
+                  {state.message && (
+                    <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 mt-2">
+                      <p className="text-sm text-blue-200">
+                        {state.message}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Controls */}
