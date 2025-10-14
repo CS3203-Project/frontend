@@ -18,13 +18,30 @@ const StripePaymentWrapper: React.FC<StripePaymentWrapperProps> = (props) => {
   const options = {
     clientSecret: undefined, // We'll create the payment intent in the form
     appearance: {
-      theme: 'stripe' as const,
+      theme: 'night' as const,
       variables: {
-        colorPrimary: '#2563eb',
-        colorBackground: '#ffffff',
-        colorText: '#1f2937',
-        colorDanger: '#dc2626',
-        borderRadius: '8px',
+        colorPrimary: '#ffffff',
+        colorBackground: 'rgba(255, 255, 255, 0.1)',
+        colorText: '#ffffff',
+        colorDanger: '#ffffff',
+        borderRadius: '12px',
+        fontFamily: 'system-ui, sans-serif',
+      },
+      rules: {
+        '.Input': {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          color: '#ffffff',
+          backdropFilter: 'blur(10px)',
+        },
+        '.Input:focus': {
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: '0 0 0 2px rgba(255, 255, 255, 0.2)',
+        },
+        '.Label': {
+          color: 'rgba(255, 255, 255, 0.9)',
+          fontWeight: '500',
+        },
       },
     },
   };

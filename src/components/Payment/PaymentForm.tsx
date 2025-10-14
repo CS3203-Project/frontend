@@ -4,6 +4,7 @@ import { CreditCard, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { currencyConfig } from '../../services/stripeConfig';
 import { paymentApi, type CreatePaymentIntentRequest } from '../../api/paymentApi';
 import toast from 'react-hot-toast';
+import { FlippableCreditCard } from '../ui/credit-debit-card';
 
 interface PaymentFormProps {
   serviceId: string;
@@ -31,6 +32,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [cardholderName, setCardholderName] = useState('');
+  const [cardPreview, setCardPreview] = useState({
+    number: '•••• •••• •••• ••••',
+    expiry: 'MM/YY',
+    cvv: '•••'
+  });
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -115,13 +122,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     style: {
       base: {
         fontSize: '16px',
-        color: '#424770',
+        color: '#ffffff',
         '::placeholder': {
-          color: '#aab7c4',
+          color: 'rgba(255, 255, 255, 0.5)',
         },
       },
       invalid: {
-        color: '#9e2146',
+        color: '#ffffff',
       },
     },
     hidePostalCode: false,
@@ -129,13 +136,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
   if (paymentSuccess) {
     return (
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <div className="max-w-md mx-auto p-6 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl">
         <div className="text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <CheckCircle className="w-16 h-16 text-white mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">
             Payment Successful!
           </h3>
-          <p className="text-gray-600">
+          <p className="text-white/70">
             Your payment of {currencyConfig.formatCurrency(amount, currency)} has been processed successfully.
           </p>
         </div>
@@ -144,52 +151,92 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center">
+    <div className="space-y-6">
+      {/* Credit Card Preview */}
+      <div className="flex justify-center">
+        <FlippableCreditCard
+          cardholderName={cardholderName || 'YOUR NAME'}
+          cardNumber={cardPreview.number}
+          expiryDate={cardPreview.expiry}
+          cvv={cardPreview.cvv}
+        />
+      </div>
+
+      {/* Payment Summary */}
+      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+        <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
           <CreditCard className="w-5 h-5 mr-2" />
           Payment Details
         </h3>
         {serviceName && (
-          <p className="text-gray-600 text-sm mb-2">Service: {serviceName}</p>
+          <p className="text-white/70 text-sm mb-2">Service: {serviceName}</p>
         )}
-        <p className="text-lg font-medium text-gray-900">
+        <p className="text-xl font-medium text-white">
           Total: {currencyConfig.formatCurrency(amount, currency)}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Cardholder Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
+            Cardholder Name
+          </label>
+          <input
+            type="text"
+            value={cardholderName}
+            onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
+            placeholder="JOHN DOE"
+            className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:ring-2 focus:ring-white/50 transition-all duration-200"
+            required
+          />
+        </div>
+
+        {/* Card Information */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2">
             Card Information
           </label>
-          <div className="border border-gray-300 rounded-md p-3 bg-white">
-            <CardElement options={cardElementOptions} />
+          <div className="border border-white/20 rounded-xl p-4 bg-white/10 backdrop-blur-sm">
+            <CardElement 
+              options={cardElementOptions}
+              onChange={(e) => {
+                if (e.complete) {
+                  setCardPreview({
+                    number: '•••• •••• •••• ' + (e.value?.cardNumber?.slice(-4) || '••••'),
+                    expiry: e.value?.expiryMonth && e.value?.expiryYear 
+                      ? `${String(e.value.expiryMonth).padStart(2, '0')}/${String(e.value.expiryYear).slice(-2)}`
+                      : 'MM/YY',
+                    cvv: '•••'
+                  });
+                }
+              }}
+            />
           </div>
         </div>
 
         {paymentError && (
-          <div className="flex items-center p-3 bg-red-50 border border-red-200 rounded-md">
-            <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-            <span className="text-sm text-red-700">{paymentError}</span>
+          <div className="flex items-center p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-xl">
+            <AlertCircle className="w-5 h-5 text-white mr-2" />
+            <span className="text-sm text-white/90">{paymentError}</span>
           </div>
         )}
 
-        <div className="flex items-center justify-center p-3 bg-gray-50 border border-gray-200 rounded-md">
-          <Lock className="w-4 h-4 text-gray-500 mr-2" />
-          <span className="text-xs text-gray-600">
+        <div className="flex items-center justify-center p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl">
+          <Lock className="w-4 h-4 text-white/70 mr-2" />
+          <span className="text-xs text-white/70">
             Your payment information is secured with 256-bit SSL encryption
           </span>
         </div>
 
         <button
           type="submit"
-          disabled={!stripe || isProcessing || loading || disabled}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-md transition-colors duration-200 flex items-center justify-center"
+          disabled={!stripe || isProcessing || loading || disabled || !cardholderName}
+          className="w-full bg-gradient-to-r from-white to-white/80 text-black font-semibold py-3 px-4 rounded-xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg flex items-center justify-center"
         >
           {isProcessing || loading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
               Processing...
             </>
           ) : (
@@ -201,8 +248,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         </button>
       </form>
 
-      <div className="mt-4 text-center">
-        <p className="text-xs text-gray-500">
+      <div className="text-center">
+        <p className="text-xs text-white/60">
           By completing this payment, you agree to our terms of service.
         </p>
       </div>

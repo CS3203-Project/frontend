@@ -42,44 +42,44 @@ const PaymentStatusPopup: React.FC<PaymentStatusPopupProps> = ({
     switch (status) {
       case 'success':
         return {
-          icon: <CheckCircle className="w-16 h-16 text-green-500" />,
+          icon: <CheckCircle className="w-16 h-16 text-white" />,
           title: 'Payment Successful!',
           message: 'Your payment has been processed successfully.',
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          titleColor: 'text-green-800',
-          messageColor: 'text-green-600'
+          bgColor: 'bg-white/10',
+          borderColor: 'border-white/30',
+          titleColor: 'text-white',
+          messageColor: 'text-white/80'
         };
       case 'error':
       case 'failed':
         return {
-          icon: <XCircle className="w-16 h-16 text-red-500" />,
+          icon: <XCircle className="w-16 h-16 text-white" />,
           title: 'Payment Failed',
           message: errorMessage || 'Your payment could not be processed. Please try again.',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          titleColor: 'text-red-800',
-          messageColor: 'text-red-600'
+          bgColor: 'bg-white/10',
+          borderColor: 'border-white/30',
+          titleColor: 'text-white',
+          messageColor: 'text-white/80'
         };
       case 'pending':
         return {
-          icon: <Clock className="w-16 h-16 text-yellow-500" />,
+          icon: <Clock className="w-16 h-16 text-white" />,
           title: 'Payment Pending',
           message: 'Your payment is being processed. Please wait for confirmation.',
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          titleColor: 'text-yellow-800',
-          messageColor: 'text-yellow-600'
+          bgColor: 'bg-white/10',
+          borderColor: 'border-white/30',
+          titleColor: 'text-white',
+          messageColor: 'text-white/80'
         };
       default:
         return {
-          icon: <AlertTriangle className="w-16 h-16 text-gray-500" />,
+          icon: <AlertTriangle className="w-16 h-16 text-white" />,
           title: 'Payment Status Unknown',
           message: 'Please check your payment status.',
-          bgColor: 'bg-gray-50',
-          borderColor: 'border-gray-200',
-          titleColor: 'text-gray-800',
-          messageColor: 'text-gray-600'
+          bgColor: 'bg-white/10',
+          borderColor: 'border-white/30',
+          titleColor: 'text-white',
+          messageColor: 'text-white/80'
         };
     }
   };
@@ -95,8 +95,8 @@ const PaymentStatusPopup: React.FC<PaymentStatusPopupProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl w-full max-w-md">
         {/* Content */}
         <div className="p-8">
           <div className="text-center">
@@ -117,29 +117,29 @@ const PaymentStatusPopup: React.FC<PaymentStatusPopupProps> = ({
 
             {/* Payment Details */}
             {status === 'success' && (
-              <div className={`p-4 rounded-lg mb-6 ${config.bgColor} ${config.borderColor} border`}>
+              <div className={`p-4 rounded-xl mb-6 ${config.bgColor} ${config.borderColor} border backdrop-blur-sm`}>
                 <div className="space-y-2 text-sm">
                   {serviceName && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Service:</span>
-                      <span className="font-medium text-gray-900">{serviceName}</span>
+                      <span className="text-white/70">Service:</span>
+                      <span className="font-medium text-white">{serviceName}</span>
                     </div>
                   )}
                   {amount && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Amount:</span>
-                      <span className="font-medium text-gray-900">{formatCurrency(amount, currency)}</span>
+                      <span className="text-white/70">Amount:</span>
+                      <span className="font-medium text-white">{formatCurrency(amount, currency)}</span>
                     </div>
                   )}
                   {paymentId && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Payment ID:</span>
-                      <span className="font-mono text-xs text-gray-700 break-all">{paymentId}</span>
+                      <span className="text-white/70">Payment ID:</span>
+                      <span className="font-mono text-xs text-white/80 break-all">{paymentId}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Date:</span>
-                    <span className="font-medium text-gray-900">{new Date().toLocaleDateString()}</span>
+                    <span className="text-white/70">Date:</span>
+                    <span className="font-medium text-white">{new Date().toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -148,13 +148,7 @@ const PaymentStatusPopup: React.FC<PaymentStatusPopupProps> = ({
             {/* Action Button */}
             <Button
               onClick={handleOkClick}
-              className={`w-full py-3 ${
-                status === 'success' 
-                  ? 'bg-green-600 hover:bg-green-700' 
-                  : status === 'error' || status === 'failed'
-                  ? 'bg-red-600 hover:bg-red-700'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
+              className="w-full py-3 bg-gradient-to-r from-white to-white/80 text-black font-semibold rounded-xl hover:scale-105 transition-all duration-200 shadow-lg"
             >
               {status === 'success' ? 'Continue to Profile' : 'OK'}
             </Button>
