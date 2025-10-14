@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
-import LocationPicker from '../components/LocationPicker';
+import LocationPickerAdvanced from '../components/LocationPickerAdvanced';
 import { serviceApi } from '../api/serviceApi';
 import { categoryApi } from '../api/categoryApi';
 import { userApi } from '../api/userApi';
@@ -554,10 +554,41 @@ export default function CreateService() {
     }));
   };
 
-  const handleLocationChange = (location: LocationInfo & { serviceRadiusKm?: number }) => {
+  const handleLocationChange = async (location: LocationInfo & { serviceRadiusKm?: number }) => {
+    if (!location) {
+      setFormData(prev => ({
+        ...prev,
+        location: {}
+      }));
+      return;
+    }
+
+    // If we have latitude and longitude but no extended geolocation data,
+    // perform reverse geocoding to get address components
+    let updatedLocation = { ...location };
+    if (location.latitude && location.longitude && !location.city && !location.country) {
+      try {
+        const { hybridSearchApi } = await import('../api/hybridSearchApi');
+        const response = await hybridSearchApi.reverseGeocode(location.latitude, location.longitude);
+        if (response.success && response.data && response.data.city && response.data.country) {
+          updatedLocation = {
+            ...location,
+            address: location.address || response.data.address,
+            city: response.data.city,
+            state: response.data.state,
+            country: response.data.country,
+            postalCode: response.data.postalCode
+          };
+        }
+      } catch (error) {
+        console.warn('Failed to reverse geocode location:', error);
+        // Continue with original location data if reverse geocoding fails
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
-      location: location
+      location: updatedLocation
     }));
   };
 
@@ -1222,12 +1253,12 @@ export default function CreateService() {
                   </p>
                 </div>
                 
-                <LocationPicker
+                <LocationPickerAdvanced
                   value={formData.location}
                   onChange={handleLocationChange}
                   className="w-full"
                   disabled={loading || uploading}
-                  required={false}
+                  showMap={true}
                 />
               </div>
             </div>

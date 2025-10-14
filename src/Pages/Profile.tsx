@@ -32,7 +32,7 @@ import type { UserProfile, ProviderProfile, Company } from '../api/userApi';
 import EditProviderModal from '../components/Profile/EditProviderModal';
 import EditProfileModal from '../components/Profile/EditProfileModal';
 import CompanyModal from '../components/Profile/CompanyModal';
-import LocationPicker from '../components/LocationPicker';
+import LocationPickerAdvanced from '../components/LocationPickerAdvanced';
 import { uploadMultipleImages } from '../utils/imageUpload';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
@@ -386,7 +386,7 @@ export default function Profile() {
     }));
   };
 
-  const handleLocationChange = (location: {
+  const handleLocationChange = async (location: {
     latitude?: number;
     longitude?: number;
     address?: string;
@@ -395,17 +395,56 @@ export default function Profile() {
     country?: string;
     postalCode?: string;
     serviceRadiusKm?: number;
-  }) => {
+  } | null) => {
+    if (!location) {
+      // Reset location fields when location is cleared
+      setServiceFormData(prev => ({
+        ...prev,
+        latitude: undefined,
+        longitude: undefined,
+        address: '',
+        city: undefined,
+        state: undefined,
+        country: undefined,
+        postalCode: undefined,
+        serviceRadiusKm: 10
+      }));
+      return;
+    }
+
+    // If we have latitude and longitude but no extended geolocation data,
+    // perform reverse geocoding to get address components
+    let updatedLocation = { ...location };
+    if (location.latitude && location.longitude && !location.city && !location.country) {
+      try {
+        const { hybridSearchApi } = await import('../api/hybridSearchApi');
+        const response = await hybridSearchApi.reverseGeocode(location.latitude, location.longitude);
+        if (response.success && response.data && response.data.city && response.data.country) {
+          updatedLocation = {
+            ...location,
+            address: location.address || response.data.address,
+            city: response.data.city,
+            state: response.data.state,
+            country: response.data.country,
+            postalCode: response.data.postalCode
+          };
+        }
+      } catch (error) {
+        console.warn('Failed to reverse geocode location:', error);
+        // Continue with original location data if reverse geocoding fails
+      }
+    }
+
     setServiceFormData(prev => ({
       ...prev,
-      latitude: location.latitude || prev.latitude,
-      longitude: location.longitude || prev.longitude,
-      address: location.address || '',
-      city: location.city || '',
-      state: location.state || '',
-      country: location.country || '',
-      postalCode: location.postalCode || '',
-      serviceRadiusKm: location.serviceRadiusKm || prev.serviceRadiusKm || 10
+      latitude: updatedLocation.latitude || prev.latitude,
+      longitude: updatedLocation.longitude || prev.longitude,
+      address: updatedLocation.address || '',
+      city: updatedLocation.city,
+      state: updatedLocation.state,
+      country: updatedLocation.country,
+      postalCode: updatedLocation.postalCode,
+      serviceRadiusKm: updatedLocation.serviceRadiusKm || prev.serviceRadiusKm || 10
     }));
   };
 
@@ -1817,19 +1856,15 @@ export default function Profile() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Service Location
                 </label>
-                <LocationPicker
-                  value={{
+                <LocationPickerAdvanced
+                  value={serviceFormData.latitude && serviceFormData.longitude ? {
                     latitude: serviceFormData.latitude,
                     longitude: serviceFormData.longitude,
-                    address: serviceFormData.address,
-                    city: serviceFormData.city,
-                    state: serviceFormData.state,
-                    country: serviceFormData.country,
-                    postalCode: serviceFormData.postalCode,
-                    serviceRadiusKm: serviceFormData.serviceRadiusKm
-                  }}
+                    address: serviceFormData.address
+                  } : undefined}
                   onChange={handleLocationChange}
                   className="w-full"
+                  showMap={true}
                 />
               </div>
 
