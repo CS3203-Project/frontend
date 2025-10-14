@@ -230,7 +230,7 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-8 flex-nowrap">
             {/* Services Dropdown */}
             <div className="relative">
-               <button
+               <div
                 className={cn(
                   "flex items-center space-x-1 font-medium transition-all duration-300 py-2 px-3 rounded-lg group",
                   isServicesRouteActive() 
@@ -240,13 +240,15 @@ const Navbar = () => {
                 onMouseEnter={handleServicesEnter}
                 onMouseLeave={handleServicesLeave}
               >
-                <span>{t('navbar.browseServices')}</span>
+                <Link to="/services" className="hover:text-white">
+                  <span>{t('navbar.browseServices')}</span>
+                </Link>
                 <ChevronDown className={cn(
                   "h-4 w-4 transition-all duration-300",
                   servicesOpen && "rotate-180 text-white",
                   isServicesRouteActive() ? "text-white" : "group-hover:text-white"
                 )} />
-              </button>
+              </div>
               
               {/* Services Mega Menu */}
               <div 
@@ -595,8 +597,7 @@ const Navbar = () => {
           <div className="px-4 py-6 space-y-6 relative z-10">
             {/* Mobile Services */}
             <div>
-              <button
-                onClick={() => setServicesOpen(!servicesOpen)}
+              <div
                 className={cn(
                   "flex items-center justify-between w-full text-left font-medium py-2 px-3 rounded-lg transition-all duration-300 group",
                   isServicesRouteActive() 
@@ -604,12 +605,20 @@ const Navbar = () => {
                     : "text-white hover:bg-white/10"
                 )}
               >
-                <span>Browse Services</span>
-                <ChevronDown className={cn(
-                  "h-4 w-4 transition-all duration-300 text-white/70 group-hover:text-white",
-                  servicesOpen && "rotate-180"
-                )} />
-              </button>
+                <Link 
+                  to="/services" 
+                  className="text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>Browse Services</span>
+                </Link>
+                <ChevronDown 
+                  onClick={() => setServicesOpen(!servicesOpen)}
+                  className={cn(
+                    "h-4 w-4 transition-all duration-300 text-white/70 group-hover:text-white",
+                    servicesOpen && "rotate-180"
+                  )} />
+              </div>
               <div className={cn(
                 "mt-2 overflow-hidden transition-all duration-300",
                 servicesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
