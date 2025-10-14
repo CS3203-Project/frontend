@@ -584,6 +584,96 @@ export default function SignupForm() {
                   {renderStep()}
                 </div>
 
+                {/* Mobile Navigation Buttons */}
+                <div className="relative z-10 lg:hidden mt-6 space-y-4">
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>Step {currentStep} of {totalSteps}</span>
+                      <span>{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+                    </div>
+                    
+                    <div className="w-full bg-white/10 rounded-full h-2">
+                      <div 
+                        className={`bg-gradient-to-r from-white/80 to-white h-2 rounded-full transition-all duration-500 ease-out ${
+                          currentStep === 1 ? 'w-1/4' :
+                          currentStep === 2 ? 'w-2/4' :
+                          currentStep === 3 ? 'w-3/4' : 'w-full'
+                        }`}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="flex justify-between gap-3">
+                    <button
+                      onClick={prevStep}
+                      disabled={currentStep === 1 || isLoading}
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                        currentStep === 1 || isLoading
+                          ? 'text-gray-500 cursor-not-allowed bg-white/5'
+                          : 'text-white bg-white/10 hover:bg-white/20 hover:text-gray-200'
+                      }`}
+                    >
+                      <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
+                      Back
+                    </button>
+
+                    {currentStep < totalSteps ? (
+                      <button
+                        onClick={nextStep}
+                        disabled={!canProceed || isLoading}
+                        className={`group relative overflow-hidden flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex-1 justify-center ${
+                          !canProceed || isLoading
+                            ? 'bg-white/20 text-white/60 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-white to-white/80 text-black hover:scale-105 shadow-lg hover:shadow-white/25'
+                        }`}
+                      >
+                        {!canProceed || isLoading ? (
+                          <>
+                            Next
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </>
+                        ) : (
+                          <>
+                            Next
+                            <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white to-white/80 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleSubmit}
+                        disabled={!canProceed || isLoading}
+                        className={`group relative overflow-hidden flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex-1 justify-center ${
+                          !canProceed || isLoading
+                            ? 'bg-white/20 text-white/60 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-white to-white/80 text-black hover:scale-105 shadow-lg hover:shadow-white/25'
+                        }`}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader className="h-4 w-4 mr-2 animate-spin" />
+                            Creating...
+                          </>
+                        ) : !canProceed ? (
+                          <>
+                            Create Account
+                            <Check className="h-4 w-4 ml-2" />
+                          </>
+                        ) : (
+                          <>
+                            Create Account
+                            <Check className="h-4 w-4 ml-2 group-hover:scale-110 transition-transform" />
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white to-white/80 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {/* Footer link */}
                 <div className="relative z-10 pt-4 text-center">
                   <p className="text-sm text-gray-400">

@@ -13,13 +13,13 @@ const CustomerManagement = () => {
       title: "Booking Management",
       description: "Track all appointments, schedules, and service requests",
       icon: Calendar,
-      gradient: "from-blue-400 to-indigo-500"
+      gradient: "bg-black dark:bg-white"
     },
     {
       title: "Communication Hub",
       description: "Centralized messaging and communication with all customers",
       icon: MessageCircle,
-      gradient: "from-green-400 to-blue-500"
+      gradient: "bg-black dark:bg-white"
     },
     {
       title: "Review & Ratings",
@@ -69,22 +69,22 @@ const CustomerManagement = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900">
+    <div className="min-h-screen min-h-screen relative">
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-500/20 to-purple-600/20 blur-3xl"></div>
-              <h1 className="relative text-4xl md:text-6xl font-bold text-white mb-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent dark:from-white/10 dark:to-transparent blur-3xl"></div>
+              <h1 className="relative text-4xl md:text-6xl font-bold text-black dark:text-white mb-6">
                 Manage Customers Like a
-                <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"> Pro</span>
+                <span className="bg-gradient-to-r text-black dark:text-white"> Pro</span>
               </h1>
             </div>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
               Streamline your customer relationships with powerful tools for bookings, communications, and performance tracking.
             </p>
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold px-8 py-3 hover:from-purple-600 hover:to-pink-700 transition-all duration-300">
+            <Button className="bg-black dark:bg-white text-black dark:text-white font-semibold px-8 py-3 hover:scale-105 transition-all duration-300">
               Try Customer Management
             </Button>
           </div>
@@ -94,10 +94,10 @@ const CustomerManagement = () => {
       {/* Features Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
             Everything You Need to Manage Customers
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Comprehensive tools to build stronger relationships and grow your business
           </p>
         </div>
@@ -108,13 +108,13 @@ const CustomerManagement = () => {
             return (
               <div
                 key={index}
-                className="bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-white/10 hover:border-purple-500/30 transition-all duration-300 group"
+                className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 dark:border-white/15 hover:border-purple-500/30 transition-all duration-300 group"
               >
-                <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${feature.gradient} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-16 h-16 rounded-3xl bg-gradient-to-r ${feature.gradient} mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                   <IconComponent className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-                <p className="text-gray-300">{feature.description}</p>
+                <h3 className="text-xl font-bold text-black dark:text-white mb-3">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-600 dark:text-gray-400">{feature.description}</p>
               </div>
             );
           })}
@@ -124,10 +124,10 @@ const CustomerManagement = () => {
       {/* Detailed Tools Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
             Powerful Management Tools
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Deep dive into the tools that will transform how you manage your customers
           </p>
         </div>
@@ -140,28 +140,28 @@ const CustomerManagement = () => {
                 key={index}
                 className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12`}
               >
-                <div className="flex-1 bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
+                <div className="flex-1 bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 dark:border-white/15">
                   <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-400 to-pink-500 mr-4 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-400 to-pink-500 mr-4 flex items-center justify-center">
                       <IconComponent className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-white">{tool.title}</h3>
                   </div>
-                  <p className="text-gray-300 mb-6">{tool.description}</p>
+                  <p className="text-gray-600 dark:text-gray-600 dark:text-gray-400 mb-6">{tool.description}</p>
                   <div className="grid grid-cols-2 gap-4">
                     {tool.benefits.map((benefit, benefitIndex) => (
                       <div key={benefitIndex} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{benefit}</span>
+                        <CheckCircle className="h-4 w-4 text-black dark:text-white flex-shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-600 dark:text-gray-400 text-sm">{benefit}</span>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-600/20 backdrop-blur-xl rounded-2xl p-8 border border-purple-500/30 h-80 flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-600/20 backdrop-blur-xl rounded-3xl p-8 border border-purple-500/30 h-80 flex items-center justify-center">
                     <div className="text-center">
-                      <IconComponent className="h-24 w-24 text-purple-400 mx-auto mb-4" />
-                      <p className="text-gray-300">Interactive Demo Available</p>
+                      <IconComponent className="h-24 w-24 text-black dark:text-white mx-auto mb-4" />
+                      <p className="text-gray-600 dark:text-gray-600 dark:text-gray-400">Interactive Demo Available</p>
                     </div>
                   </div>
                 </div>
@@ -173,36 +173,36 @@ const CustomerManagement = () => {
 
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="bg-gradient-to-r from-purple-500/20 to-pink-600/20 backdrop-blur-xl rounded-2xl p-12 border border-purple-500/30">
+        <div className="bg-gradient-to-r from-purple-500/20 to-pink-600/20 backdrop-blur-xl rounded-3xl p-12 border border-purple-500/30">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
               Proven Results
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               See how our customer management tools help service providers succeed
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-purple-400 mb-2">85%</div>
-              <div className="text-white font-semibold mb-1">Customer Retention</div>
-              <div className="text-gray-400 text-sm">Average improvement</div>
+              <div className="text-4xl font-bold text-black dark:text-white mb-2">85%</div>
+              <div className="text-black dark:text-white font-semibold mb-1">Customer Retention</div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">Average improvement</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-pink-400 mb-2">60%</div>
-              <div className="text-white font-semibold mb-1">Time Saved</div>
-              <div className="text-gray-400 text-sm">On admin tasks</div>
+              <div className="text-4xl font-bold text-black dark:text-white mb-2">60%</div>
+              <div className="text-black dark:text-white font-semibold mb-1">Time Saved</div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">On admin tasks</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-purple-400 mb-2">4.8/5</div>
-              <div className="text-white font-semibold mb-1">Customer Rating</div>
-              <div className="text-gray-400 text-sm">Average provider score</div>
+              <div className="text-4xl font-bold text-black dark:text-white mb-2">4.8/5</div>
+              <div className="text-black dark:text-white font-semibold mb-1">Customer Rating</div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">Average provider score</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-pink-400 mb-2">2x</div>
-              <div className="text-white font-semibold mb-1">Booking Growth</div>
-              <div className="text-gray-400 text-sm">In first 6 months</div>
+              <div className="text-4xl font-bold text-black dark:text-white mb-2">2x</div>
+              <div className="text-black dark:text-white font-semibold mb-1">Booking Growth</div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">In first 6 months</div>
             </div>
           </div>
         </div>
@@ -211,10 +211,10 @@ const CustomerManagement = () => {
       {/* Workflow Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
             Streamlined Customer Workflow
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             From first contact to repeat bookings - manage every step efficiently
           </p>
         </div>
@@ -249,14 +249,14 @@ const CustomerManagement = () => {
             const IconComponent = step.icon;
             return (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-400 to-pink-500 mx-auto mb-4 flex items-center justify-center relative">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-r from-purple-400 to-pink-500 mx-auto mb-4 flex items-center justify-center relative">
                   <IconComponent className="h-8 w-8 text-white" />
                   <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
                     {step.step}
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm">{step.description}</p>
+                <h3 className="text-lg font-semibold text-black dark:text-white mb-2">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">{step.description}</p>
               </div>
             );
           })}
@@ -265,15 +265,15 @@ const CustomerManagement = () => {
 
       {/* CTA Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 text-center">
-        <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-12 border border-white/10">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+        <div className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-3xl p-12 border border-white/20 dark:border-white/15">
+          <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
             Ready to Transform Your Customer Management?
           </h2>
-          <p className="text-xl text-gray-300 mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 mb-8">
             Join thousands of service providers already using our customer management tools
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold px-8 py-3 hover:from-purple-600 hover:to-pink-700 transition-all duration-300">
+            <Button className="bg-black dark:bg-white text-black dark:text-white font-semibold px-8 py-3 hover:scale-105 transition-all duration-300">
               Start Free Trial
             </Button>
             <Button className="bg-white/10 text-white border border-white/20 font-semibold px-8 py-3 hover:bg-white/20 hover:border-white/30 transition-all duration-300">

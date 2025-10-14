@@ -57,22 +57,22 @@ const EasySetup = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-green-900">
+    <div className="min-h-screen min-h-screen relative">
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 via-blue-500/20 to-green-600/20 blur-3xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent dark:from-white/10 dark:to-transparent blur-3xl"></div>
               <h1 className="relative text-4xl md:text-6xl font-bold text-white mb-6">
                 Get Your Service Online in
-                <span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent"> Minutes</span>
+                <span className="bg-gradient-to-r text-black dark:text-white"> Minutes</span>
               </h1>
             </div>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
               Our streamlined setup process gets you from zero to earning in just 8 minutes. No technical skills required.
             </p>
-            <Button className="bg-gradient-to-r from-green-500 to-blue-600 text-white font-semibold px-8 py-3 hover:from-green-600 hover:to-blue-700 transition-all duration-300">
+            <Button className="bg-black dark:bg-white text-white font-semibold px-8 py-3 hover:scale-105 transition-all duration-300">
               Start Setup Now
             </Button>
           </div>
@@ -85,7 +85,7 @@ const EasySetup = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Simple 4-Step Process
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Follow our guided setup wizard and you'll be ready to serve customers in no time
           </p>
         </div>
@@ -96,18 +96,18 @@ const EasySetup = () => {
             return (
               <div
                 key={index}
-                className="relative bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-white/10 hover:border-green-500/30 transition-all duration-300 group"
+                className="relative bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-2xl p-8 border border-white/25 dark:border-white/20 dark:border-white/15 hover:shadow-2xl transition-all duration-300 group"
               >
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <IconComponent className="h-8 w-8 text-white" />
                   </div>
-                  <div className="text-sm font-semibold text-green-400 mb-2">
+                  <div className="text-sm font-semibold text-black dark:text-white mb-2">
                     Step {step.step}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
-                  <p className="text-gray-300 mb-4">{step.description}</p>
-                  <div className="flex items-center justify-center space-x-2 text-sm text-green-400">
+                  <p className="text-gray-600 dark:text-gray-600 dark:text-gray-400 mb-4">{step.description}</p>
+                  <div className="flex items-center justify-center space-x-2 text-sm text-black dark:text-white">
                     <Clock className="h-4 w-4" />
                     <span>{step.time}</span>
                   </div>
@@ -116,7 +116,7 @@ const EasySetup = () => {
                 {/* Arrow connector (except for last item) */}
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ArrowRight className="h-6 w-6 text-gray-500" />
+                    <ArrowRight className="h-6 w-6 text-gray-600 dark:text-gray-400" />
                   </div>
                 )}
               </div>
@@ -131,7 +131,7 @@ const EasySetup = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Setup Made Simple
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             We've designed every aspect of the setup process to be intuitive and fast
           </p>
         </div>
@@ -142,13 +142,13 @@ const EasySetup = () => {
             return (
               <div
                 key={index}
-                className="bg-black/40 backdrop-blur-xl rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300 text-center group"
+                className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-xl p-6 border border-white/25 dark:border-white/20 dark:border-white/15 hover:border-white/25 dark:border-white/20 transition-all duration-300 text-center group"
               >
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-400 to-blue-500 mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <IconComponent className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
+                <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
               </div>
             );
           })}
@@ -157,22 +157,22 @@ const EasySetup = () => {
 
       {/* Demo Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="bg-gradient-to-r from-green-500/20 to-blue-600/20 backdrop-blur-xl rounded-2xl p-12 border border-green-500/30 text-center">
+        <div className="bg-gradient-to-r from-white/60 to-white/40 dark:from-black/60 dark:to-black/40 backdrop-blur-xl rounded-2xl p-12 border border-white/25 dark:border-white/20 dark:border-white/15 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             See It In Action
           </h2>
-          <p className="text-xl text-gray-300 mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-600 dark:text-gray-400 mb-8">
             Watch how easy it is to set up your service profile
           </p>
-          <div className="relative bg-black/50 rounded-xl p-8 mb-8">
+          <div className="relative bg-white/50 dark:bg-black/50 rounded-xl p-8 mb-8">
             <div className="flex items-center justify-center h-64">
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 cursor-pointer">
                 <Play className="h-10 w-10 text-white ml-1" />
               </div>
             </div>
-            <p className="text-gray-400 mt-4">Click to watch 2-minute setup demo</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-4">Click to watch 2-minute setup demo</p>
           </div>
-          <Button className="bg-gradient-to-r from-green-500 to-blue-600 text-white font-semibold px-8 py-3 hover:from-green-600 hover:to-blue-700 transition-all duration-300">
+          <Button className="bg-black dark:bg-white text-white font-semibold px-8 py-3 hover:scale-105 transition-all duration-300">
             Start Your Setup Now
           </Button>
         </div>
@@ -181,20 +181,20 @@ const EasySetup = () => {
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="bg-black/40 backdrop-blur-xl rounded-xl p-8 border border-white/10">
-            <div className="text-4xl font-bold text-green-400 mb-2">8 min</div>
+          <div className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-xl p-8 border border-white/25 dark:border-white/20 dark:border-white/15">
+            <div className="text-4xl font-bold text-black dark:text-white mb-2">8 min</div>
             <div className="text-white font-semibold mb-1">Average Setup Time</div>
-            <div className="text-gray-400 text-sm">From start to first booking</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">From start to first booking</div>
           </div>
-          <div className="bg-black/40 backdrop-blur-xl rounded-xl p-8 border border-white/10">
-            <div className="text-4xl font-bold text-blue-400 mb-2">95%</div>
+          <div className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-xl p-8 border border-white/25 dark:border-white/20 dark:border-white/15">
+            <div className="text-4xl font-bold text-black dark:text-white mb-2">95%</div>
             <div className="text-white font-semibold mb-1">Success Rate</div>
-            <div className="text-gray-400 text-sm">Complete setup on first try</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">Complete setup on first try</div>
           </div>
-          <div className="bg-black/40 backdrop-blur-xl rounded-xl p-8 border border-white/10">
-            <div className="text-4xl font-bold text-green-400 mb-2">24/7</div>
+          <div className="bg-white/70 dark:bg-black/70 backdrop-blur-2xl rounded-xl p-8 border border-white/25 dark:border-white/20 dark:border-white/15">
+            <div className="text-4xl font-bold text-black dark:text-white mb-2">24/7</div>
             <div className="text-white font-semibold mb-1">Support Available</div>
-            <div className="text-gray-400 text-sm">Help when you need it</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">Help when you need it</div>
           </div>
         </div>
       </div>

@@ -105,21 +105,20 @@ const Chatbot: React.FC = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:scale-110"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-white to-white/80 text-black rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:scale-110"
         >
           <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
         </button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 h-[500px] bg-black/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 flex flex-col overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50 w-96 h-[500px] bg-black/20 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 p-4 border-b border-white/20 flex items-center justify-between">
+          <div className="bg-white/5 backdrop-blur-sm p-4 border-b border-white/20 flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                <MessageCircle className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-r from-white to-white/80 rounded-full flex items-center justify-center">
+                <MessageCircle className="w-4 h-4 text-black" />
               </div>
               <div>
                 <h3 className="text-white font-semibold">Zia Assistant</h3>
@@ -144,14 +143,14 @@ const Chatbot: React.FC = () => {
                 <div
                   className={`max-w-[80%] p-3 rounded-xl ${
                     message.isUser
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white ml-4'
+                      ? 'bg-gradient-to-r from-white to-white/80 text-black ml-4 shadow-lg'
                       : 'bg-white/10 backdrop-blur-sm text-white border border-white/20 mr-4'
                   }`}
                 >
                   <div className="text-sm whitespace-pre-wrap break-words">
                     {message.message}
                   </div>
-                  <div className={`text-xs mt-1 ${message.isUser ? 'text-white/70' : 'text-white/50'}`}>
+                  <div className={`text-xs mt-1 ${message.isUser ? 'text-black/70' : 'text-white/50'}`}>
                     {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
@@ -167,7 +166,7 @@ const Chatbot: React.FC = () => {
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="text-xs px-3 py-2 bg-white/10 text-white/80 rounded-lg hover:bg-white/20 transition-colors border border-white/20 hover:border-white/30"
+                      className="text-xs px-3 py-2 bg-white/10 text-white/80 rounded-lg hover:bg-white/20 transition-all duration-200 border border-white/20 hover:border-white/40 backdrop-blur-sm"
                     >
                       {suggestion}
                     </button>
@@ -192,7 +191,7 @@ const Chatbot: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 border-t border-white/20 bg-black/50">
+          <div className="p-4 border-t border-white/20 bg-white/5 backdrop-blur-sm">
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -200,13 +199,13 @@ const Chatbot: React.FC = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything about Zia..."
-                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 backdrop-blur-sm"
+                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:border-white/50 focus:ring-2 focus:ring-white/50 backdrop-blur-sm hover:border-white/30 transition-all duration-200"
                 disabled={isLoading}
               />
               <button
                 onClick={() => sendMessage(inputMessage)}
                 disabled={!inputMessage.trim() || isLoading}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-white to-white/80 text-black p-2 rounded-xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
               >
                 <Send className="w-5 h-5" />
               </button>
