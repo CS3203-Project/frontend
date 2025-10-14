@@ -1,3 +1,4 @@
+//locationPickerMap
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import { MapPin, Target, Search, Loader2, Navigation, X, Plus, Minus } from 'lucide-react';
@@ -172,7 +173,7 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [mapCenter, setMapCenter] = useState<GoogleMapsLatLngLiteral>({ lat: 6.9271, lng: 79.8612 }); // Colombo default
-  const [zoom, setZoom] = useState(12);
+  const [zoom, setZoom] = useState(13); // Increased zoom level for better detail
   const [showRadiusInput, setShowRadiusInput] = useState(false);
   const [manualRadius, setManualRadius] = useState<string>('');
 
@@ -199,29 +200,9 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
         };
         onChange(location);
         if (location.latitude !== undefined && location.longitude !== undefined) {
-          if (
-            typeof location.latitude === 'number' &&
-            typeof location.longitude === 'number'
-          ) {
-            if (
-              typeof location.latitude === 'number' &&
-              typeof location.longitude === 'number'
-            ) {
-              if (
-                typeof location.latitude === 'number' &&
-                typeof location.longitude === 'number'
-              ) {
-                if (
-                  typeof location.latitude === 'number' &&
-                  typeof location.longitude === 'number'
-                ) {
-                  setMapCenter({ lat: location.latitude, lng: location.longitude });
-                }
-              }
-            }
-          }
+          setMapCenter({ lat: location.latitude, lng: location.longitude });
+          setZoom(15);
         }
-        setZoom(15);
       }
     });
   }, [onChange]);
@@ -320,8 +301,8 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Map Container */}
-      <div className="w-full h-80 relative">
+      {/* Map Container - Made wider by using aspect ratio */}
+      <div className="w-full aspect-[16/10] min-h-[280px] relative">
         <Wrapper
           apiKey={googleMapsApiKey || 'your-api-key-here'}
           libraries={['places', 'geometry']}
@@ -401,7 +382,7 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
         )}
       </div>
 
-      {/* Add Service Radius Section */}
+      {/* Add Service Radius Section
       {allowManualRadius && value && (
         <div className="mt-3 space-y-3">
           {!showRadiusInput ? (
@@ -486,9 +467,9 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
             </div>
           )}
         </div>
-      )}
+      )} */}
 
-      {/* Current Location Display */}
+      {/* Current Location Display
       {value && (value.latitude || value.address) && (
         <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center space-x-2 text-sm text-blue-800">
@@ -506,7 +487,7 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

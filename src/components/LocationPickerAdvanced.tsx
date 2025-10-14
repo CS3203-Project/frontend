@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MapPin, Target, Search, Loader2, Navigation, X } from 'lucide-react';
+//locationPickerAdvanced
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { MapPin, Target, Search, Loader2, Navigation, X, Map } from 'lucide-react';
 import { hybridSearchApi } from '../api/hybridSearchApi';
 import type { LocationParams } from '../api/hybridSearchApi';
+import LocationPickerMap from './LocationPickerMap';
 
 interface LocationPickerProps {
   value?: LocationParams;
@@ -14,6 +17,7 @@ interface LocationPickerProps {
   autoDetect?: boolean;
   disabled?: boolean;
   allowManualRadius?: boolean; // Allow manual radius input instead of slider
+  showMap?: boolean; // New prop to show/hide map integration
 }
 
 interface LocationSuggestion {
@@ -32,7 +36,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   maxRadius = 50,
   autoDetect = false,
   disabled = false,
-  allowManualRadius = true
+  allowManualRadius = true,
+  showMap = true
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -70,49 +75,46 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   }, [value]);
 
-  // Debounced search for location suggestions
-  const debouncedSearch = useMemo(() => {
-    return (query: string) => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+  // Declare google maps types for autocomplete
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+  // Initialize Google Places Autocomplete for the main input field
+  const initializeAutocomplete = useCallback(() => {
+    if (!inputRef.current || !window.google) return;
+
+    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+      types: ['geocode'],
+      fields: ['place_id', 'geometry', 'formatted_address', 'name']
+    });
+
+    autocompleteRef.current.addListener('place_changed', () => {
+      const place = autocompleteRef.current?.getPlace();
+      if (place?.geometry?.location) {
+        const location: LocationParams = {
+          latitude: place.geometry.location.lat(),
+          longitude: place.geometry.location.lng(),
+          address: place.formatted_address || place.name,
+          radius: undefined
+        };
+        onChange(location);
+        setIsOpen(false);
+        setSuggestions([]);
       }
+    });
+  }, [onChange]);
 
-      searchTimeoutRef.current = setTimeout(async () => {
-        if (query.length < 3) {
-          setSuggestions([]);
-          return;
-        }
-
-        setIsLoading(true);
-        try {
-          // Simple mock suggestions - in a real app, you'd use Google Places API
-          const mockSuggestions: LocationSuggestion[] = [
-            {
-              description: `${query} - Colombo, Sri Lanka`,
-              placeId: `place_${query}_colombo`,
-              types: ['locality']
-            },
-            {
-              description: `${query} - Kandy, Sri Lanka`,
-              placeId: `place_${query}_kandy`,
-              types: ['locality']
-            },
-            {
-              description: `${query} - Galle, Sri Lanka`,
-              placeId: `place_${query}_galle`,
-              types: ['locality']
-            }
-          ];
-          setSuggestions(mockSuggestions);
-        } catch (err) {
-          console.error('Failed to get location suggestions:', err);
-          setSuggestions([]);
-        } finally {
-          setIsLoading(false);
-        }
-      }, 300);
+  // Initialize autocomplete when component mounts (wait for Google Maps to load)
+  useEffect(() => {
+    const checkGoogleMaps = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        initializeAutocomplete();
+      } else {
+        // Retry after a short delay if Google Maps not yet loaded
+        setTimeout(checkGoogleMaps, 100);
+      }
     };
-  }, []);
+    checkGoogleMaps();
+  }, [initializeAutocomplete]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -120,8 +122,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     setError(null);
 
     if (newValue.trim()) {
-      debouncedSearch(newValue);
-      setIsOpen(true);
+      // Google Places Autocomplete will handle suggestions automatically
+      setIsOpen(false);
     } else {
       setSuggestions([]);
       setIsOpen(false);
@@ -385,6 +387,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Map Visualizer - Show when map is enabled and there's a location */}
+      {showMap && value && value.latitude && value.longitude && (
+        <div className="mt-4">
+          <LocationPickerMap
+            value={value}
+            onChange={onChange}
+            googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+            allowManualRadius={allowManualRadius}
+            className="w-full"
+          />
         </div>
       )}
 
