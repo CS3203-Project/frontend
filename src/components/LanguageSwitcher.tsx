@@ -21,6 +21,14 @@ const LanguageSwitcher = () => {
     setIsOpen(false);
   };
 
+  const toggleTranslationIcon = () => {
+    const stored = localStorage.getItem('floatingTranslateIconVisible');
+    const isVisible = stored !== null ? JSON.parse(stored) : true;
+    localStorage.setItem('floatingTranslateIconVisible', JSON.stringify(!isVisible));
+    // Reload to apply the change immediately
+    window.location.reload();
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,6 +93,24 @@ const LanguageSwitcher = () => {
                 )}
               </button>
             ))}
+
+            {/* Separator */}
+            <div className="border-t border-white/10 my-2"></div>
+
+            {/* Translation Icon Toggle */}
+            <button
+              onClick={toggleTranslationIcon}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm text-white/90 hover:text-white transition-all duration-300 hover:bg-white/10 group"
+              title="Toggle the floating translation icon"
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-base">🌐</span>
+                <span>Translation Icon</span>
+              </div>
+              <div className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">
+                {localStorage.getItem('floatingTranslateIconVisible') === 'false' ? 'Hidden' : 'Visible'}
+              </div>
+            </button>
           </div>
         </div>
       )}
