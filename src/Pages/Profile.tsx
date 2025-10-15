@@ -1109,23 +1109,23 @@ export default function Profile() {
                     
                     {/* Show basic provider info */}
                     <div className="mt-8 text-left">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Submitted Information</h3>
-                      <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Your Submitted Information</h3>
+                      <div className="space-y-4 p-4 rounded-lg bg-white/70 border border-gray-200 dark:bg-white/5 dark:border-white/10">
                         {providerProfile.bio && (
                           <div>
-                            <h4 className="font-medium text-gray-900 mb-1">Bio</h4>
-                            <p className="text-gray-600 text-sm">{providerProfile.bio}</p>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-1">Bio</h4>
+                            <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed">{providerProfile.bio}</p>
                           </div>
                         )}
                         
                         {providerProfile.skills && providerProfile.skills.length > 0 && (
                           <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Skills</h4>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Skills</h4>
                             <div className="flex flex-wrap gap-2">
                               {providerProfile.skills.map((skill, index) => (
                                 <span
                                   key={index}
-                                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                                  className="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-200 border border-blue-300/60 dark:border-blue-400/30 rounded-full text-sm"
                                 >
                                   {skill}
                                 </span>
@@ -1136,12 +1136,12 @@ export default function Profile() {
                         
                         {providerProfile.qualifications && providerProfile.qualifications.length > 0 && (
                           <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Qualifications</h4>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Qualifications</h4>
                             <div className="space-y-1">
                               {providerProfile.qualifications.map((qualification, index) => (
                                 <div key={index} className="flex items-center space-x-2">
-                                  <Award className="h-4 w-4 text-blue-500" />
-                                  <span className="text-gray-600 text-sm">{qualification}</span>
+                                  <Award className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                                  <span className="text-gray-700 dark:text-gray-200 text-base">{qualification}</span>
                                 </div>
                               ))}
                             </div>

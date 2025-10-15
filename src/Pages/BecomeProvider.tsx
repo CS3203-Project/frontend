@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -24,6 +24,10 @@ import Orb from '../components/Orb';
 
 export default function BecomeProvider() {
   const navigate = useNavigate();
+  // Section refs for scrolling to first invalid field on submit
+  const bioSectionRef = useRef<HTMLDivElement | null>(null);
+  const skillsSectionRef = useRef<HTMLDivElement | null>(null);
+  const qualificationsSectionRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState<CreateProviderData>({
     bio: '',
     skills: [],
@@ -40,12 +44,15 @@ export default function BecomeProvider() {
   const [touched, setTouched] = useState<{[key: string]: boolean}>({});
 
   // Real-time validation
-  const validateField = (field: string, value: any) => {
+  const validateField = (
+    field: 'bio' | 'skills' | 'qualifications',
+    value: string | string[]
+  ): boolean => {
     const errors: {[key: string]: string} = {};
     
     switch (field) {
       case 'bio':
-        if (!value?.trim()) {
+        if (typeof value !== 'string' || !value?.trim()) {
           errors.bio = 'Bio is required';
         } else if (value.trim().length < 50) {
           errors.bio = 'Bio should be at least 50 characters long';
@@ -54,14 +61,14 @@ export default function BecomeProvider() {
         }
         break;
       case 'skills':
-        if (!value || value.length === 0) {
+        if (!Array.isArray(value) || value.length === 0) {
           errors.skills = 'At least one skill is required';
         } else if (value.length < 2) {
           errors.skills = 'Please add at least 2 skills';
         }
         break;
       case 'qualifications':
-        if (!value || value.length === 0) {
+        if (!Array.isArray(value) || value.length === 0) {
           errors.qualifications = 'At least one qualification is required';
         }
         break;
@@ -71,9 +78,9 @@ export default function BecomeProvider() {
     return !errors[field];
   };
 
-  const handleFieldBlur = (field: string) => {
+  const handleFieldBlur = (field: 'bio' | 'skills' | 'qualifications') => {
     setTouched(prev => ({ ...prev, [field]: true }));
-    validateField(field, formData[field as keyof CreateProviderData]);
+    validateField(field, formData[field as keyof CreateProviderData] as string | string[]);
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,6 +132,18 @@ export default function BecomeProvider() {
     const isValidQualifications = validateField('qualifications', formData.qualifications);
     
     if (!isValidBio || !isValidSkills || !isValidQualifications) {
+      // Mark all as touched so inline errors are visible
+      setTouched({ bio: true, skills: true, qualifications: true });
+
+      // Scroll to the first invalid section to guide the user
+      if (!isValidBio) {
+        bioSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (!isValidSkills) {
+        skillsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (!isValidQualifications) {
+        qualificationsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
       toast.error('Please fix the validation errors before submitting');
       return;
     }
@@ -137,8 +156,9 @@ export default function BecomeProvider() {
       setTimeout(() => {
         navigate('/profile');
       }, 2000);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create provider profile');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create provider profile';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -312,7 +332,7 @@ export default function BecomeProvider() {
                 </div>
 
               {/* Enhanced Bio Section */}
-              <div className="space-y-6 animate-slide-up delay-1000">
+              <div ref={bioSectionRef} className="space-y-6 animate-slide-up delay-1000">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-xl font-semibold text-white">
                     <div className="relative p-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl mr-3 backdrop-blur-sm">
@@ -392,7 +412,7 @@ export default function BecomeProvider() {
               </div>
 
               {/* Enhanced Skills Section */}
-              <div className="space-y-6 animate-slide-up delay-1100">
+              <div ref={skillsSectionRef} className="space-y-6 animate-slide-up delay-1100">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-xl font-semibold text-white">
                     <div className="relative p-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl mr-3 backdrop-blur-sm">
@@ -501,7 +521,7 @@ export default function BecomeProvider() {
               </div>
 
               {/* Qualifications Section */}
-              <div className="space-y-4">
+              <div ref={qualificationsSectionRef} className="space-y-4">
                 <label className="flex items-center text-xl font-semibold text-white mb-4">
                   <div className="p-2 bg-green-600/20 rounded-lg mr-3">
                     <Award className="h-5 w-5 text-green-400" />
@@ -547,6 +567,23 @@ export default function BecomeProvider() {
                         </button>
                       </div>
                     ))}
+                  </div>
+                )}
+                {/* Qualifications error and success indicators */}
+                {formErrors.qualifications && touched.qualifications && (
+                  <div className="p-3 bg-red-500/10 backdrop-blur-sm border border-red-500/30 rounded-lg animate-slide-up">
+                    <p className="text-red-400 text-sm flex items-center space-x-2">
+                      <span className="text-red-500">⚠️</span>
+                      <span>{formErrors.qualifications}</span>
+                    </p>
+                  </div>
+                )}
+                {formData.qualifications && formData.qualifications.length >= 1 && !formErrors.qualifications && (
+                  <div className="p-3 bg-green-500/10 backdrop-blur-sm border border-green-500/30 rounded-lg animate-slide-up">
+                    <p className="text-green-400 text-sm flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Great! You've added {formData.qualifications.length} qualification{formData.qualifications.length > 1 ? 's' : ''}.</span>
+                    </p>
                   </div>
                 )}
                 
