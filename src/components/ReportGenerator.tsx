@@ -40,6 +40,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
   const [isGenerating, setIsGenerating] = useState(false);
   const [reports, setReports] = useState<GeneratedReport[]>([]);
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
+  const [formErrors, setFormErrors] = useState<{ startDate?: string; endDate?: string }>({});
 
   // Set default dates (last 30 days)
   useEffect(() => {
@@ -200,7 +201,15 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
 
   // Main report generation handler
   const handleGenerateReport = async () => {
+    // Reset errors
+    setFormErrors({});
+
+    // Basic validation with inline feedback
     if (!startDate || !endDate) {
+      const nextErrors: { startDate?: string; endDate?: string } = {};
+      if (!startDate) nextErrors.startDate = 'Select a start date';
+      if (!endDate) nextErrors.endDate = 'Select an end date';
+      setFormErrors(nextErrors);
       showErrorToast('Please select both start and end dates');
       return;
     }
@@ -208,6 +217,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
     const start = new Date(startDate);
     const end = new Date(endDate);
     if (start > end) {
+      setFormErrors({ endDate: 'End date must be on or after the start date' });
       showErrorToast('Start date cannot be after end date');
       return;
     }
@@ -317,7 +327,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -337,7 +347,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-gray-50">
+  <div className="flex border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
           {[
             { id: 'generate', label: 'Generate Report', icon: FileText },
             { id: 'history', label: 'Report History', icon: Clock }
@@ -358,7 +368,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+  <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] bg-gradient-to-br from-white via-white to-blue-50/30">
           {activeTab === 'generate' && (
             <div className="space-y-6">
               {/* Report Configuration */}
@@ -371,7 +381,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
                   <select
                     value={reportType}
                     onChange={(e) => setReportType(e.target.value as ReportType)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600/40 bg-white text-gray-900"
                   >
                     <option value="customers">Customer Report</option>
                     <option value="providers">Service Provider Report</option>
@@ -388,7 +398,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
                   <select
                     value="pdf"
                     disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
+                    className="w-full px-3 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
                   >
                     <option value="pdf">PDF</option>
                   </select>
@@ -397,26 +407,40 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) =>
                 {/* Date Range */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date
+                    Start Date <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    aria-invalid={!!formErrors.startDate}
+                    style={{ colorScheme: 'light' }}
+                    className={`w-full px-3 py-3 border rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600/40 ${
+                      formErrors.startDate ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
                   />
+                  {formErrors.startDate && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.startDate}</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date
+                    End Date <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    aria-invalid={!!formErrors.endDate}
+                    style={{ colorScheme: 'light' }}
+                    className={`w-full px-3 py-3 border rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600/40 ${
+                      formErrors.endDate ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
                   />
+                  {formErrors.endDate && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.endDate}</p>
+                  )}
                 </div>
               </div>
 
