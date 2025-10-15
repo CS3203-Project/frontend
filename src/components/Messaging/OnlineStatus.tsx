@@ -34,16 +34,16 @@ export const OnlineStatus: React.FC<OnlineStatusProps> = ({
       <div 
         className={`${sizeClasses[size]} rounded-full ${
           isOnline 
-            ? 'bg-green-500 animate-pulse' 
-            : 'bg-gray-400'
+            ? 'bg-white animate-pulse' 
+            : 'bg-white/30'
         }`}
       />
       {showText && (
         <span 
           className={`${textSizeClasses[size]} font-medium ${
             isOnline 
-              ? 'text-green-500' 
-              : 'text-gray-400'
+              ? 'text-white' 
+              : 'text-white/60'
           }`}
         >
           {isOnline ? 'Online' : 'Offline'}

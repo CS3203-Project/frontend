@@ -130,32 +130,56 @@ const Chat: React.FC = () => {
     };
   }, [currentUser, selectedUser]);
 
-  if (!currentUser) return <div>Loading user...</div>;
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center h-[60vh] bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-2xl border border-white/20">
+        <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white mx-auto mb-4"></div>
+          <p className="text-white/80">Loading user...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col md:flex-row h-[60vh] border rounded-lg">
+    <div className="flex flex-col md:flex-row h-[60vh] bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-2xl border border-white/20 overflow-hidden">
       {/* User List */}
-      <div className="w-full md:w-1/4 border-r p-4 overflow-y-auto">
-        <h3 className="font-bold mb-2">Online Users</h3>
-        {onlineUsers.length === 0 && <div className="text-gray-500">No users online</div>}
-        <ul>
+      <div className="w-full md:w-1/4 border-r border-white/20 p-4 overflow-y-auto bg-black/40 backdrop-blur-sm">
+        <h3 className="font-bold mb-4 text-white">Online Users</h3>
+        {onlineUsers.length === 0 && (
+          <div className="text-white/60 text-center py-8">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <p>No users online</p>
+          </div>
+        )}
+        <ul className="space-y-2">
           {onlineUsers.map(user => (
             <li
               key={user.userId}
-              className={`p-2 rounded cursor-pointer mb-1 ${
+              className={`p-3 rounded-xl cursor-pointer transition-all duration-300 border ${
                 selectedUser?.userId === user.userId
-                  ? 'bg-blue-100 font-semibold'
-                  : 'hover:bg-gray-100'
+                  ? 'bg-white/20 border-white/30 text-white'
+                  : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-white/20'
               }`}
               onClick={() => setSelectedUser(user)}
             >
-              {user.name}
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center border border-white/20">
+                  <span className="text-xs font-semibold text-white">{user.name.charAt(0).toUpperCase()}</span>
+                </div>
+                <span className="font-medium">{user.name}</span>
+              </div>
             </li>
           ))}
         </ul>
       </div>
+      
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-black/40 backdrop-blur-sm">
         <div className="flex-1">
           {selectedUser ? (
             <MessageList
@@ -164,8 +188,16 @@ const Chat: React.FC = () => {
               selectedUserId={selectedUser.userId}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              Select a user to start chatting
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 max-w-md">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <p className="text-white/80 font-medium mb-2">Select a user to start chatting</p>
+                <p className="text-white/60 text-sm">Choose someone from the online users list</p>
+              </div>
             </div>
           )}
         </div>

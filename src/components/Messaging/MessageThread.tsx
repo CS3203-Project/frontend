@@ -182,12 +182,38 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
 
   if (!activeConversation) {
     return (
-      <div className={`flex items-center justify-center h-full bg-gray-900 ${className}`}>
-        <div className="text-center text-green-400 font-mono">
-          <div className="text-6xl mb-4">⚠</div>
-          <div className="text-lg font-bold mb-2">$ NO ACTIVE CONNECTION</div>
-          <div className="text-sm text-gray-500">
-            Select a conversation from the terminal list to establish connection...
+      <div className={`flex flex-col h-full bg-gradient-to-br from-gray-900 via-black to-gray-900 ${className}`}>
+        {/* Header Skeleton */}
+        <div className="p-4 border-b border-white/20 bg-black/40 backdrop-blur-sm">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-8 bg-white/10 rounded-lg animate-pulse"></div>
+            <div className="flex-1 h-6 bg-white/5 rounded-lg animate-pulse"></div>
+            <div className="w-16 h-6 bg-white/10 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Messages Area Skeleton */}
+        <div className="flex-1 p-4 space-y-4 overflow-hidden">
+          {/* Empty state with skeleton */}
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 max-w-md w-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center relative z-10">
+                <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <p className="text-lg font-medium text-white mb-2 relative z-10">No conversation selected</p>
+              <p className="text-sm text-white/60 mb-4 relative z-10">Select a conversation to start messaging</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Input Area Skeleton */}
+        <div className="p-4 border-t border-white/20 bg-black/40 backdrop-blur-sm">
+          <div className="flex space-x-3">
+            <div className="flex-1 h-12 bg-white/5 rounded-xl animate-pulse"></div>
+            <div className="w-20 h-12 bg-white/10 rounded-xl animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -196,16 +222,26 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
 
   if (error) {
     return (
-      <div className={`p-4 text-center text-red-400 bg-gray-900 font-mono ${className}`}>
-        <div className="text-4xl mb-4">✖</div>
-        <div className="text-lg font-bold mb-2">$ CONNECTION ERROR</div>
-        <div className="text-sm mb-4">Error: {error}</div>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="px-4 py-2 bg-red-600 text-white font-mono rounded hover:bg-red-500"
-        >
-          RETRY CONNECTION
-        </button>
+      <div className={`flex flex-col h-full bg-gradient-to-br from-gray-900 via-black to-gray-900 ${className}`}>
+        <div className="flex items-center justify-center h-full p-4">
+          <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 relative overflow-hidden max-w-md w-full">
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center relative z-10">
+              <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <p className="text-lg font-medium text-white mb-2 relative z-10">Connection error</p>
+            <p className="text-sm text-white/60 mb-6 relative z-10">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-medium border border-white/30 hover:border-white/40 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+              <span className="relative z-10">Retry connection</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -217,68 +253,87 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
     : `User ${otherUserId?.slice(-8) || 'Unknown'}`;
 
   return (
-    <div className={`flex flex-col h-full bg-gray-900 ${className}`} style={{ fontFamily: 'Consolas, Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace' }}>
-      {/* Terminal Header */}
-      <div className="p-3 border-b border-gray-700 bg-gray-800">
-        <div className="flex items-center space-x-2">
-          {/* Terminal dots */}
-          <div className="flex space-x-1">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          </div>
-          
-          {/* Terminal title */}
-          <div className="flex-1 text-center">
-            <span className="text-gray-300 text-sm font-mono">
-              Chat Terminal - {contactName}
-            </span>
-          </div>
-          
-          {/* Connection status */}
-          <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full ${isContactOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
-            <span className={`text-xs font-mono ${isContactOnline ? 'text-green-400' : 'text-gray-400'}`}>
-              {isContactOnline ? 'ONLINE' : 'OFFLINE'}
-            </span>
+    <div className={`flex flex-col h-full bg-gradient-to-br from-gray-900 via-black to-gray-900 ${className}`}>
+      {/* Header */}
+      <div className="p-4 border-b border-white/20 bg-black/40 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-white font-medium text-sm">{contactName}</h3>
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${isContactOnline ? 'bg-green-400 animate-pulse' : 'bg-white/40'}`}></div>
+                <span className={`text-xs ${isContactOnline ? 'text-green-400' : 'text-white/60'}`}>
+                  {isContactOnline ? 'Online' : 'Offline'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Messages - Terminal Style with Message Bubbles */}
+      {/* Messages */}
       <div 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900"
-        style={{ 
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#4B5563 #1F2937'
-        }}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
       >
         {loading && messages.length === 0 && (
-          <div className="text-center py-8">
-            <div className="text-green-400 font-mono text-sm mb-4">
-              $ Initializing connection...
+          <div className="space-y-4">
+            {/* Skeleton messages loading */}
+            <div className="flex justify-start">
+              <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/5 rounded-2xl animate-pulse">
+                <div className="space-y-2">
+                  <div className="h-4 bg-white/10 rounded-lg"></div>
+                  <div className="h-4 bg-white/10 rounded-lg w-3/4"></div>
+                </div>
+              </div>
             </div>
-            <Loader size="md" variant="accent" />
-            <div className="animate-pulse text-green-400 font-mono text-xs mt-4">
-              ████████████████████████████████
+            <div className="flex justify-end">
+              <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/10 rounded-2xl animate-pulse">
+                <div className="space-y-2">
+                  <div className="h-4 bg-white/5 rounded-lg"></div>
+                  <div className="h-4 bg-white/5 rounded-lg w-5/6"></div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/5 rounded-2xl animate-pulse">
+                <div className="space-y-2">
+                  <div className="h-4 bg-white/10 rounded-lg"></div>
+                  <div className="h-4 bg-white/10 rounded-lg w-4/6"></div>
+                  <div className="h-4 bg-white/10 rounded-lg w-2/6"></div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/10 rounded-2xl animate-pulse">
+                <div className="space-y-2">
+                  <div className="h-4 bg-white/5 rounded-lg"></div>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {loading && messages.length > 0 && (
-          <div className="text-green-400 font-mono text-xs py-2 flex items-center justify-center space-x-2">
-            <Loader size="sm" variant="accent" />
-            <span className="animate-pulse">$ Loading previous messages...</span>
+          <div className="text-center py-4">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
+              <span className="text-white/90 text-sm">Loading more messages...</span>
+            </div>
           </div>
         )}
 
         {messageGroups.map(({ date, messages: groupMessages }) => (
-          <div key={date} className="space-y-3">
-            {/* Date separator - Terminal style */}
+          <div key={date} className="space-y-4">
+            {/* Date separator */}
             <div className="flex items-center justify-center py-2">
-              <div className="text-gray-500 text-xs font-mono px-2">
-                ─────────── {formatDate(date)} ───────────
+              <div className="text-white/60 text-xs px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
+                {formatDate(date)}
               </div>
             </div>
 
@@ -286,60 +341,47 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
             <div className="space-y-3">
               {groupMessages.map((message, index) => {
                 const isOwnMessage = message.fromId === currentUserId;
-                const timestamp = formatTime(message.createdAt);
-                const username = isOwnMessage ? 'YOU' : contactName.toUpperCase().replace(/\s+/g, '_');
-                const messageId = `#${String(index + 1).padStart(3, '0')}`;
                 
                 return (
                   <div key={`${message.id}-${index}`} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${
                       isOwnMessage 
-                        ? 'bg-green-500/20 border-green-400/30' 
+                        ? 'bg-white/20 border-white/30' 
                         : 'bg-white/10 border-white/20'
-                    } backdrop-blur-sm rounded-xl p-4 border shadow-xl relative overflow-hidden group transition-all duration-300 hover:${
+                    } backdrop-blur-sm rounded-2xl px-4 py-3 border shadow-lg relative overflow-hidden group transition-all duration-300 hover:${
                       isOwnMessage 
-                        ? 'border-green-400/50 bg-green-500/30' 
+                        ? 'border-white/40 bg-white/30' 
                         : 'border-white/30 bg-white/15'
                     }`}>
                       
                       {/* Shimmering gradient effect */}
-                      <div className={`absolute inset-0 bg-gradient-to-r from-transparent ${
-                        isOwnMessage 
-                          ? 'via-green-400/10 to-transparent' 
-                          : 'via-white/5 to-transparent'
-                      } transform -skew-x-12 group-hover:animate-pulse rounded-xl`}></div>
-                      
-                      {/* Message header with timestamp and user */}
-                      <div className={`flex items-center space-x-2 mb-2 text-xs font-mono ${
-                        isOwnMessage ? 'text-green-200' : 'text-green-300'
-                      } relative z-10`}>
-                        <span className="text-gray-400">{timestamp}</span>
-                        <span>{messageId}</span>
-                        <span className="font-bold">{username}</span>
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse rounded-2xl"></div>
                       
                       {/* Message content */}
-                      <div className={`font-mono text-sm break-words ${
-                        isOwnMessage ? 'text-white' : 'text-gray-100'
-                      } relative z-10`}>
+                      <div className="text-white relative z-10 break-words">
                         {message.content}
                       </div>
 
-                      {/* Read receipt for own messages */}
-                      {isOwnMessage && (
-                        <div className="flex justify-end mt-2 relative z-10">
-                          {message.receivedAt ? (
-                            <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          ) : (
-                            <svg className="w-3 h-3 text-green-400/60" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                      )}
+                      {/* Timestamp */}
+                      <div className="flex items-center justify-end mt-2 relative z-10">
+                        <span className="text-xs text-white/60">
+                          {formatTime(message.createdAt)}
+                        </span>
+                        {isOwnMessage && (
+                          <div className="ml-2">
+                            {message.receivedAt ? (
+                              <svg className="w-3 h-3 text-white/80" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L4 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3 h-3 text-white/40" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -349,40 +391,34 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
         ))}
 
         {messages.length === 0 && !loading && (
-          <div className="text-center py-8">
-            <div className="text-gray-500 font-mono text-sm mb-2">
-              $ Connection established
-            </div>
-            <div className="text-gray-400 font-mono text-xs">
-              No messages in buffer. Start typing to initiate conversation...
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 max-w-md w-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center relative z-10">
+                <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <p className="text-lg font-medium text-white mb-2 relative z-10">No messages yet</p>
+              <p className="text-sm text-white/60 relative z-10">Start the conversation by sending a message</p>
             </div>
           </div>
         )}
 
-        <div ref={messagesEndRef} style={{ height: '1px', marginTop: '8px' }} />
+        <div ref={messagesEndRef} className="h-1 mt-2" />
       </div>
 
-      {/* Message input - Terminal Style */}
-      <div className="p-4 border-t border-gray-700 bg-gray-800">
+      {/* Message Input */}
+      <div className="p-4 border-t border-white/20 bg-black/40 backdrop-blur-sm">
         <form onSubmit={handleSendMessage} className="flex items-end space-x-3">
-          {/* Terminal prompt */}
-          <div className="flex-shrink-0 text-green-400 font-mono text-sm self-end pb-3">
-            $
-          </div>
-          
           <div className="flex-1">
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type message here..."
+              placeholder="Type your message..."
               rows={1}
-              className="w-full p-3 bg-gray-900 border border-gray-600 rounded text-green-300 placeholder-gray-500 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              style={{ 
-                minHeight: '44px', 
-                maxHeight: '120px',
-                fontFamily: 'Consolas, Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
-              }}
+              className="w-full p-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/60 resize-none focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-300 min-h-[44px] max-h-[120px]"
               disabled={sending}
             />
           </div>
@@ -390,19 +426,22 @@ export const MessageThread: React.FC<MessageThreadProps> = ({ className = '' }) 
           <button
             type="submit"
             disabled={!newMessage.trim() || sending}
-            className="px-4 py-2 bg-green-600 text-black font-mono text-sm font-bold rounded hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[60px]"
+            className="px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-medium border border-white/30 hover:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px] relative overflow-hidden group"
           >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
             {sending ? (
-              <div className="text-black font-mono text-xs">...</div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
             ) : (
-              'SEND'
+              <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
             )}
           </button>
         </form>
         
-        {/* Terminal info line */}
-        <div className="mt-2 text-xs text-gray-500 font-mono">
-          Press Enter to send • Shift+Enter for new line • {messages.length} messages in buffer
+        {/* Helper text */}
+        <div className="mt-2 text-xs text-white/60 text-center">
+          Press Enter to send • Shift+Enter for new line
         </div>
       </div>
     </div>

@@ -96,20 +96,20 @@ export const UserSearch: React.FC<UserSearchProps> = ({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-3 pl-12 bg-black/40 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 transition-all duration-300"
         />
         
         {/* Search Icon */}
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
         {/* Loading Spinner */}
         {loading && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
           </div>
         )}
       </div>
@@ -118,10 +118,11 @@ export const UserSearch: React.FC<UserSearchProps> = ({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          className="absolute z-50 w-full mt-2 bg-black/40 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl max-h-60 overflow-y-auto"
         >
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse rounded-xl"></div>
           {users.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-white/60 relative z-10">
               {loading ? 'Searching...' : 'No users found'}
             </div>
           ) : (
@@ -129,7 +130,7 @@ export const UserSearch: React.FC<UserSearchProps> = ({
               <div
                 key={user.id}
                 onClick={() => handleSelectUser(user)}
-                className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                className="p-4 hover:bg-white/5 cursor-pointer border-b border-white/10 last:border-b-0 transition-all duration-300 relative z-10 group"
               >
                 <div className="flex items-center space-x-3">
                   {/* Avatar */}
@@ -138,10 +139,10 @@ export const UserSearch: React.FC<UserSearchProps> = ({
                       <img
                         src={user.imageUrl}
                         alt={`${user.firstName} ${user.lastName}`}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover border border-white/20"
                       />
                     ) : (
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center text-white text-sm font-medium border border-white/20">
                         {user.firstName.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -149,11 +150,11 @@ export const UserSearch: React.FC<UserSearchProps> = ({
 
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-white truncate">
                       {user.firstName} {user.lastName}
                     </p>
                     {user.email && (
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-white/60 truncate">
                         {user.email}
                       </p>
                     )}

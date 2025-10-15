@@ -191,7 +191,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
                     <Star
                       className={`w-8 h-8 ${
                         star <= (hoverRating || rating)
-                          ? 'text-yellow-400 fill-yellow-400'
+                          ? 'text-white fill-white'
                           : 'text-white/30 hover:text-white/60'
                       } transition-colors duration-200`}
                     />

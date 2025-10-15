@@ -116,6 +116,7 @@ const ConversationViewInner: React.FC<{
   const [ratingType, setRatingType] = useState<'customer' | 'service'>('customer');
   const [serviceData, setServiceData] = useState<any>(null);
   const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
+  const [showChatOnMobile, setShowChatOnMobile] = useState(true); // Default to showing chat on mobile
 
   // Auto-select conversation based on URL parameter
   useEffect(() => {
@@ -243,17 +244,17 @@ const ConversationViewInner: React.FC<{
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-red-500/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-red-500/10 to-red-500/5 animate-pulse rounded-xl"></div>
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-red-500/20 to-red-500/10 flex items-center justify-center relative z-10">
-              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <main className="flex-grow flex items-center justify-center px-4 py-6 mt-16">
+          <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 relative overflow-hidden max-w-md w-full">
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center relative z-10">
+              <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <p className="text-lg font-medium text-red-400 mb-2 relative z-10">Error loading conversation</p>
+            <p className="text-lg font-medium text-white mb-2 relative z-10">Error loading conversation</p>
             <p className="text-sm text-white/60 mb-6 relative z-10">{conversationError}</p>
-            <div className="flex space-x-3 relative z-10">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 relative z-10">
               <button 
                 onClick={handleBackToHub}
                 className="px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-medium border border-white/30 hover:border-white/40 relative overflow-hidden group"
@@ -263,9 +264,9 @@ const ConversationViewInner: React.FC<{
               </button>
               <button 
                 onClick={() => window.location.reload()} 
-                className="px-6 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all duration-300 font-medium border border-red-500/30 hover:border-red-500/40 relative overflow-hidden group"
+                className="px-6 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-medium border border-white/30 hover:border-white/40 relative overflow-hidden group"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
                 <span className="relative z-10">Retry</span>
               </button>
             </div>
@@ -277,7 +278,7 @@ const ConversationViewInner: React.FC<{
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-black-900 via-black to-gray-900">
       <Navbar />
       <main className="flex-grow px-4 py-6 mt-16">
         <div className="h-[calc(100vh-8rem)] flex flex-col">
@@ -307,21 +308,175 @@ const ConversationViewInner: React.FC<{
           </div>
           
           {/* Main Content */}
-          <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-2xl flex-1 flex overflow-hidden border border-white/20 relative">
+          <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-2xl flex-1 flex flex-col md:flex-row overflow-hidden border border-white/20 relative">
             {/* Background gradient effects */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse rounded-2xl"></div>
             
             {conversationLoading || loading ? (
-              <div className="flex items-center justify-center h-full w-full relative z-10">
-                <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/20 border-t-white mx-auto mb-4"></div>
-                  <p className="text-white/90">Loading conversation...</p>
+              <div className="flex-1 flex flex-col relative z-10">
+                {/* Mobile Toggle Buttons - Only visible on small screens during loading */}
+                <div className="md:hidden flex border-b border-white/20 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm">
+                  <button
+                    onClick={() => setShowChatOnMobile(false)}
+                    className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 ${
+                      !showChatOnMobile 
+                        ? 'bg-white/20 text-white border-b-2 border-white/60' 
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Confirmation
+                  </button>
+                  <button
+                    onClick={() => setShowChatOnMobile(true)}
+                    className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 ${
+                      showChatOnMobile 
+                        ? 'bg-white/20 text-white border-b-2 border-white/60' 
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Chat
+                  </button>
+                </div>
+
+                {/* Mobile responsive skeleton loading */}
+                <div className="flex flex-col h-full">
+                  {/* Left Side Skeleton - Confirmation Panel */}
+                  <div className={`w-full md:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-gradient-to-b from-white/5 to-white/10 backdrop-blur-sm border-b md:border-b-0 md:border-r border-white/20 p-4 md:p-6 space-y-4 overflow-y-auto h-full md:max-h-none ${
+                    showChatOnMobile ? 'hidden md:flex' : 'flex'
+                  }`}>
+                    {/* User info skeleton */}
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-white/10 rounded-full animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-white/5 rounded-lg animate-pulse"></div>
+                        <div className="h-3 bg-white/5 rounded-lg animate-pulse w-3/4"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Service info skeleton */}
+                    <div className="space-y-3">
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse"></div>
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse w-5/6"></div>
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse w-4/6"></div>
+                    </div>
+                    
+                    {/* Confirmation buttons skeleton */}
+                    <div className="space-y-3 mt-6">
+                      <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+                      <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Right Side Skeleton - Message Thread */}
+                  <div className={`flex-1 min-w-0 flex flex-col p-4 md:p-6 space-y-4 ${
+                    !showChatOnMobile ? 'hidden md:flex' : 'flex'
+                  }`}>
+                    {/* User info skeleton */}
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-white/10 rounded-full animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-white/5 rounded-lg animate-pulse"></div>
+                        <div className="h-3 bg-white/5 rounded-lg animate-pulse w-3/4"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Service info skeleton */}
+                    <div className="space-y-3">
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse"></div>
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse w-5/6"></div>
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse w-4/6"></div>
+                    </div>
+                    
+                    {/* Confirmation buttons skeleton */}
+                    <div className="space-y-3 mt-6">
+                      <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+                      <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Right Side Skeleton - Message Thread */}
+                  <div className="flex-1 min-w-0 flex flex-col p-4 md:p-6 space-y-4">
+                    {/* Message input skeleton */}
+                    <div className="flex space-x-3">
+                      <div className="flex-1 h-12 bg-white/5 rounded-xl animate-pulse"></div>
+                      <div className="w-12 h-12 bg-white/10 rounded-xl animate-pulse"></div>
+                    </div>
+                    
+                    {/* Messages skeleton */}
+                    <div className="flex-1 space-y-4 overflow-hidden">
+                      {/* Incoming message */}
+                      <div className="flex justify-start">
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/5 rounded-2xl animate-pulse">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-white/10 rounded-lg"></div>
+                            <div className="h-4 bg-white/10 rounded-lg w-3/4"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Outgoing message */}
+                      <div className="flex justify-end">
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/10 rounded-2xl animate-pulse">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-white/5 rounded-lg"></div>
+                            <div className="h-4 bg-white/5 rounded-lg w-5/6"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Another incoming message */}
+                      <div className="flex justify-start">
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/5 rounded-2xl animate-pulse">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-white/10 rounded-lg"></div>
+                            <div className="h-4 bg-white/10 rounded-lg w-4/6"></div>
+                            <div className="h-4 bg-white/10 rounded-lg w-2/6"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Typing indicator skeleton */}
+                      <div className="flex justify-start">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-white/20 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-white/20 rounded-full animate-bounce [animation-delay:0.1s]"></div>
+                            <div className="w-2 h-2 bg-white/20 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : activeConversation ? (
               <>
-                {/* Left Side - Confirmation Panel (Fixed width) */}
-                <div className="w-80 xl:w-96 flex-shrink-0 flex flex-col bg-gradient-to-b from-white/5 to-white/10 backdrop-blur-sm relative z-10 border-r border-white/20">
+                {/* Mobile Toggle Buttons - Only visible on small screens */}
+                <div className="md:hidden flex border-b border-white/20 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm">
+                  <button
+                    onClick={() => setShowChatOnMobile(false)}
+                    className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 ${
+                      !showChatOnMobile 
+                        ? 'bg-white/20 text-white border-b-2 border-white/60' 
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Confirmation
+                  </button>
+                  <button
+                    onClick={() => setShowChatOnMobile(true)}
+                    className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 ${
+                      showChatOnMobile 
+                        ? 'bg-white/20 text-white border-b-2 border-white/60' 
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Chat
+                  </button>
+                </div>
+
+                {/* Left Side - Confirmation Panel */}
+                <div className={`w-full md:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-gradient-to-b from-white/5 to-white/10 backdrop-blur-sm border-b md:border-b-0 md:border-r border-white/20 overflow-y-auto h-full md:max-h-none ${
+                  showChatOnMobile ? 'hidden md:flex' : 'flex'
+                }`}>
                   <ConfirmationPanel
                     key={activeConversation.id}
                     conversationId={activeConversation.id}
@@ -331,8 +486,10 @@ const ConversationViewInner: React.FC<{
                   />
                 </div>
                 
-                {/* Right Side - Message Thread (Better proportioned) */}
-                <div className="flex-1 min-w-0 flex flex-col overflow-hidden relative z-10">
+                {/* Right Side - Message Thread */}
+                <div className={`flex-1 min-w-0 flex flex-col overflow-hidden relative z-10 ${
+                  !showChatOnMobile ? 'hidden md:flex' : 'flex'
+                }`}>
                   <MessageThread />
                 </div>
               </>
@@ -430,11 +587,84 @@ const ConversationView: React.FC = () => {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/20 border-t-white mx-auto mb-4 relative z-10"></div>
-            <p className="text-white/90 relative z-10">Loading conversation...</p>
+        <main className="flex-grow px-4 py-6 mt-16">
+          <div className="h-[calc(100vh-8rem)] flex flex-col">
+            {/* Header Skeleton */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-32 h-10 bg-white/10 rounded-xl animate-pulse"></div>
+                <div className="w-48 h-10 bg-white/5 rounded-xl animate-pulse"></div>
+              </div>
+            </div>
+            
+            {/* Main Content Skeleton */}
+            <div className="bg-black/40 backdrop-blur-xl rounded-2xl shadow-2xl flex-1 flex flex-col md:flex-row overflow-hidden border border-white/20 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 animate-pulse rounded-2xl"></div>
+              
+              <div className="flex-1 flex flex-col relative z-10">
+                <div className="flex flex-col h-full">
+                  {/* Left Side Skeleton - Confirmation Panel */}
+                  <div className="w-full md:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-gradient-to-b from-white/5 to-white/10 backdrop-blur-sm border-b md:border-b-0 md:border-r border-white/20 p-4 md:p-6 space-y-4 overflow-y-auto h-full md:max-h-none">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-white/10 rounded-full animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-white/5 rounded-lg animate-pulse"></div>
+                        <div className="h-3 bg-white/5 rounded-lg animate-pulse w-3/4"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse"></div>
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse w-5/6"></div>
+                      <div className="h-4 bg-white/5 rounded-lg animate-pulse w-4/6"></div>
+                    </div>
+                    
+                    <div className="space-y-3 mt-6">
+                      <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+                      <div className="h-10 bg-white/5 rounded-xl animate-pulse"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Right Side Skeleton - Message Thread */}
+                  <div className="flex-1 min-w-0 flex flex-col p-4 md:p-6 space-y-4">
+                    <div className="flex space-x-3">
+                      <div className="flex-1 h-12 bg-white/5 rounded-xl animate-pulse"></div>
+                      <div className="w-12 h-12 bg-white/10 rounded-xl animate-pulse"></div>
+                    </div>
+                    
+                    <div className="flex-1 space-y-4 overflow-hidden">
+                      <div className="flex justify-start">
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/5 rounded-2xl animate-pulse">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-white/10 rounded-lg"></div>
+                            <div className="h-4 bg-white/10 rounded-lg w-3/4"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/10 rounded-2xl animate-pulse">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-white/5 rounded-lg"></div>
+                            <div className="h-4 bg-white/5 rounded-lg w-5/6"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-start">
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 bg-white/5 rounded-2xl animate-pulse">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-white/10 rounded-lg"></div>
+                            <div className="h-4 bg-white/10 rounded-lg w-4/6"></div>
+                            <div className="h-4 bg-white/10 rounded-lg w-2/6"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
         <Footer />
@@ -446,15 +676,15 @@ const ConversationView: React.FC = () => {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-red-500/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-red-500/10 to-red-500/5 animate-pulse rounded-xl"></div>
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-red-500/20 to-red-500/10 flex items-center justify-center relative z-10">
-              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <main className="flex-grow flex items-center justify-center px-4 py-6 mt-16">
+          <div className="text-center p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 relative overflow-hidden max-w-md w-full">
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-white/20 to-white/10 flex items-center justify-center relative z-10">
+              <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <p className="text-lg font-medium text-red-400 mb-2 relative z-10">Error loading conversation</p>
+            <p className="text-lg font-medium text-white mb-2 relative z-10">Error loading conversation</p>
             <p className="text-sm text-white/60 mb-6 relative z-10">{error || 'User not found'}</p>
             <button 
               onClick={() => navigate('/conversation-hub')} 

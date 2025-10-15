@@ -160,7 +160,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
             key={star}
             className={`w-4 h-4 ${
               star <= rating
-                ? 'text-yellow-400 fill-yellow-400'
+                ? 'text-white fill-white'
                 : 'text-white/30'
             }`}
           />
@@ -236,7 +236,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
               {/* User Profile Section */}
               <div className="bg-white/5 backdrop-blur-sm p-6 rounded-xl border border-white/20">
                 <div className="flex items-start space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl font-bold">
+                  <div className="w-16 h-16 bg-gradient-to-r from-white/20 to-white/10 rounded-xl flex items-center justify-center text-white text-xl font-bold">
                     {userDetails.firstName?.[0]}{userDetails.lastName?.[0]}
                   </div>
 
@@ -260,8 +260,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 
                       {userDetails.isVerified && (
                         <div className="flex items-center space-x-2">
-                          <Award className="w-4 h-4 text-green-400" />
-                          <span className="text-green-400">Verified</span>
+                          <Award className="w-4 h-4 text-white" />
+                          <span className="text-white">Verified</span>
                         </div>
                       )}
                     </div>
@@ -275,7 +275,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 
                     {userDetails.averageRating && (
                       <div className="flex items-center space-x-2 mt-3">
-                        <span className="text-yellow-400 font-medium">{userDetails.averageRating.toFixed(1)}</span>
+                        <span className="text-white font-medium">{userDetails.averageRating.toFixed(1)}</span>
                         {renderStars(Math.round(userDetails.averageRating))}
                         <span className="text-white/60 text-sm">
                           ({userDetails.totalReviews || 0} reviews)
@@ -299,7 +299,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                         <h4 className="text-sm font-medium text-white/80 mb-2">Skills</h4>
                         <div className="flex flex-wrap gap-2">
                           {userDetails.skills.map((skill, index) => (
-                            <span key={index} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs">
+                            <span key={index} className="px-2 py-1 bg-white/10 text-white rounded-lg text-xs">
                               {skill}
                             </span>
                           ))}
@@ -312,7 +312,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                         <h4 className="text-sm font-medium text-white/80 mb-2">Qualifications</h4>
                         <div className="flex flex-wrap gap-2">
                           {userDetails.qualifications.map((qual, index) => (
-                            <span key={index} className="px-2 py-1 bg-green-500/20 text-green-400 rounded-lg text-xs">
+                            <span key={index} className="px-2 py-1 bg-white/10 text-white rounded-lg text-xs">
                               {qual}
                             </span>
                           ))}
@@ -348,7 +348,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                               </p>
                               <div className="flex items-center space-x-2">
                                 {renderStars(review.rating)}
-                                <span className="text-yellow-400 text-sm">{review.rating}/5</span>
+                                <span className="text-white text-sm">{review.rating}/5</span>
                               </div>
                             </div>
                           </div>

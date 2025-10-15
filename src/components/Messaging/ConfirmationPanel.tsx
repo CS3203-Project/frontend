@@ -124,9 +124,9 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
 
   // Status indicator
   const getStatusIcon = () => {
-    if (isComplete) return <CheckCircle className="h-5 w-5 text-green-400" />;
-    if (partialConfirmed) return <Clock className="h-5 w-5 text-yellow-400" />;
-    return <AlertCircle className="h-5 w-5 text-red-400" />;
+    if (isComplete) return <CheckCircle className="h-5 w-5 text-white" />;
+    if (partialConfirmed) return <Clock className="h-5 w-5 text-white/60" />;
+    return <AlertCircle className="h-5 w-5 text-white/40" />;
   };
 
   const getStatusText = () => {
@@ -137,9 +137,9 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
   };
 
   const getStatusColor = () => {
-    if (isComplete) return 'bg-green-500/20 border-green-400/30';
-    if (partialConfirmed) return 'bg-yellow-500/20 border-yellow-400/30';
-    return 'bg-red-500/20 border-red-400/30';
+    if (isComplete) return 'bg-white/20 border-white/30';
+    if (partialConfirmed) return 'bg-white/10 border-white/20';
+    return 'bg-white/5 border-white/10';
   };
 
   // Minimized floating view
@@ -187,7 +187,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
             {getStatusIcon()}
             <h3 className="text-lg font-semibold text-white">{getStatusText()}</h3>
             {saving && (
-              <div className="flex items-center space-x-1 text-blue-400">
+              <div className="flex items-center space-x-1 text-white/60">
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
                 <span className="text-xs">Saving...</span>
               </div>
@@ -213,20 +213,20 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
 
         {/* Progress indicators */}
         <div className="flex items-center space-x-4 mt-3 flex-wrap">
-          <div className={`flex items-center space-x-1 text-xs ${record.customerConfirmation ? 'text-green-400' : 'text-white/50'}`}>
-            <div className={`w-2 h-2 rounded-full ${record.customerConfirmation ? 'bg-green-400' : 'bg-white/30'}`}></div>
+          <div className={`flex items-center space-x-1 text-xs ${record.customerConfirmation ? 'text-white' : 'text-white/50'}`}>
+            <div className={`w-2 h-2 rounded-full ${record.customerConfirmation ? 'bg-white' : 'bg-white/30'}`}></div>
             <span>Customer</span>
           </div>
-          <div className={`flex items-center space-x-1 text-xs ${record.providerConfirmation ? 'text-green-400' : 'text-white/50'}`}>
-            <div className={`w-2 h-2 rounded-full ${record.providerConfirmation ? 'bg-green-400' : 'bg-white/30'}`}></div>
+          <div className={`flex items-center space-x-1 text-xs ${record.providerConfirmation ? 'text-white' : 'text-white/50'}`}>
+            <div className={`w-2 h-2 rounded-full ${record.providerConfirmation ? 'bg-white' : 'bg-white/30'}`}></div>
             <span>Provider</span>
           </div>
-          <div className={`flex items-center space-x-1 text-xs ${hasDateTime ? 'text-green-400' : 'text-white/50'}`}>
-            <div className={`w-2 h-2 rounded-full ${hasDateTime ? 'bg-green-400' : 'bg-white/30'}`}></div>
+          <div className={`flex items-center space-x-1 text-xs ${hasDateTime ? 'text-white' : 'text-white/50'}`}>
+            <div className={`w-2 h-2 rounded-full ${hasDateTime ? 'bg-white' : 'bg-white/30'}`}></div>
             <span>Schedule</span>
           </div>
-          <div className={`flex items-center space-x-1 text-xs ${hasServiceFee ? 'text-green-400' : 'text-white/50'}`}>
-            <div className={`w-2 h-2 rounded-full ${hasServiceFee ? 'bg-green-400' : 'bg-white/30'}`}></div>
+          <div className={`flex items-center space-x-1 text-xs ${hasServiceFee ? 'text-white' : 'text-white/50'}`}>
+            <div className={`w-2 h-2 rounded-full ${hasServiceFee ? 'bg-white' : 'bg-white/30'}`}></div>
             <span>Service Fee</span>
           </div>
         </div>
@@ -249,11 +249,11 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
                   checked={!!record.customerConfirmation}
                   disabled={!isCustomer || saving}
                   onChange={(e) => update({ customerConfirmation: e.target.checked })}
-                  className="rounded text-blue-500 focus:ring-blue-400 focus:ring-offset-gray-800 bg-white/20 border-white/30 relative z-10"
+                  className="rounded text-white focus:ring-white/50 focus:ring-offset-black bg-white/20 border-white/30 relative z-10"
                 />
                 <span className="font-medium text-white relative z-10">Customer Confirmation</span>
                 {isCustomer && (
-                  <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-1 rounded border border-blue-400/30 relative z-10">You</span>
+                  <span className="text-xs text-white bg-white/20 px-2 py-1 rounded border border-white/30 relative z-10">You</span>
                 )}
               </label>
 
@@ -264,11 +264,11 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
                   checked={!!record.providerConfirmation}
                   disabled={!isProvider || saving}
                   onChange={(e) => update({ providerConfirmation: e.target.checked })}
-                  className="rounded text-blue-500 focus:ring-blue-400 focus:ring-offset-gray-800 bg-white/20 border-white/30 relative z-10"
+                  className="rounded text-white focus:ring-white/50 focus:ring-offset-black bg-white/20 border-white/30 relative z-10"
                 />
                 <span className="font-medium text-white relative z-10">Provider Confirmation</span>
                 {isProvider && (
-                  <span className="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded border border-green-400/30 relative z-10">You</span>
+                  <span className="text-xs text-white bg-white/20 px-2 py-1 rounded border border-white/30 relative z-10">You</span>
                 )}
               </label>
             </div>
@@ -297,9 +297,9 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
                       placeholder="0.00"
                       min="0"
                       step="0.01"
-                      className={`w-full border border-white/30 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white/20 text-white placeholder-white/50 backdrop-blur-sm ${
+                      className={`w-full border border-white/30 rounded-xl px-3 py-2 focus:ring-2 focus:ring-white/50 focus:border-white/50 bg-white/20 text-white placeholder-white/50 backdrop-blur-sm ${
                         !isProvider ? 'cursor-not-allowed opacity-50' : ''
-                      } ${hasUnsavedChanges ? 'border-yellow-400 bg-yellow-500/20' : ''}`}
+                      } ${hasUnsavedChanges ? 'border-white bg-white/30' : ''}`}
                       value={serviceFeeInput}
                       disabled={!isProvider || saving}
                       onChange={(e) => {
@@ -322,7 +322,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
                     {hasUnsavedChanges && !saving && (
                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                         <div className="flex items-center space-x-1 text-xs text-yellow-400">
-                          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                          <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
                           <span>Press Enter</span>
                         </div>
                       </div>
@@ -349,7 +349,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
                     disabled={saving}
                     className="mt-3 w-full px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm relative overflow-hidden group"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
                     {saving ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent relative z-10"></div>
@@ -419,7 +419,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
           {/* Summary when complete */}
           {isComplete && (
             <div className="mt-6 p-4 bg-green-500/20 border border-green-400/30 rounded-xl backdrop-blur-sm relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400/5 via-green-400/10 to-green-400/5 animate-pulse rounded-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
               <div className="flex items-center space-x-2 mb-3 relative z-10">
                 <CheckCircle className="h-6 w-6 text-green-400" />
                 <span className="font-semibold text-green-400 text-lg">Booking Confirmed!</span>
@@ -453,7 +453,7 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
           {/* Incomplete warning for provider */}
           {isProvider && !isComplete && (partialConfirmed || hasDateTime) && (
             <div className="mt-4 p-4 bg-orange-500/20 border border-orange-400/30 rounded-xl backdrop-blur-sm relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/5 via-orange-400/10 to-orange-400/5 animate-pulse rounded-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse rounded-xl"></div>
               <div className="flex items-center space-x-2 relative z-10">
                 <AlertCircle className="h-5 w-5 text-orange-400" />
                 <span className="font-medium text-orange-400">Action Required</span>
@@ -464,41 +464,43 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
               </p>
             </div>
           )}
+
+          {/* User Details and Rating Buttons - Moved inside scrollable area */}
+          {(onViewUserDetails || onReviewClick) && (
+            <div className="mt-6 p-4 border-t border-white/20 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm relative z-10 space-y-3 rounded-xl">
+              {onViewUserDetails && (
+                <button
+                  className="w-full px-4 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-medium border border-white/30 hover:border-white/40 backdrop-blur-sm relative overflow-hidden group"
+                  onClick={onViewUserDetails}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                  <span className="relative z-10">
+                    {currentUserRole === 'USER'
+                      ? 'View Service Provider'
+                      : 'View Customer'}
+                  </span>
+                </button>
+              )}
+
+              {onReviewClick && (
+                <button
+                  className="w-full px-4 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 font-medium border border-white/30 hover:border-white/40 backdrop-blur-sm relative overflow-hidden group"
+                  onClick={onReviewClick}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                  <span className="relative z-10">
+                    {currentUserRole === 'USER'
+                      ? 'Rate Service & Provider'
+                      : 'Rate Customer'}
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* User Details and Rating Buttons */}
-      {(onViewUserDetails || onReviewClick) && (
-        <div className="p-4 border-t border-white/20 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm relative z-10 space-y-3">
-          {onViewUserDetails && (
-            <button
-              className="w-full px-4 py-3 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-300 font-medium border border-purple-400/30 hover:border-purple-400/50 backdrop-blur-sm relative overflow-hidden group"
-              onClick={onViewUserDetails}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-              <span className="relative z-10">
-                {currentUserRole === 'USER'
-                  ? '👤 View Service Provider'
-                  : '👤 View Customer'}
-              </span>
-            </button>
-          )}
-
-          {onReviewClick && (
-            <button
-              className="w-full px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-300 font-medium border border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm relative overflow-hidden group"
-              onClick={onReviewClick}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-              <span className="relative z-10">
-                {currentUserRole === 'USER'
-                  ? '⭐ Rate Service & Provider'
-                  : '⭐ Rate Customer'}
-              </span>
-            </button>
-          )}
-        </div>
-      )}
+      {/* Rating buttons removed from here - now inside scrollable area above */}
     </div>
   );
 };
