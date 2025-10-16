@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Languages, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import Loader from './Loader';
 
 interface FloatingTranslateIconProps {
   // Optional callback for when translation is completed
@@ -33,6 +34,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
   });
   const [overlays, setOverlays] = useState<TranslationOverlay[]>([]);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [loaderMinTime, setLoaderMinTime] = useState(false);
   const [isVisible, setIsVisible] = useState(() => {
     const stored = localStorage.getItem('floatingTranslateIconVisible');
     return stored !== null ? JSON.parse(stored) : true;
@@ -451,7 +453,13 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
 
     console.log('✅ Starting translation process');
     setIsTranslating(true);
-    
+    setLoaderMinTime(true);
+
+    // Start minimum loader display timer (2 seconds for better visibility)
+    setTimeout(() => {
+      setLoaderMinTime(false);
+    }, 2000);
+
     // Show a temporary loading overlay for better UX during translation
     const tempLoadingOverlay: TranslationOverlay = {
       id: `loading-${Date.now()}`, // Generate a unique ID
@@ -502,8 +510,6 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
       // Trigger callback if provided
       onTranslation?.(originalText, translatedText);
 
-      // No auto-close - translation will stay until manually closed by the user
-
     } catch (error) {
       console.error('Translation failed:', error);
       
@@ -530,7 +536,15 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
       }, 3000);
       
     } finally {
-      setIsTranslating(false);
+      // Hide loader only if minimum time has passed
+      if (!loaderMinTime) {
+        setIsTranslating(false);
+      } else {
+        // Wait for minimum time to pass before hiding loader
+        setTimeout(() => {
+          setIsTranslating(false);
+        }, 100);
+      }
     }
   };
 
@@ -664,7 +678,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
               transform: 'translateX(-50%)',
             }}
           >
-            <div className="bg-black/95 backdrop-blur-sm text-white rounded-lg shadow-2xl border border-white/20 p-4 max-w-sm animate-in slide-in-from-bottom-2 duration-300">
+            <div className="bg-black/95 backdrop-blur-sm text-white rounded-lg shadow-2xl border border-gray-300 p-4 max-w-sm animate-in slide-in-from-bottom-2 duration-300">
               {/* Header */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
@@ -673,27 +687,16 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
                 </div>
                 <button
                   onClick={() => removeOverlay(overlay)}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
                   title="Close"
                 >
-                  <Trash2 className="w-4 h-4 text-white/70 hover:text-white" />
+                  <Trash2 className="w-4 h-4 text-white hover:text-gray-800" />
                 </button>
               </div>
 
-              {/* Original text */}
-              <div className="text-sm text-gray-300 mb-2 italic">
-                "{overlay.originalText}"
-              </div>
-
-              {/* Translated text */}
+              {/* Translated text only */}
               <div className="text-base font-medium">
                 {overlay.translatedText}
-              </div>
-
-              {/* Auto-close indicator - always shows 5s even for info overlays */}
-              <div className="text-xs text-gray-400 mt-2 flex items-center space-x-1">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span>Auto-close in 5s</span>
               </div>
             </div>
 
@@ -740,24 +743,26 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
         }}
         onMouseDown={handleMouseDown}
         draggable={false}
-        title={recentlyDragged ? "✅ Ready! Click now to translate the text underneath!" : "⚠️ First: Drag me over text, then click to translate!"}
+        title={recentlyDragged ? "Click now to translate" : "⚠️ First: Drag me over text, then click to translate!"}
       >
       <div className="relative">
         {/* Main icon container */}
-          <div className={`w-14 h-14 bg-gradient-to-r ${recentlyDragged ? 'from-green-400 via-blue-500 to-purple-600' : 'from-blue-500 via-purple-500 to-pink-500'} rounded-full flex items-center justify-center shadow-2xl border-2 ${recentlyDragged ? 'border-green-400 border-4' : 'border-white/20'} backdrop-blur-sm
+          <div className={`w-10 h-10 bg-gradient-to-br ${recentlyDragged ? 'from-slate-600 to-slate-800' : 'from-gray-600 to-gray-800'} rounded-full flex items-center justify-center shadow-lg border ${recentlyDragged ? 'border-blue-400 border-2' : 'border-gray-400'} backdrop-blur-sm
             ${isDragging ? 'animate-pulse' : ''}`}>
             <Languages className="w-7 h-7 text-white" />
 
-            {/* Translating indicator */}
+            {/* Translating indicator - using existing Loader component */}
             {isTranslating && (
-              <div className="absolute inset-0 rounded-full bg-white/20 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader size="sm" variant="white" />
+              </div>
             )}
             
             {/* Ready for translation click indicator */}
             {recentlyDragged && (
               <>
                 <div className="absolute inset-0 rounded-full bg-green-400/20 animate-ping" style={{animationDuration: '1s'}} />
-                <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg border border-green-400/50">
+                <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg border border-gray-400">
                   <span className="animate-pulse">👆</span> Click now to translate
                 </div>
               </>
@@ -789,16 +794,16 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
             transition: 'transform 0.05s ease-out'
           }}
         >
-          <div 
-            className={`
-              bg-white dark:bg-gray-800 backdrop-blur-md text-gray-800 dark:text-white rounded-lg shadow-2xl 
-              ${overlay.language === 'loading' ? 'border-2 border-yellow-400/70 p-3 max-w-sm animate-pulse' : 
-                overlay.language === 'error' ? 'border-2 border-red-500/70 p-3 max-w-sm' : 
-                overlay.isDragging ? 'border-2 border-blue-500/50 p-4 max-w-md' : 'border border-blue-500/30 p-4 max-w-md'
-              } animate-in ${overlay.language === 'loading' ? 'fade-in duration-200' : 'slide-in-from-bottom-2 duration-300'}
-              ${overlay.isDragging ? 'ring-2 ring-blue-400 dark:ring-blue-600' : ''}
-              transition-all duration-150
-            `}
+            <div
+              className={`
+                bg-black/95 dark:bg-gray-900 backdrop-blur-md text-white rounded-lg shadow-2xl
+                ${overlay.language === 'loading' ? 'border border-gray-400/70 p-3 max-w-sm animate-pulse' :
+                  overlay.language === 'error' ? 'border border-red-500/70 p-3 max-w-sm' :
+                  overlay.isDragging ? 'border-2 border-blue-400/50 p-4 max-w-md' : 'border border-blue-500/30 p-4 max-w-md'
+                } animate-in ${overlay.language === 'loading' ? 'fade-in duration-200' : 'slide-in-from-bottom-2 duration-300'}
+                ${overlay.isDragging ? 'ring-2 ring-blue-400 dark:ring-blue-600' : ''}
+                transition-all duration-150
+              `}
             style={{
               transformOrigin: 'center bottom',
               animation: overlay.language !== 'loading' && overlay.language !== 'error' ? 'popIn 0.3s ease-out' : undefined,
@@ -808,11 +813,11 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
             onMouseDown={(e) => overlay.language !== 'loading' && overlay.language !== 'error' ? handleOverlayMouseDown(e, overlay.id) : null}
           >
             {overlay.language === 'loading' ? (
-              /* Loading state */
+              /* Loading state with shared Loader component */
               <div className="flex flex-col items-center justify-center py-2">
-                <div className="w-8 h-8 border-4 border-t-yellow-500 border-yellow-200 rounded-full animate-spin mb-3"></div>
+                <Loader size="md" variant="primary" className="mb-3" />
                 <div className="text-base font-medium">Translating...</div>
-                <div className="text-xs text-gray-500 mt-1">{overlay.originalText.substring(0, 30)}{overlay.originalText.length > 30 ? '...' : ''}</div>
+                <div className="text-xs text-gray-400 mt-1">{overlay.originalText.substring(0, 30)}{overlay.originalText.length > 30 ? '...' : ''}</div>
               </div>
             ) : overlay.language === 'error' ? (
               /* Error state */
@@ -874,23 +879,9 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
                   </div>
                 </div>
 
-                {/* Content area with better spacing */}
-                <div className="space-y-3">
-                  {/* Original text */}
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Original:</div>
-                    <div className="text-sm bg-gray-50 dark:bg-gray-900/50 p-2 rounded border border-gray-200 dark:border-gray-700">
-                      {overlay.originalText}
-                    </div>
-                  </div>
-
-                  {/* Translated text */}
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Translation:</div>
-                    <div className="text-base font-medium bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800/50">
-                      {overlay.translatedText}
-                    </div>
-                  </div>
+                {/* Just the translated text - clean and simple */}
+                <div className="text-base font-medium leading-relaxed">
+                  {overlay.translatedText}
                 </div>
 
                 {/* Bottom hint with dragging info */}
@@ -926,7 +917,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
       
       {/* Drag Reminder - shown when user tries to click without dragging first */}
       {showDragReminder && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] bg-red-500/95 backdrop-blur-sm text-white px-6 py-4 rounded-lg shadow-2xl border-2 border-red-400 max-w-md animate-in zoom-in duration-300">
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] bg-black/95 backdrop-blur-sm text-white px-6 py-4 rounded-lg shadow-2xl border border-gray-300 max-w-md animate-in zoom-in duration-300">
           <div className="text-center">
             <div className="text-3xl mb-2">🚫</div>
             <div className="text-lg font-bold mb-2">Must Drag First!</div>
@@ -938,14 +929,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
         </div>
       )}
       
-      {/* Debug helper - show element being targeted */}
-      {recentlyDragged && (
-        <div className="fixed bottom-4 left-4 z-40 bg-black/95 backdrop-blur-sm text-white px-4 py-3 rounded-lg shadow-xl border border-green-400/50 max-w-xs">
-          <div className="text-sm">
-            <strong>✅ Ready:</strong> Click the icon to translate the content underneath.
-          </div>
-        </div>
-      )}
+
     </>
   );
 };

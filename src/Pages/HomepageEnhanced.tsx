@@ -107,8 +107,8 @@ export default function Homepage() {
 
             {/* Main Heading */}
             <h1 className="animate-fade-in text-balance bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text py-6 text-5xl font-semibold leading-none tracking-tighter text-transparent sm:text-6xl md:text-7xl lg:text-8xl mb-6">
-              <span className="block">Discover the right people.</span>
-              <span className="block">Skills. Services. Social.</span>
+              <span className="block">The Ignite</span>
+              <span className="block">Talent. Services. Social.</span>
             </h1>
 
             {/* Subtitle */}
