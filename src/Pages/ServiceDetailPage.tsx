@@ -1153,22 +1153,27 @@ const ServiceDetailPage: React.FC = () => {
                         </p>
 
                         {/* Contact Information */}
-                        {(provider?.user?.email || provider?.user?.phone) && (
-                          <div className="mt-4 w-full space-y-2">
-                            {provider?.user?.email && (
-                              <div className="flex items-center justify-center gap-2 text-sm bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20 dark:border-white/15">
-                                <Mail className="w-4 h-4 text-black dark:text-white" />
-                                <span className="text-gray-700 dark:text-gray-300 truncate">{provider.user.email}</span>
-                              </div>
-                            )}
-                            {provider?.user?.phone && (
-                              <div className="flex items-center justify-center gap-2 text-sm bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20 dark:border-white/15">
-                                <Phone className="w-4 h-4 text-black dark:text-white" />
-                                <span className="text-gray-700 dark:text-gray-300">{provider.user.phone}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {(() => {
+                          console.log('Provider phone:', provider?.user?.phone);
+                          return (provider?.user?.email || provider?.user?.phone) && (
+                            <div className="mt-4 w-full space-y-2">
+                              {provider?.user?.email && (
+                                <div className="flex flex-col items-center justify-center gap-1 text-sm bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/20 dark:border-white/15">
+                                  <div className="flex items-center gap-2">
+                                    <Mail className="w-4 h-4 text-black dark:text-white" />
+                                    <span className="text-gray-700 dark:text-gray-300 truncate">{provider.user.email}</span>
+                                  </div>
+                                  {provider?.user?.phone && (
+                                    <div className="flex items-center gap-2">
+                                      <Phone className="w-4 h-4 text-black dark:text-white" />
+                                      <span className="text-gray-700 dark:text-gray-300">{provider.user.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {/* Stats */}
                         {((provider?.averageRating !== undefined && provider?.averageRating !== null) || (provider?.services?.length !== undefined && provider?.services?.length !== null)) && (
