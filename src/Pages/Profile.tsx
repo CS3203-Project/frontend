@@ -623,10 +623,19 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+      <div className="min-h-screen bg-black to-purple-50 dark:bg-black  flex flex-col">
         <div className="flex-1 flex items-center justify-center mt-16">
           <div className="text-center">
-            <p className="text-red-600">Failed to load profile. Please try again.</p>
+        <p className="text-black dark:text-white mb-4">Please log in to access your profile.</p>
+        <Button
+          onClick={() => {
+        localStorage.setItem('RedirectAfterLogin', window.location.pathname);
+        navigate('/signin');
+          }}
+          className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full"
+        >
+          Log In
+        </Button>
           </div>
         </div>
       </div>

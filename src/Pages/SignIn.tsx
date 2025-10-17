@@ -31,8 +31,10 @@ export default function SignIn() {
         } catch (profileError) {
           console.error('Failed to fetch user profile after login:', profileError);
         }
-        
-        setTimeout(() => (window.location.href = '/'), 1200);
+
+        setTimeout(() => {
+          window.location.href = localStorage.getItem('RedirectAfterLogin') || '/';
+        }, 1200);
       } else {
         setError(result?.message || 'Sign in failed');
         toast.error(result?.message || 'Sign in failed');

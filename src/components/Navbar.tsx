@@ -76,10 +76,12 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('RedirectAfterLogin'); 
       await clearMessages(); // Clear IndexedDB messages on logout
       await logout(); // Use AuthContext logout
       setUserMenuOpen(false);
       window.location.href = '/';
+
     } catch (error) {
       console.error('Logout failed:', error);
     }

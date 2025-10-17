@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ServiceRequestAPI, { ServiceRequest, CreateServiceRequestData } from '../api/serviceRequestApi';
 import { useNavigate } from 'react-router-dom';
+import Button from '@/components/Button';
 
 const ServiceRequestPage = () => {
-  const { isLoggedIn } = useAuth();
+  const { user, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,10 +19,6 @@ const ServiceRequestPage = () => {
 
   // Fetch service requests on component mount
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/signin');
-      return;
-    }
     fetchServiceRequests();
   }, [isLoggedIn, navigate]);
 
@@ -91,6 +88,27 @@ const ServiceRequestPage = () => {
       console.error('Error deleting service request:', err);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black to-purple-50 dark:bg-black  flex flex-col">
+        <div className="flex-1 flex items-center justify-center mt-16">
+          <div className="text-center">
+        <p className="text-black dark:text-white mb-4">Please log in to access your profile.</p>
+        <Button
+          onClick={() => {
+        localStorage.setItem('RedirectAfterLogin', window.location.pathname);
+        navigate('/signin');
+          }}
+          className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full"
+        >
+          Log In
+        </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white pt-20 pb-12">

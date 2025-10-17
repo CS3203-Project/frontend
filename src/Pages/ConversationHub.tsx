@@ -7,6 +7,7 @@ import type { UserProfile } from '../api/userApi';
 import type { ConversationWithLastMessage } from '../api/messagingApi';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Button from '@/components/Button';
 
 const ConversationHubContent: React.FC<{ currentUser: UserProfile }> = ({ currentUser }) => {
   return (
@@ -421,6 +422,7 @@ const ConversationHubInner: React.FC<{ currentUserId: string }> = ({ currentUser
 };
 
 const ConversationHub: React.FC = () => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -517,27 +519,22 @@ const ConversationHub: React.FC = () => {
         
         <Navbar />
         <main className="flex-grow flex items-center justify-center relative z-10 px-4">
-          <div className="text-center bg-black/40 backdrop-blur-xl rounded-2xl border border-white/20 p-12 shadow-2xl max-w-md w-full relative overflow-hidden">
-            {/* Glittering border effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse"></div>
-            
-            <div className="relative z-10">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <p className="text-xl font-semibold text-white mb-2">Unable to Load Conversation Hub</p>
-              <p className="text-white/70 mb-8">{error || 'User authentication required'}</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="px-8 py-3 bg-gradient-to-r from-white to-white/80 text-black font-semibold rounded-xl hover:scale-105 transition-all duration-300 shadow-lg relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
-                <span className="relative z-10">Retry</span>
-              </button>
-            </div>
-          </div>
+          <div className="min-h-screen bg-black to-purple-50 dark:bg-black  flex flex-col">
+                  <div className="flex-1 flex items-center justify-center mt-16">
+                    <div className="text-center">
+                  <p className="text-black dark:text-white mb-4">Please log in to access your profile.</p>
+                  <Button
+                    onClick={() => {
+                  localStorage.setItem('RedirectAfterLogin', window.location.pathname);
+                  navigate('/signin');
+                    }}
+                    className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full"
+                  >
+                    Log In
+                  </Button>
+                    </div>
+                  </div>
+                </div>
         </main>
         <Footer />
       </div>

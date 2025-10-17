@@ -19,6 +19,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { cn } from '../utils/utils';
 import { confirmationApi } from '../api/confirmationApi';
 import GlassmorphismProfileCard from '../components/ui/ProfileCard';
+import Button from '@/components/Button';
 
 interface DetailedService {
   id: string;
@@ -109,6 +110,7 @@ const ServiceDetailPage: React.FC = () => {
   
   // Payment modal state
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Calculate total media items (video + images)
   const totalMediaItems = service ? (service.videoUrl ? 1 : 0) + service.images.length : 0;
@@ -336,8 +338,7 @@ const ServiceDetailPage: React.FC = () => {
   const handleBookNow = async () => {
     // Check if user is logged in
     if (!isLoggedIn || !user) {
-      toast.error('Please log in to book a service');
-      navigate('/signin');
+      setShowLoginPrompt(true);
       return;
     }
 
@@ -472,8 +473,7 @@ const ServiceDetailPage: React.FC = () => {
   // Payment handlers
   const handlePayNow = () => {
     if (!isLoggedIn || !user) {
-      toast.error('Please log in to make a payment');
-      navigate('/signin');
+      setShowLoginPrompt(true);
       return;
     }
     
@@ -796,6 +796,28 @@ const ServiceDetailPage: React.FC = () => {
     { label: service.category?.name || 'Category', href: `/services/${service.category?.slug}` },
     { label: service.title || 'Service' }
   ];
+
+  if (showLoginPrompt) {
+    return (
+      <div className="min-h-screen bg-black to-purple-50 dark:bg-black  flex flex-col">
+        <div className="flex-1 flex items-center justify-center mt-16">
+          <div className="text-center">
+        <p className="text-black dark:text-white mb-4">Please log in to access your profile.</p>
+        <Button
+          onClick={() => {
+        localStorage.setItem('RedirectAfterLogin', window.location.pathname);
+        navigate('/signin');
+        setShowLoginPrompt(false);
+          }}
+          className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full"
+        >
+          Log In
+        </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-black dark:via-gray-950 dark:to-black flex flex-col relative overflow-hidden">
@@ -1172,7 +1194,13 @@ const ServiceDetailPage: React.FC = () => {
 
                         {/* View Profile Button */}
                         <button
-                          onClick={() => navigate(`/provider/${provider.id}`)}
+                          onClick={() => {
+                            if (!isLoggedIn || !user) {
+                              setShowLoginPrompt(true);
+                              return;
+                            }
+                            navigate(`/provider/${provider.id}`);
+                          }}
                           className="mt-4 text-sm text-black dark:text-white hover:underline flex items-center gap-1"
                         >
                           View Full Profile
