@@ -102,7 +102,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
     // Reset any previous state and set dragging to true
     setRecentlyDragged(false); // Clear any previous state
     setIsDragging(true); // Now we're dragging
-    
+
     // Track whether the mouse actually moved during this drag
     let hasActuallyMoved = false;
     let mouseMovedDistance = 0;
@@ -113,7 +113,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
       const deltaX = moveEvent.clientX - initialMouseX;
       const deltaY = moveEvent.clientY - initialMouseY;
       mouseMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
+
       // Consider it a real drag if moved more than 5 pixels
       if (mouseMovedDistance > 5) {
         hasActuallyMoved = true;
@@ -139,7 +139,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
     const handleMouseUp = (upEvent: MouseEvent) => {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       console.log('🖱️ Mouse up - duration:', duration, 'ms, moved distance:', mouseMovedDistance, 'hasActuallyMoved:', hasActuallyMoved);
 
       // Remove event listeners FIRST
@@ -150,7 +150,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
       setIsDragging(false);
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
-      
+
       // CRITICAL FIX: Handle both drag and click scenarios
       if (hasActuallyMoved) {
         // This was a real drag - set ready to translate
@@ -158,15 +158,15 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
         setTimeout(() => {
           setRecentlyDragged(true);
         }, 100); // 100ms delay to ensure clean state transition
-        
+
         // Automatically reset recentlyDragged state after 5 seconds if user doesn't click
         setTimeout(() => {
           setRecentlyDragged(false);
         }, 5000);
       } else if (duration < 200 && mouseMovedDistance < 5) {
         // This was a quick click without drag - handle it as a click
-        console.log('�️ Quick click detected - checking if ready to translate');
-        
+        console.log('🖱️ Quick click detected - checking if ready to translate');
+
         // Small delay to ensure state is clean, then check if we should translate
         setTimeout(() => {
           if (recentlyDragged) {
@@ -182,7 +182,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
 
       // Get final position after drag
       console.log('📍 Icon positioned at:', iconPosition);
-      
+
       // IMPORTANT: Prevent any mouseup event from triggering other handlers
       upEvent.stopPropagation();
       upEvent.preventDefault();
@@ -191,6 +191,131 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
     // Add listeners to document to capture mouse movements even outside component
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    console.log('👆 Touch start event'); // Debug log
+
+    // Prevent default touch behaviors (scrolling, zooming)
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Prevent text selection and default behavior
+    document.body.style.userSelect = 'none';
+
+    // Use the initial touch position when dragging started
+    const touch = e.touches[0];
+    const initialTouchX = touch.clientX;
+    const initialTouchY = touch.clientY;
+    const initialIconX = iconPosition.x;
+    const initialIconY = iconPosition.y;
+    const startTime = Date.now();
+
+    console.log(`📍 Initial - Touch: (${initialTouchX}, ${initialTouchY}), Icon: (${initialIconX}, ${initialIconY})`);
+
+    // Reset any previous state and set dragging to true
+    setRecentlyDragged(false); // Clear any previous state
+    setIsDragging(true); // Now we're dragging
+
+    // Track whether the touch actually moved during this drag
+    let hasActuallyMoved = false;
+    let touchMovedDistance = 0;
+
+    // Handler functions defined inside to capture closure
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      // Prevent default to stop scrolling
+      moveEvent.preventDefault();
+
+      const touch = moveEvent.touches[0];
+      if (!touch) return;
+
+      // Calculate movement distance to determine if this was a real drag
+      const deltaX = touch.clientX - initialTouchX;
+      const deltaY = touch.clientY - initialTouchY;
+      touchMovedDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      // Consider it a real drag if moved more than 5 pixels
+      if (touchMovedDistance > 5) {
+        hasActuallyMoved = true;
+      }
+
+      // Calculate new position based on touch movement
+      const newX = initialIconX + deltaX;
+      const newY = initialIconY + deltaY;
+
+      // Constrain to viewport bounds
+      const maxX = window.innerWidth - 56;
+      const maxY = window.innerHeight - 56;
+
+      const constrainedPosition = {
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY)),
+      };
+
+      // Update position immediately during drag
+      setIconPosition(constrainedPosition);
+    };
+
+    const handleTouchEnd = (endEvent: TouchEvent) => {
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
+      console.log('👆 Touch end - duration:', duration, 'ms, moved distance:', touchMovedDistance, 'hasActuallyMoved:', hasActuallyMoved);
+
+      // Remove event listeners FIRST
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+
+      // Clean up drag state immediately
+      setIsDragging(false);
+      document.body.style.userSelect = '';
+
+      // Handle both drag and tap scenarios
+      if (hasActuallyMoved) {
+        // This was a real drag - set ready to translate
+        console.log('✅ Real touch drag detected - setting ready to translate');
+        setTimeout(() => {
+          setRecentlyDragged(true);
+        }, 100); // 100ms delay to ensure clean state transition
+
+        // Automatically reset recentlyDragged state after 5 seconds if user doesn't tap
+        setTimeout(() => {
+          setRecentlyDragged(false);
+        }, 5000);
+      } else if (duration < 200 && touchMovedDistance < 5) {
+        // This was a quick tap without drag - handle it as a tap
+        console.log('👆 Quick tap detected - checking if ready to translate');
+
+        // Small delay to ensure state is clean, then check if we should translate
+        setTimeout(() => {
+          if (recentlyDragged) {
+            console.log('✅ Tap after drag - triggering translation');
+            // Create a synthetic mouse event for compatibility with handleIconClick
+            const syntheticEvent = {
+              clientX: initialTouchX,
+              clientY: initialTouchY,
+              preventDefault: () => {},
+              stopPropagation: () => {},
+            };
+            handleIconClick(syntheticEvent as any);
+          } else {
+            console.log('🚫 Tap without drag - showing reminder');
+            setShowDragReminder(true);
+            setTimeout(() => setShowDragReminder(false), 4000);
+          }
+        }, 50);
+      }
+
+      // Get final position after drag
+      console.log('📍 Icon positioned at:', iconPosition);
+
+      // Prevent any default touch end behavior
+      endEvent.preventDefault();
+    };
+
+    // Add listeners to document to capture touch movements even outside component
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: false });
   };
 
   // Handle clicking on the floating icon to show translation of element underneath
@@ -742,6 +867,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
           filter: isDragging ? 'brightness(1.2)' : 'none',
         }}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
         draggable={false}
         title={recentlyDragged ? "Click now to translate" : "⚠️ First: Drag me over text, then click to translate!"}
       >
@@ -771,7 +897,7 @@ const FloatingTranslateIcon: React.FC<FloatingTranslateIconProps> = ({ onTransla
             {/* Not ready indicator - shown when icon hasn't been dragged */}
             {!recentlyDragged && !isDragging && (
               <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg border border-gray-500/50 opacity-0 hover:opacity-100 transition-opacity">
-                <span>🖱️</span> Drag first, then click
+                <span>👆</span> Drag first, then tap
               </div>
             )}
           </div>          {/* Hover effect ring */}
