@@ -14,12 +14,36 @@ interface Props {
 
 const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, onReviewClick, onViewUserDetails }) => {
   const { user } = useAuth();
+  
+  // Utility functions - defined at the top to avoid reference errors
+  const toLocalInput = (iso: string | null) => {
+    if (!iso) return '';
+    const date = new Date(iso);
+    // Get local timezone offset and adjust the date for datetime-local input
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().slice(0, 16);
+  };
+  
+  const fromLocalInput = (v: string) => {
+    if (!v) return null;
+    // Create date from local input and convert to UTC
+    const date = new Date(v);
+    return date.toISOString();
+  };
+  
   const [record, setRecord] = useState<ConversationConfirmation | null>(null);
   const [saving, setSaving] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [serviceFeeInput, setServiceFeeInput] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [startDateInput, setStartDateInput] = useState<string>('');
+  const [endDateInput, setEndDateInput] = useState<string>('');
+  const [hasStartTimeUnsavedChanges, setHasStartTimeUnsavedChanges] = useState(false);
+  const [hasEndTimeUnsavedChanges, setHasEndTimeUnsavedChanges] = useState(false);
+  const [isStartTimeEditing, setIsStartTimeEditing] = useState(false);
+  const [isEndTimeEditing, setIsEndTimeEditing] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const isCustomer = currentUserRole === 'USER';
   const isProvider = currentUserRole === 'PROVIDER';
@@ -29,7 +53,13 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
     if (conversationId !== currentConversationId) {
       setRecord(null);
       setServiceFeeInput('');
+      setStartDateInput('');
+      setEndDateInput('');
       setHasUnsavedChanges(false);
+      setHasStartTimeUnsavedChanges(false);
+      setHasEndTimeUnsavedChanges(false);
+      setIsStartTimeEditing(false);
+      setIsEndTimeEditing(false);
       setSaving(false);
       setCurrentConversationId(conversationId);
     }
@@ -39,16 +69,28 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
     let mounted = true;
     (async () => {
       try {
+        console.log('Loading confirmation record for conversation:', conversationId);
         const rec = await confirmationApi.ensure(conversationId);
+        console.log('Loaded confirmation record:', rec);
         if (mounted && conversationId === currentConversationId) {
           setRecord(rec);
           setServiceFeeInput(rec.serviceFee?.toString() || '');
+          const startLocal = toLocalInput(rec.startDate);
+          const endLocal = toLocalInput(rec.endDate);
+          console.log('Setting inputs - startDate:', rec.startDate, 'converted to:', startLocal);
+          console.log('Setting inputs - endDate:', rec.endDate, 'converted to:', endLocal);
+          setStartDateInput(startLocal);
+          setEndDateInput(endLocal);
+          setHasStartTimeUnsavedChanges(false);
+          setHasEndTimeUnsavedChanges(false);
+          setIsStartTimeEditing(false);
+          setIsEndTimeEditing(false);
         }
       } catch (e) {
         console.error('Failed to load confirmation record:', e);
       }
     })();
-    return () => { 
+    return () => {
       mounted = false;
     };
   }, [conversationId, currentConversationId]);
@@ -89,6 +131,64 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
     }
   };
 
+  // Function to save start time (called on button click or Enter key)
+  const saveStartTime = async () => {
+    if (!record) return;
+
+    setSaving(true);
+    setHasStartTimeUnsavedChanges(false);
+    setIsStartTimeEditing(false);
+
+    try {
+      const patch: Partial<ConversationConfirmation> = {
+        startDate: fromLocalInput(startDateInput),
+      };
+
+      console.log('Saving start time:', patch);
+      const updated = await confirmationApi.upsert(conversationId, patch);
+      console.log('Start time saved successfully:', updated);
+      setRecord(updated);
+      setStartDateInput(toLocalInput(updated.startDate));
+    } catch (e) {
+      console.error('Failed to update start time', e);
+      alert('Failed to save start time. Please try again.');
+      // Revert unsaved changes on error
+      setHasStartTimeUnsavedChanges(true);
+      setIsStartTimeEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Function to save end time (called on button click or Enter key)
+  const saveEndTime = async () => {
+    if (!record) return;
+
+    setSaving(true);
+    setHasEndTimeUnsavedChanges(false);
+    setIsEndTimeEditing(false);
+
+    try {
+      const patch: Partial<ConversationConfirmation> = {
+        endDate: fromLocalInput(endDateInput),
+      };
+
+      console.log('Saving end time:', patch);
+      const updated = await confirmationApi.upsert(conversationId, patch);
+      console.log('End time saved successfully:', updated);
+      setRecord(updated);
+      setEndDateInput(toLocalInput(updated.endDate));
+    } catch (e) {
+      console.error('Failed to update end time', e);
+      alert('Failed to save end time. Please try again.');
+      // Revert unsaved changes on error
+      setHasEndTimeUnsavedChanges(true);
+      setIsEndTimeEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const update = async (patch: Partial<ConversationConfirmation>) => {
     if (!record) return;
     setSaving(true);
@@ -103,17 +203,24 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
   };
 
   useConfirmationSocket(conversationId, (confirmation) => {
-    // Only update if it's for the current conversation
+    // Only update if it's for the current conversation AND not actively editing
     if (confirmation.conversationId === conversationId) {
       setRecord(confirmation);
-      setServiceFeeInput(confirmation.serviceFee?.toString() || '');
+      
+      // Only update local inputs if user is not actively editing them
+      if (!hasUnsavedChanges) {
+        setServiceFeeInput(confirmation.serviceFee?.toString() || '');
+      }
+      if (!isStartTimeEditing && !hasStartTimeUnsavedChanges) {
+        setStartDateInput(toLocalInput(confirmation.startDate));
+      }
+      if (!isEndTimeEditing && !hasEndTimeUnsavedChanges) {
+        setEndDateInput(toLocalInput(confirmation.endDate));
+      }
     }
   }, user?.id || '');
 
   if (!record) return null;
-
-  const toLocalInput = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : '');
-  const fromLocalInput = (v: string) => (v ? new Date(v).toISOString() : null);
 
   // Calculate confirmation status
   const bothConfirmed = record.customerConfirmation && record.providerConfirmation;
@@ -389,29 +496,121 @@ const ConfirmationPanel: React.FC<Props> = ({ conversationId, currentUserRole, o
               <h4 className="text-sm font-semibold text-white/80 uppercase tracking-wide border-b border-white/20 pb-2">
                 Schedule
               </h4>
-              
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 hover:border-white/30 transition-all duration-300 relative overflow-hidden group">
+
+              <div className={`bg-white/10 backdrop-blur-sm p-4 rounded-xl border hover:border-white/30 transition-all duration-300 relative overflow-hidden group ${hasStartTimeUnsavedChanges ? 'border-blue-400/50 bg-blue-500/10' : 'border-white/20'}`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
                 <label className="block text-sm font-medium text-white/90 mb-2 relative z-10">Start Date & Time</label>
-                <input
-                  type="datetime-local"
-                  className="w-full border border-white/30 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white/20 text-white backdrop-blur-sm relative z-10"
-                  value={toLocalInput(record.startDate)}
-                  disabled={saving}
-                  onChange={(e) => update({ startDate: fromLocalInput(e.target.value) })}
-                />
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    className={`w-full border border-white/30 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white/20 text-white backdrop-blur-sm relative z-10 ${
+                      hasStartTimeUnsavedChanges ? 'border-blue-400 bg-blue-500/20' : ''
+                    }`}
+                    value={startDateInput}
+                    disabled={saving}
+                    onFocus={() => setIsStartTimeEditing(true)}
+                    onBlur={() => setIsStartTimeEditing(false)}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setStartDateInput(newValue);
+                      setHasStartTimeUnsavedChanges(newValue !== toLocalInput(record.startDate));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveStartTime();
+                      }
+                    }}
+                  />
+                  {hasStartTimeUnsavedChanges && !saving && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <div className="flex items-center space-x-1 text-xs text-blue-400">
+                        <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                        <span>Unsaved</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {hasStartTimeUnsavedChanges && (
+                  <button
+                    onClick={saveStartTime}
+                    disabled={saving}
+                    className="mt-3 w-full px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm relative overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                    {saving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent relative z-10"></div>
+                        <span className="relative z-10">Saving Start Time...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 relative z-10" />
+                        <span className="relative z-10">Save Start Time</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 hover:border-white/30 transition-all duration-300 relative overflow-hidden group">
+              <div className={`bg-white/10 backdrop-blur-sm p-4 rounded-xl border hover:border-white/30 transition-all duration-300 relative overflow-hidden group ${hasEndTimeUnsavedChanges ? 'border-blue-400/50 bg-blue-500/10' : 'border-white/20'}`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
                 <label className="block text-sm font-medium text-white/90 mb-2 relative z-10">End Date & Time</label>
-                <input
-                  type="datetime-local"
-                  className="w-full border border-white/30 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white/20 text-white backdrop-blur-sm relative z-10"
-                  value={toLocalInput(record.endDate)}
-                  disabled={saving}
-                  onChange={(e) => update({ endDate: fromLocalInput(e.target.value) })}
-                />
+                <div className="relative">
+                  <input
+                    type="datetime-local"
+                    className={`w-full border border-white/30 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white/20 text-white backdrop-blur-sm relative z-10 ${
+                      hasEndTimeUnsavedChanges ? 'border-blue-400 bg-blue-500/20' : ''
+                    }`}
+                    value={endDateInput}
+                    disabled={saving}
+                    onFocus={() => setIsEndTimeEditing(true)}
+                    onBlur={() => setIsEndTimeEditing(false)}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setEndDateInput(newValue);
+                      setHasEndTimeUnsavedChanges(newValue !== toLocalInput(record.endDate));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveEndTime();
+                      }
+                    }}
+                  />
+                  {hasEndTimeUnsavedChanges && !saving && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <div className="flex items-center space-x-1 text-xs text-blue-400">
+                        <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                        <span>Unsaved</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {hasEndTimeUnsavedChanges && (
+                  <button
+                    onClick={saveEndTime}
+                    disabled={saving}
+                    className="mt-3 w-full px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 backdrop-blur-sm relative overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:animate-pulse"></div>
+                    {saving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent relative z-10"></div>
+                        <span className="relative z-10">Saving End Time...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 relative z-10" />
+                        <span className="relative z-10">Save End Time</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              <div className="text-xs text-white/60 mt-2 relative z-10">
+                💡 Tip: Press <kbd className="px-1 py-0.5 bg-white/20 border border-white/30 rounded text-white/80">Enter</kbd> or click the save buttons to confirm your changes
               </div>
             </div>
           </div>
