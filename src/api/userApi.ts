@@ -539,8 +539,53 @@ export const userApi = {
     }
   },
 
-  // You can add more user-related API calls here
-  // updateProfile: async (userId: string, data: UpdateUserData): Promise<UserProfile> => { ... },
+  // Get customer reviews received (from service providers)
+  getCustomerReviewsReceived: async (userId: string, page: number = 1, limit: number = 10) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.get(`/reviews/user/${userId}/received?page=${page}&limit=${limit}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to fetch customer reviews');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  },
+
+  // Get service reviews received (from customers for services)
+  getServiceReviewsReceived: async (providerId: string, page: number = 1, limit: number = 10) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await apiClient.get(`/service-reviews/provider/${providerId}?page=${page}&limit=${limit}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(error.response.data?.message || 'Failed to fetch service reviews');
+      } else if (error.request) {
+        throw new Error('Network error. Please check your connection.');
+      } else {
+        throw new Error('An unexpected error occurred');
+      }
+    }
+  }
 };
 
 export default userApi;

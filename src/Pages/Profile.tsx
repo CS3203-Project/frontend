@@ -54,6 +54,8 @@ import EditProfileModal from '../components/Profile/EditProfileModal';
 import CompanyModal from '../components/Profile/CompanyModal';
 import LocationPickerAdvanced from '../components/LocationPickerAdvanced';
 import { uploadMultipleImages } from '../utils/imageUpload';
+import ReviewCard from '../components/ReviewCard';
+import { serviceReviewApi } from '../api/serviceReviewApi';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -80,6 +82,12 @@ export default function Profile() {
   const [paymentPage, setPaymentPage] = useState(1);
   const [totalPaymentPages, setTotalPaymentPages] = useState(1);
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
+
+  // Reviews related state
+  const [customerReviews, setCustomerReviews] = useState<any[]>([]);
+  const [serviceReviews, setServiceReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [selectedReviewType, setSelectedReviewType] = useState<'customer' | 'service'>('customer');
   
   // Use AuthContext user data and sync with local state for provider-specific data
   const user = authUser || localUser;
@@ -189,7 +197,7 @@ export default function Profile() {
   // Fetch provider earnings
   const fetchProviderEarnings = useCallback(async () => {
     if (!user || user.role !== 'PROVIDER') return;
-    
+
     try {
       const earningsData = await paymentApi.getProviderEarnings();
       console.log('Earnings data received:', earningsData);
@@ -201,6 +209,43 @@ export default function Profile() {
     }
   }, [user]);
 
+  // Fetch customer reviews (when user is acting as customer)
+  const fetchCustomerReviews = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      setReviewsLoading(true);
+      const response = await userApi.getCustomerReviewsReceived(user.id);
+      setCustomerReviews(response.reviews || []);
+    } catch (error) {
+      console.error('Failed to fetch customer reviews:', error);
+      setCustomerReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [user]);
+
+  // Fetch service reviews (when user has provider profile data)
+  const fetchServiceReviews = useCallback(async () => {
+    if (!user || !providerProfile?.id) return;
+
+    try {
+      setReviewsLoading(true);
+      // Use serviceReviewApi similar to Provider page
+      const response = await serviceReviewApi.getProviderServiceReviews(providerProfile.id);
+      if (response.success) {
+        setServiceReviews(response.data.reviews || []);
+      } else {
+        setServiceReviews([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch service reviews:', error);
+      setServiceReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [user, providerProfile?.id]);
+
   // Replace the old fetchProfile useEffect with optimized version
   useEffect(() => {
     if (!authLoading && user) {
@@ -210,10 +255,19 @@ export default function Profile() {
         // Fetch earnings for providers
         fetchProviderEarnings().catch(err => console.log('Earnings fetch failed:', err));
       }
+      // Fetch reviews for all users - service reviews loaded separately when provider profile is available
+      fetchCustomerReviews().catch(err => console.log('Customer reviews fetch failed:', err));
       // Fetch payment history for all users (providers and customers)
       fetchPaymentHistory().catch(err => console.log('Payment history fetch failed:', err));
     }
-  }, [authLoading, user, fetchProviderData, fetchProviderEarnings, fetchPaymentHistory]);
+  }, [authLoading, user, fetchProviderData, fetchProviderEarnings, fetchPaymentHistory, fetchCustomerReviews]);
+
+  // Separate effect to fetch service reviews when provider profile is loaded
+  useEffect(() => {
+    if (providerProfile?.id && user) {
+      fetchServiceReviews().catch(err => console.log('Service reviews fetch failed:', err));
+    }
+  }, [providerProfile?.id, user, fetchServiceReviews]);
 
   const refreshServices = useCallback(() => {
     if (providerProfile?.id) {
@@ -930,7 +984,7 @@ export default function Profile() {
             </div>
 
             {/* My Services Section - Moved to Left Column */}
-            {user.role === 'PROVIDER' && providerProfile && (
+            {providerProfile && (
               <>
                 {servicesLoading ? (
                   <div className="backdrop-blur-md bg-white/70 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] p-6">
@@ -957,15 +1011,15 @@ export default function Profile() {
                     </div>
                     <div className="space-y-4">
                       {services.map((service) => (
-                        <div 
-                          key={service.id} 
+                        <div
+                          key={service.id}
                           onClick={() => navigate(`/service/${service.id}`)}
                           className="group p-4 rounded-xl bg-white/50 dark:bg-black/50 backdrop-blur-sm border border-white/30 dark:border-white/20 hover:border-white/50 dark:hover:border-white/30 cursor-pointer transition-all duration-300 hover:scale-102 hover:shadow-lg"
                         >
                           <div className="flex items-start gap-3">
                             {service.images && service.images.length > 0 ? (
-                              <img 
-                                src={service.images[0]} 
+                              <img
+                                src={service.images[0]}
                                 alt={service.title || 'Service image'}
                                 className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                                 onError={(e) => {
@@ -1397,6 +1451,197 @@ export default function Profile() {
                   </div>
                 )}
 
+                {/* Reviews Section with Dropdown for Providers */}
+                {(
+                  <div className="backdrop-blur-md bg-white/70 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_12px_48px_0_rgba(0,0,0,0.15)] transition-all duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                      <div>
+                        <h2 className="text-xl font-bold bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text text-transparent">My Reviews</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                          {selectedReviewType === 'customer'
+                            ? 'Feedback received from service providers'
+                            : 'Customer feedback on your services'
+                          }
+                        </p>
+                      </div>
+
+                      {/* Review Type Dropdown for Providers */}
+                      <div className="relative">
+                        <select
+                          value={selectedReviewType}
+                          onChange={(e) => setSelectedReviewType(e.target.value as 'customer' | 'service')}
+                          className="px-4 py-2 pr-8 bg-white/80 dark:bg-black/60 border border-white/30 dark:border-white/20 rounded-xl text-sm font-medium text-black dark:text-white backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-all duration-200 hover:bg-white/90 dark:hover:bg-black/70 appearance-none"
+                        >
+                          {customerReviews.length > 0 && (
+                            <option value="customer" className="bg-white dark:bg-black text-black dark:text-white">⭐ Reviews from Providers</option>
+                          )}
+                          {serviceReviews.length > 0 && (
+                            <option value="service" className="bg-white dark:bg-black text-black dark:text-white">🤝 Reviews from Customers</option>
+                          )}
+                        </select>
+                        <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 text-black dark:text-white h-4 w-4 pointer-events-none rotate-90" />
+                      </div>
+                    </div>
+
+                    {reviewsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white mx-auto mb-3"></div>
+                        <p className="text-gray-600 dark:text-gray-400">Loading reviews...</p>
+                      </div>
+                    ) : selectedReviewType === 'customer' && customerReviews.length > 0 ? (
+                      <div className="space-y-6">
+                        {customerReviews.slice(0, 5).map((review, index) => (
+                          <div key={review.id || index} className="group border border-white/20 dark:border-white/10 rounded-xl p-4 bg-white/30 dark:bg-black/20 backdrop-blur-sm hover:border-white/40 dark:hover:border-white/20 transition-all duration-300">
+                            <div className="flex items-start space-x-4">
+                              {review.reviewer?.imageUrl ? (
+                                <img
+                                  src={review.reviewer.imageUrl}
+                                  alt={`${review.reviewer?.firstName || 'Provider'} ${review.reviewer?.lastName || ''}`}
+                                  className="w-12 h-12 rounded-full object-cover border-2 border-white/40 dark:border-white/30"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-semibold text-sm border-2 border-white/40 dark:border-white/30">
+                                  {((review.reviewer?.firstName || 'P').charAt(0) || 'P').toUpperCase()}
+                                  {((review.reviewer?.lastName || '').charAt(0) || 'R').toUpperCase()}
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-black dark:text-white text-base">
+                                      {review.reviewer?.firstName || 'Provider'} {review.reviewer?.lastName || ''}
+                                    </h4>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <div className="flex items-center space-x-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-4 w-4 ${
+                                              i < (review.rating || 0)
+                                                ? 'text-yellow-400 fill-current'
+                                                : 'text-gray-300 dark:text-gray-600'
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                                        {review.rating || 0}.0
+                                      </span>
+                                      <span className="text-sm text-gray-500">• Provider</span>
+                                    </div>
+                                    <div className="flex items-center mt-1">
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric'
+                                        }) : 'N/A'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="mt-3">
+                                  <blockquote className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed border-l-4 border-blue-500/30 pl-4 italic bg-white/50 dark:bg-black/30 p-3 rounded-r-lg">
+                                    "{review.comment || 'No comment provided'}"
+                                  </blockquote>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {customerReviews.length > 5 && (
+                          <div className="text-center pt-4 border-t border-white/20 dark:border-white/10">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                              Showing 5 of {customerReviews.length} reviews
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : selectedReviewType === 'service' && serviceReviews.length > 0 ? (
+                      <div className="space-y-6">
+                        {serviceReviews.slice(0, 5).map((review, index) => (
+                          <div key={review.id || index} className="group border border-white/20 dark:border-white/10 rounded-xl p-4 bg-white/30 dark:bg-black/20 backdrop-blur-sm hover:border-white/40 dark:hover:border-white/20 transition-all duration-300">
+                            <div className="flex items-start space-x-4">
+                              <img
+                                src={review.clientAvatar || `https://picsum.photos/seed/${review.reviewerId}/60/60`}
+                                alt={review.clientName}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-white/40 dark:border-white/30"
+                                onError={(e) => {
+                                  e.currentTarget.src = `https://picsum.photos/seed/${review.reviewerId}/60/60`;
+                                }}
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-black dark:text-white text-base">
+                                      {review.clientName || 'Anonymous Customer'}
+                                    </h4>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <div className="flex items-center space-x-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-4 w-4 ${
+                                              i < (review.rating || 0)
+                                                ? 'text-yellow-400 fill-current'
+                                                : 'text-gray-300 dark:text-gray-600'
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                                        {review.rating || 0}.0
+                                      </span>
+                                      <span className="text-sm text-gray-500">•</span>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {typeof review.service === 'object' ? review.service?.title : review.service || 'Service'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center mt-1">
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {review.date || (review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric'
+                                        }) : 'N/A')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="mt-3">
+                                  <blockquote className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed border-l-4 border-blue-500/30 pl-4 italic bg-white/50 dark:bg-black/30 p-3 rounded-r-lg">
+                                    "{review.comment || 'No comment provided'}"
+                                  </blockquote>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {serviceReviews.length > 5 && (
+                          <div className="text-center pt-4 border-t border-white/20 dark:border-white/10">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                              Showing 5 of {serviceReviews.length} reviews
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Star className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-black dark:text-white mb-2">No reviews yet</h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {selectedReviewType === 'customer'
+                            ? 'Reviews from service providers will appear here once you receive feedback.'
+                            : 'Reviews from customers will appear here once you receive feedback on your services.'
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Companies */}
                 <div className="bg-black/20 backdrop-blur-lg rounded-xl shadow-2xl p-6 border border-white/10">
                   <div className="flex items-center justify-between mb-4">
@@ -1513,6 +1758,8 @@ export default function Profile() {
                     </div>
                   )}
                 </div>
+
+
 
                 {/* Payment History & Earnings */}
                 <div className="backdrop-blur-md bg-white/70 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_12px_48px_0_rgba(0,0,0,0.15)] transition-all duration-300">
@@ -1856,6 +2103,197 @@ export default function Profile() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Reviews Section with Dropdown */}
+                {(customerReviews.length > 0 || (user.role === 'PROVIDER' && serviceReviews.length > 0)) && (
+                  <div className="backdrop-blur-md bg-white/70 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_12px_48px_0_rgba(0,0,0,0.15)] transition-all duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                      <div>
+                        <h2 className="text-xl font-bold bg-gradient-to-br from-black from-30% to-black/40 dark:from-white dark:to-white/40 bg-clip-text text-transparent">My Reviews</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                          {selectedReviewType === 'customer'
+                            ? 'Feedback received from service providers'
+                            : 'Customer feedback on your services'
+                          }
+                        </p>
+                      </div>
+
+                      {/* Review Type Dropdown */}
+                      <div className="relative">
+                        <select
+                          value={selectedReviewType}
+                          onChange={(e) => setSelectedReviewType(e.target.value as 'customer' | 'service')}
+                          className="px-4 py-2 pr-8 bg-white/80 dark:bg-black/60 border border-white/30 dark:border-white/20 rounded-xl text-sm font-medium text-black dark:text-white backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 transition-all duration-200 hover:bg-white/90 dark:hover:bg-black/70 appearance-none"
+                        >
+                          {customerReviews.length > 0 && (
+                            <option value="customer" className="bg-white dark:bg-black text-black dark:text-white">⭐ Reviews from Providers</option>
+                          )}
+                          {user.role === 'PROVIDER' && serviceReviews.length > 0 && (
+                            <option value="service" className="bg-white dark:bg-black text-black dark:text-white">🤝 Reviews from Customers</option>
+                          )}
+                        </select>
+                        <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 text-black dark:text-white h-4 w-4 pointer-events-none rotate-90" />
+                      </div>
+                    </div>
+
+                    {reviewsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white mx-auto mb-3"></div>
+                        <p className="text-gray-600 dark:text-gray-400">Loading reviews...</p>
+                      </div>
+                    ) : selectedReviewType === 'customer' && customerReviews.length > 0 ? (
+                      <div className="space-y-6">
+                        {customerReviews.slice(0, 5).map((review, index) => (
+                          <div key={review.id || index} className="group border border-white/20 dark:border-white/10 rounded-xl p-4 bg-white/30 dark:bg-black/20 backdrop-blur-sm hover:border-white/40 dark:hover:border-white/20 transition-all duration-300">
+                            <div className="flex items-start space-x-4">
+                              {review.reviewer?.imageUrl ? (
+                                <img
+                                  src={review.reviewer.imageUrl}
+                                  alt={`${review.reviewer?.firstName || 'Provider'} ${review.reviewer?.lastName || ''}`}
+                                  className="w-12 h-12 rounded-full object-cover border-2 border-white/40 dark:border-white/30"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-semibold text-sm border-2 border-white/40 dark:border-white/30">
+                                  {((review.reviewer?.firstName || 'P').charAt(0) || 'P').toUpperCase()}
+                                  {((review.reviewer?.lastName || '').charAt(0) || 'R').toUpperCase()}
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-black dark:text-white text-base">
+                                      {review.reviewer?.firstName || 'Provider'} {review.reviewer?.lastName || ''}
+                                    </h4>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <div className="flex items-center space-x-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-4 w-4 ${
+                                              i < (review.rating || 0)
+                                                ? 'text-yellow-400 fill-current'
+                                                : 'text-gray-300 dark:text-gray-600'
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                                        {review.rating || 0}.0
+                                      </span>
+                                      <span className="text-sm text-gray-500">• Provider</span>
+                                    </div>
+                                    <div className="flex items-center mt-1">
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric'
+                                        }) : 'N/A'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="mt-3">
+                                  <blockquote className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed border-l-4 border-blue-500/30 pl-4 italic bg-white/50 dark:bg-black/30 p-3 rounded-r-lg">
+                                    "{review.comment || 'No comment provided'}"
+                                  </blockquote>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {customerReviews.length > 5 && (
+                          <div className="text-center pt-4 border-t border-white/20 dark:border-white/10">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                              Showing 5 of {customerReviews.length} reviews
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : selectedReviewType === 'service' && serviceReviews.length > 0 ? (
+                      <div className="space-y-6">
+                        {serviceReviews.slice(0, 5).map((review, index) => (
+                          <div key={review.id || index} className="group border border-white/20 dark:border-white/10 rounded-xl p-4 bg-white/30 dark:bg-black/20 backdrop-blur-sm hover:border-white/40 dark:hover:border-white/20 transition-all duration-300">
+                            <div className="flex items-start space-x-4">
+                              <img
+                                src={review.clientAvatar || `https://picsum.photos/seed/${review.reviewerId}/60/60`}
+                                alt={review.clientName}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-white/40 dark:border-white/30"
+                                onError={(e) => {
+                                  e.currentTarget.src = `https://picsum.photos/seed/${review.reviewerId}/60/60`;
+                                }}
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-black dark:text-white text-base">
+                                      {review.clientName || 'Anonymous Customer'}
+                                    </h4>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <div className="flex items-center space-x-1">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`h-4 w-4 ${
+                                              i < (review.rating || 0)
+                                                ? 'text-yellow-400 fill-current'
+                                                : 'text-gray-300 dark:text-gray-600'
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                                        {review.rating || 0}.0
+                                      </span>
+                                      <span className="text-sm text-gray-500">•</span>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {typeof review.service === 'object' ? review.service?.title : review.service || 'Service'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center mt-1">
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {review.date || (review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric'
+                                        }) : 'N/A')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="mt-3">
+                                  <blockquote className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed border-l-4 border-blue-500/30 pl-4 italic bg-white/50 dark:bg-black/30 p-3 rounded-r-lg">
+                                    "{review.comment || 'No comment provided'}"
+                                  </blockquote>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {serviceReviews.length > 5 && (
+                          <div className="text-center pt-4 border-t border-white/20 dark:border-white/10">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                              Showing 5 of {serviceReviews.length} reviews
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Star className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-black dark:text-white mb-2">No reviews yet</h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {selectedReviewType === 'customer'
+                            ? 'Reviews from service providers will appear here once you receive feedback.'
+                            : 'Reviews from customers will appear here once you receive feedback on your services.'
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Customer Payment History */}
                 <div className="bg-black/30 backdrop-blur-xl rounded-xl shadow-2xl p-6 border border-white/20 relative overflow-hidden">
