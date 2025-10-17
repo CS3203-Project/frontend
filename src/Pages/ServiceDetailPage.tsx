@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar, 
-  Shield, Award, ChevronLeft, ChevronRight, Send, Bookmark, Share2, Eye,
-  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard, Github, Linkedin, Twitter, ArrowUpRight
+import {
+  Star, Heart, MapPin, Clock, MessageCircle, Phone, Mail, ArrowLeft, Calendar,
+  Shield, Award, ChevronLeft, ChevronRight, Send, Bookmark, Eye,
+  CheckCircle, Users, ThumbsUp, User, GraduationCap, CreditCard, Github, Linkedin, Twitter, ArrowUpRight, QrCode, Download, Share2
 } from 'lucide-react';
 import { serviceApi, type ServiceResponse } from '../api/serviceApi';
 import { serviceReviewApi, type ServiceReview, type ReviewStats } from '../api/serviceReviewApi';
@@ -20,6 +20,8 @@ import { cn } from '../utils/utils';
 import { confirmationApi } from '../api/confirmationApi';
 import GlassmorphismProfileCard from '../components/ui/ProfileCard';
 import Button from '@/components/Button';
+import QRCode from 'react-qr-code';
+import * as QRCodeLib from 'qrcode';
 
 interface DetailedService {
   id: string;
@@ -112,6 +114,9 @@ const ServiceDetailPage: React.FC = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // QR code state
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+
   // Calculate total media items (video + images)
   const totalMediaItems = service ? (service.videoUrl ? 1 : 0) + service.images.length : 0;
 
@@ -149,6 +154,14 @@ const ServiceDetailPage: React.FC = () => {
       return () => clearInterval(interval);
     }
   }, [reviews.length]);
+
+  // Generate QR code URL for sharing
+  useEffect(() => {
+    if (service) {
+      const currentUrl = window.location.href;
+      setQrCodeUrl(currentUrl);
+    }
+  }, [service]);
 
   // Transform ServiceResponse (API data) to DetailedService format
   const transformApiService = (apiService: ServiceResponse): DetailedService => {
@@ -540,6 +553,85 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
+  // Share service handler
+  const handleShareService = async () => {
+    if (!service) return;
+
+    const shareData = {
+      title: service.title,
+      text: `Check out this service: ${service.title}`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        // You could show a toast notification here
+        alert('Service link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Service link copied to clipboard!');
+      } catch (clipboardError) {
+        console.error('Error copying to clipboard:', clipboardError);
+      }
+    }
+  };
+
+  // Download QR code handler
+  const handleDownloadQR = async () => {
+    if (!qrCodeUrl) return;
+
+    try {
+      // Use the qrcode library to generate and download
+      // Create a temporary div to render the QR code
+      const tempDiv = document.createElement('div');
+      tempDiv.style.display = 'none';
+      document.body.appendChild(tempDiv);
+
+      // Generate QR code using the imported library
+      QRCodeLib.toCanvas(qrCodeUrl, {
+        width: 256,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      }, (error: any, canvas: HTMLCanvasElement) => {
+        if (error) {
+          console.error('QR Code generation error:', error);
+          document.body.removeChild(tempDiv);
+          alert('Unable to generate QR code. Please try again.');
+          return;
+        }
+
+        // Convert to blob and download
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${service?.title?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'service'}-qr-code.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }
+          // Clean up
+          document.body.removeChild(tempDiv);
+        }, 'image/png');
+      });
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      alert('Unable to download QR code. Please try again.');
+    }
+  };
+
   // Review helpers
   const filteredReviews = reviewFilter === 'all' 
     ? reviews 
@@ -886,12 +978,6 @@ const ServiceDetailPage: React.FC = () => {
                   </button>
                   <button
                     className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/5 dark:border-white/5 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
-                    title="Share service"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    className="p-3 rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md border border-white/5 dark:border-white/5 text-black dark:text-white hover:bg-white dark:hover:bg-black/50 transition-all duration-300 hover:scale-110 shadow-lg"
                     title="Bookmark service"
                   >
                     <Bookmark className="w-4 h-4" />
@@ -1112,7 +1198,7 @@ const ServiceDetailPage: React.FC = () => {
             </div>
 
             {/* Right Column - Unified Booking & Provider Card */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-6 pb-10">
               {/* Unified Glass Morphism Card */}
               <div className="relative">
                 <div 
@@ -1276,9 +1362,56 @@ const ServiceDetailPage: React.FC = () => {
                     </button>
                   </div>
 
+                  {/* QR Code Section */}
+                  <div className="pt-6 border-t border-white/20 dark:border-white/20">
+                    <h4 className="text-sm font-semibold text-black dark:text-white mb-4 flex items-center">
+                      <QrCode className="w-4 h-4 mr-2" />
+                      QR Code
+                    </h4>
+                    <div className="flex flex-col items-center space-y-3">
+                      {/* QR Code */}
+                      <div className="bg-white/60 dark:bg-black/30 backdrop-blur-xl p-4 rounded-xl border border-white/20 dark:border-white/15 shadow-sm">
+                        <div className="w-24 h-24 flex items-center justify-center">
+                          {qrCodeUrl ? (
+                            <QRCode
+                              value={qrCodeUrl}
+                              size={96}
+                              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                              viewBox={`0 0 256 256`}
+                              fgColor="currentColor"
+                              bgColor="transparent"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-black/20 dark:bg-white/20 rounded animate-pulse"></div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={handleDownloadQR}
+                          className="flex items-center space-x-1 bg-white/60 dark:bg-black/30 backdrop-blur-xl hover:bg-white/80 dark:hover:bg-black/50 text-black dark:text-white border border-white/20 dark:border-white/15 rounded-lg px-3 py-2 shadow-sm transition-all duration-200 text-xs"
+                          title="Download QR Code"
+                        >
+                          <Download className="w-3 h-3" />
+                          <span>Download</span>
+                        </button>
+                        <button
+                          onClick={handleShareService}
+                          className="flex items-center space-x-1 bg-white/60 dark:bg-black/30 backdrop-blur-xl hover:bg-white/80 dark:hover:bg-black/50 text-black dark:text-white border border-white/20 dark:border-white/15 rounded-lg px-3 py-2 shadow-sm transition-all duration-200 text-xs"
+                          title="Share Service"
+                        >
+                          <Share2 className="w-3 h-3" />
+                          <span>Share</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Working Hours Section */}
                   {service.workingTime && service.workingTime.length > 0 && (
-                    <div className="pt-6 border-t border-white/20 dark:border-white/20">
+                    <div >
                       <h4 className="text-sm font-semibold text-black dark:text-white mb-3 flex items-center">
                         <Clock className="w-4 h-4 mr-2" />
                         Working Hours
