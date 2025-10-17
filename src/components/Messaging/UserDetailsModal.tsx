@@ -206,7 +206,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
         <div className="relative z-10 p-6 border-b border-white/20">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white">
-              {userRole === 'PROVIDER' ? '👤 Customer Details' : '🏢 Service Provider Details'}
+              {userRole === 'PROVIDER' ? 'Customer Details' : '🏢 Service Provider Details'}
             </h2>
             <button
               onClick={handleClose}

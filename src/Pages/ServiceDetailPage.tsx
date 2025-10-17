@@ -224,7 +224,7 @@ const ServiceDetailPage: React.FC = () => {
       console.log('  - Average Rating:', providerData?.averageRating);
       console.log('  - Total Reviews:', providerData?.totalReviews);
       console.log('  - Is Verified:', providerData?.isVerified);
-      console.log('👤 User details (via relation):');
+      console.log('User details (via relation):');
       console.log('  - First Name:', providerData?.user?.firstName);
       console.log('  - Last Name:', providerData?.user?.lastName);
       console.log('  - Email:', providerData?.user?.email);

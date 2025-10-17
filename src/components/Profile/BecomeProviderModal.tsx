@@ -79,11 +79,11 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Become a Service Provider</h2>
+        <div className="flex items-center justify-between p-6 border-b border-white-200">
+          <h2 className="text-2xl font-bold text-white-900">Become a Service Provider</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-white-100 rounded-full transition-colors"
             disabled={loading}
           >
             <X className="h-5 w-5" />
@@ -95,47 +95,47 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Bio */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bio <span className="text-gray-400">(Optional)</span>
+              <label className="block text-sm font-medium text-white-700 mb-2">
+                Bio <span className="text-white-400">(Optional)</span>
               </label>
               <textarea
                 value={formData.bio || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-white-300 rounded-lg focus:ring-2 focus:ring-white-500 focus:border-transparent resize-none"
                 rows={4}
                 placeholder="Tell potential clients about yourself, your experience, and what makes you unique..."
                 maxLength={1000}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-white-500 mt-1">
                 {formData.bio?.length || 0}/1000 characters
               </p>
             </div>
 
             {/* Logo URL */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Logo/Profile Image URL <span className="text-gray-400">(Optional)</span>
+              <label className="block text-sm font-medium text-white-700 mb-2">
+                Logo/Profile Image URL <span className="text-white-400">(Optional)</span>
               </label>
               <input
                 type="url"
                 value={formData.logoUrl || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, logoUrl: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-white-300 rounded-lg focus:ring-2 focus:ring-white-500 focus:border-transparent"
                 placeholder="https://example.com/your-logo.jpg"
               />
             </div>
 
             {/* Skills */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Skills <span className="text-gray-400">(Optional)</span>
+              <label className="block text-sm font-medium text-white-700 mb-2">
+                Skills <span className="text-white-400">(Optional)</span>
               </label>
               <div className="flex space-x-2 mb-3">
                 <input
                   type="text"
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-white-300 rounded-lg focus:ring-2 focus:ring-white-500 focus:border-transparent"
                   placeholder="Enter a skill (e.g., React.js, Photography, etc.)"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
                 />
@@ -153,13 +153,13 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
                 {formData.skills?.map((skill, index) => (
                   <span
                     key={index}
-                    className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                    className="flex items-center space-x-1 px-3 py-1 bg-white-100 text-white-800 rounded-full text-sm"
                   >
                     <span>{skill}</span>
                     <button
                       type="button"
                       onClick={() => removeSkill(skill)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-white-600 hover:text-white-800"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -170,15 +170,15 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
 
             {/* Qualifications */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Qualifications <span className="text-gray-400">(Optional)</span>
+              <label className="block text-sm font-medium text-white-700 mb-2">
+                Qualifications <span className="text-white-400">(Optional)</span>
               </label>
               <div className="flex space-x-2 mb-3">
                 <input
                   type="text"
                   value={newQualification}
                   onChange={(e) => setNewQualification(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-white-300 rounded-lg focus:ring-2 focus:ring-white-500 focus:border-transparent"
                   placeholder="Enter a qualification (e.g., Bachelor's in Computer Science)"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addQualification())}
                 />
@@ -196,9 +196,9 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
                 {formData.qualifications?.map((qualification, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-2 bg-white-50 rounded-lg"
                   >
-                    <span className="text-sm text-gray-700">{qualification}</span>
+                    <span className="text-sm text-white-700">{qualification}</span>
                     <button
                       type="button"
                       onClick={() => removeQualification(qualification)}
@@ -214,7 +214,7 @@ export default function BecomeProviderModal({ isOpen, onClose, onSuccess }: Beco
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-white-200">
           <Button
             variant="ghost"
             onClick={onClose}

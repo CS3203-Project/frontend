@@ -737,7 +737,7 @@ export default function Profile() {
                 : 'bg-white/50 dark:bg-black/50 text-black dark:text-white border-white/30 dark:border-white/20'
             } shadow-[0_4px_16px_0_rgba(0,0,0,0.08)]`}
               >
-            {user.role === 'PROVIDER' ? '⭐ Service Provider' : '👤 User'}
+            {user.role === 'PROVIDER' ? 'Service Provider' : 'User'}
               </span>
               {user.isEmailVerified && (
             <span className="flex items-center text-black dark:text-white bg-white/50 dark:bg-black/50 px-3 py-1 rounded-full border border-white/30 dark:border-white/20 backdrop-blur-md shadow-[0_4px_16px_0_rgba(0,0,0,0.08)]">
@@ -1836,20 +1836,20 @@ export default function Profile() {
               /* USER role content */
               <div className="space-y-6">
                 {/* Welcome Section */}
-                <div className="bg-black/20 backdrop-blur-lg rounded-xl shadow-2xl p-8 text-center border border-white/10">
+                <div className="bg-black-900 border border-gray-700 rounded-xl p-8 text-center">
                   <div className="max-w-md mx-auto">
-                    <div className="w-16 h-16 bg-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-400/30">
-                      <User className="h-8 w-8 text-blue-400" />
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-600">
+                      <User className="h-8 w-8 text-gray-400" />
                     </div>
                     <h2 className="text-2xl font-semibold text-white mb-2">Welcome to Zia!</h2>
-                    <p className="text-gray-300 mb-6">
-                      You're currently a user on our platform. Upgrade to become a service provider 
+                    <p className="text-gray-400 mb-6">
+                      You're currently a user on our platform. Upgrade to become a service provider
                       to offer your services and start earning!
                     </p>
                     <Button
                       onClick={handleBecomeProvider}
                       size="lg"
-                      className="flex items-center space-x-2 mx-auto bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 border border-purple-400/20"
+                      className="flex items-center space-x-2 mx-auto px-6 py-3 text-base font-semibold bg-white hover:bg-gray-100 text-black border-2 border-gray hover:border-white/60 rounded-full backdrop-blur-md transition-all duration-300 shadow-[0_8px_24px_0_rgba(0,0,0,0.15)] hover:shadow-[0_12px_32px_0_rgba(0,0,0,0.25)] hover:scale-105 hover:-translate-y-1"
                     >
                       <UserPlus className="h-5 w-5" />
                       <span>Become a Service Provider</span>

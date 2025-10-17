@@ -485,7 +485,7 @@ const Navbar = () => {
                 >
                   <Bell className="h-5 w-5 text-white/90 group-hover:text-white transition-colors duration-300" />
                   {stats && stats.unread > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-white text-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                       {stats.unread > 99 ? '99+' : stats.unread}
                     </span>
                   )}
