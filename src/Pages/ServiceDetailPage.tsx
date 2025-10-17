@@ -74,6 +74,8 @@ const ServiceDetailPage: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
   const { user, isLoggedIn } = useAuth();
+
+  console.log('ServiceDetailPage - serviceId from URL:', serviceId);
   const [service, setService] = useState<DetailedService | null>(null);
   const [provider, setProvider] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,6 +118,10 @@ const ServiceDetailPage: React.FC = () => {
 
   // QR code state
   const [qrCodeUrl, setQrCodeUrl] = useState('');
+
+  // Schedule state
+  const [currentSchedules, setCurrentSchedules] = useState<{ startTime: string; endTime: string }[]>([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
 
   // Calculate total media items (video + images)
   const totalMediaItems = service ? (service.videoUrl ? 1 : 0) + service.images.length : 0;
@@ -277,6 +283,29 @@ const ServiceDetailPage: React.FC = () => {
     }
   };
 
+  // Fetch current schedules
+  const fetchCurrentSchedules = async (serviceId: string) => {
+    try {
+      setScheduleLoading(true);
+      console.log('Fetching schedules for service:', serviceId);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/schedule/current/${serviceId}`);
+      console.log('Schedule API response status:', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Schedule API response data:', data);
+        if (data.success) {
+          setCurrentSchedules(data.data);
+        }
+      } else {
+        console.error('Schedule API error:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching current schedules:', error);
+    } finally {
+      setScheduleLoading(false);
+    }
+  };
+
   // Refetch reviews when filter changes
   useEffect(() => {
     if (service) {
@@ -317,6 +346,10 @@ const ServiceDetailPage: React.FC = () => {
           
           // Fetch service reviews
           await fetchServiceReviews(response.data.id);
+
+          // Fetch current schedules
+          console.log('About to fetch schedules for service:', response.data.id);
+          await fetchCurrentSchedules(response.data.id);
         } else {
           toast.error('Service not found');
           navigate('/services');
@@ -721,6 +754,9 @@ const ServiceDetailPage: React.FC = () => {
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
                       </div>
                       <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-3/4 animate-pulse relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
+                      </div>
+                      <div className="h-4 bg-gradient-to-r from-black/15 to-gray-400/25 dark:from-white/15 dark:to-gray-500/25 rounded w-4/6 animate-pulse relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent animate-shimmer"></div>
                       </div>
                     </div>
@@ -1193,6 +1229,88 @@ const ServiceDetailPage: React.FC = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Current Schedule Section */}
+                  {currentSchedules.length > 0 && (
+                    <div className="mt-6 bg-white/60 dark:bg-black/50 backdrop-blur-xl rounded-2xl p-4 md:p-6 border border-white/20 dark:border-white/15 shadow-lg">
+                      <h3 className="text-lg font-semibold text-black dark:text-white mb-4 flex items-center">
+                        <Calendar className="w-5 h-5 mr-2" />
+                        Confirmed Schedule
+                      </h3>
+                      {scheduleLoading ? (
+                        <div className="flex justify-center py-4">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-2 h-2 bg-black dark:bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Desktop Table View */}
+                          <div className="hidden md:block bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl border border-white/20 dark:border-white/15 overflow-hidden">
+                            <table className="w-full text-sm">
+                              <thead className="bg-white/70 dark:bg-black/50">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-black dark:text-white font-semibold">Start Time</th>
+                                  <th className="px-4 py-3 text-left text-black dark:text-white font-semibold">End Time</th>
+                                  <th className="px-4 py-3 text-left text-black dark:text-white font-semibold">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {currentSchedules.map((schedule, index) => (
+                                  <tr key={index} className="border-t border-white/20 dark:border-white/15">
+                                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                      {new Date(schedule.startTime).toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                      {new Date(schedule.endTime).toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                        <CheckCircle className="w-3 h-3 mr-1" />
+                                        Confirmed
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Mobile Card View */}
+                          <div className="md:hidden space-y-3">
+                            {currentSchedules.map((schedule, index) => (
+                              <div key={index} className="bg-white/50 dark:bg-black/30 backdrop-blur-md rounded-xl border border-white/20 dark:border-white/15 p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Confirmed
+                                  </span>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Start:</span>
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 text-right">
+                                      {new Date(schedule.startTime).toLocaleDateString()} <br />
+                                      <span className="text-xs">{new Date(schedule.startTime).toLocaleTimeString()}</span>
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">End:</span>
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 text-right">
+                                      {new Date(schedule.endTime).toLocaleDateString()} <br />
+                                      <span className="text-xs">{new Date(schedule.endTime).toLocaleTimeString()}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1225,7 +1343,7 @@ const ServiceDetailPage: React.FC = () => {
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-black dark:bg-white rounded-full flex items-center justify-center border-2 border-white dark:border-black">
                               <svg className="w-3.5 h-3.5 text-white dark:text-black" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
+                            </svg>
                             </div>
                           )}
                         </div>
@@ -1500,7 +1618,7 @@ const ServiceDetailPage: React.FC = () => {
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-black dark:bg-white rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-lg">
                               <svg className="w-3.5 h-3.5 text-white dark:text-black" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
+                            </svg>
                             </div>
                           </div>
                           <div className="flex-1">
