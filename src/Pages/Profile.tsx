@@ -1476,7 +1476,7 @@ export default function Profile() {
                             <option value="customer" className="bg-white dark:bg-black text-black dark:text-white">⭐ Reviews from Providers</option>
                           )}
                           {serviceReviews.length > 0 && (
-                            <option value="service" className="bg-white dark:bg-black text-black dark:text-white">🤝 Reviews from Customers</option>
+                            <option value="service" className="bg-white dark:bg-black text-black dark:text-white"> Reviews from Customers</option>
                           )}
                         </select>
                         <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 text-black dark:text-white h-4 w-4 pointer-events-none rotate-90" />
@@ -2129,7 +2129,7 @@ export default function Profile() {
                             <option value="customer" className="bg-white dark:bg-black text-black dark:text-white">⭐ Reviews from Providers</option>
                           )}
                           {user.role === 'PROVIDER' && serviceReviews.length > 0 && (
-                            <option value="service" className="bg-white dark:bg-black text-black dark:text-white">🤝 Reviews from Customers</option>
+                            <option value="service" className="bg-white dark:bg-black text-black dark:text-white">Reviews from Customers</option>
                           )}
                         </select>
                         <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 text-black dark:text-white h-4 w-4 pointer-events-none rotate-90" />
