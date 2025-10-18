@@ -12,8 +12,8 @@ import Articles from './Pages/Articles.jsx'
 import SucessStories from './Pages/SucessStories.jsx'
 import HowWorks from './Pages/HowWorks.jsx'
 
-import OnlineServiceProviderProfile from './Pages/OnlineServiceProviderProfile';
-import PrintingServiceProviderProfile from "./Pages/PrintingServiceProviderProfile";
+// import OnlineServiceProviderProfile from './Pages/OnlineServiceProviderProfile';
+// import PrintingServiceProviderProfile from "./Pages/PrintingServiceProviderProfile";
 
 
 import Signup from './Pages/Signup.tsx'
@@ -76,8 +76,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/become-provider" element={<BecomeProvider />} />
             <Route path="/provider/:id" element={<Provider />} />
-            <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
-            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
+            {/* <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} /> */}
             <Route path="/create-service" element={<CreateService />} />
             <Route path="/messaging" element={<MessagingPage />} />
             <Route path="/conversation-hub" element={<ConversationHub />} />
@@ -93,8 +93,8 @@ function App() {
             <Route path="/provider-earnings" element={<ProviderEarnings />} />
             <Route path="/notifications" element={<NotificationsPage />} />
 
-            <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
-            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} />
+            {/* <Route path="/provider/online/:id" element={<OnlineServiceProviderProfile />} />
+            <Route path="/provider/printing/:id" element={<PrintingServiceProviderProfile />} /> */}
             <Route path="/service-request" element={<ServiceRequestPage />} />
             <Route path="/service-request/:id/matches" element={<ServiceRequestMatchesPage />} />
                     
