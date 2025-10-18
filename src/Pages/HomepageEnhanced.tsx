@@ -20,12 +20,12 @@ export default function Homepage() {
   const navigate = useNavigate();
 
   const popularSearches: string[] = [
-    'Web Development',
-    'Graphic Design', 
-    'Content Writing',
-    'Digital Marketing',
-    'Photography',
-    'Video Editing'
+    'ICT services',
+    'ART', 
+    'Home Services',
+    'Marketing',
+    'Consultation',
+    'Innovations'
   ];
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
@@ -113,8 +113,8 @@ export default function Homepage() {
 
             {/* Subtitle */}
             <p className="animate-fade-in mb-12 text-balance text-lg tracking-tight text-gray-600 dark:text-gray-400 md:text-xl max-w-3xl mx-auto leading-relaxed">
-              Connect with verified professionals and get high-quality services 
-              delivered with excellence and reliability
+              We build the connection...
+              Tech for everyone
             </p>
 
             {/* Enhanced Search Bar with Geolocation */}
